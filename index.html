@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <meta name="author" content="Thomas Muguet" />
+
+    <title>Leaflet.TrackDrawer</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.css" />
+    <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css" />
+
+    <style>
+      .leaflet-bar .easy-button-button.active-active,
+      .leaflet-bar .easy-button-button.active-active:hover {
+        color: #ffffff;
+        background-color: #24b835;
+        border-bottom: 1px solid #999;
+      }
+    </style>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/leaflet/dist/leaflet.js"></script>
+    <script src="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js"></script>
+    <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
+    <script src="dist/leaflet.trackdrawer.polyfill.js"></script>
+  </head>
+
+  <body>
+    <div id="map" style="position: absolute; top:0px; left: 0px; bottom: 100px; right: 0px;"></div>
+    <div
+      id="console"
+      style="position: absolute; height: 100px; left: 0px; bottom: 0px; right: 0px; overflow: auto;"
+    ></div>
+
+    <script>
+      window.onload = function() {
+        var mode = null;
+
+        function setMode(m) {
+          mode = m;
+          deleteBtn.state('loaded');
+          promoteBtn.state('loaded');
+          demoteBtn.state('loaded');
+
+          if (mode === 'delete') deleteBtn.state('active');
+          else if (mode === 'promote') promoteBtn.state('active');
+          else if (mode === 'demote') demoteBtn.state('active');
+        }
+
+        var map = L.map('map', {
+          center: L.latLng(44.96777356135154, 6.06822967529297),
+          zoom: 13,
+        });
+
+        var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        var osmAttrib = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+        var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+        map.addLayer(osm);
+
+        var deleteBtn = L.easyButton({
+          states: [
+            {
+              stateName: 'loaded',
+              icon: 'fa-eraser',
+              title: 'Delete marker on click',
+              onClick: function(btn, map) {
+                setMode('delete');
+              },
+            },
+            {
+              stateName: 'active',
+              icon: 'fa-eraser',
+              title: 'Delete marker on click',
+              onClick: function(btn, map) {
+                setMode(null);
+              },
+            },
+          ],
+        });
+        var promoteBtn = L.easyButton({
+          states: [
+            {
+              stateName: 'loaded',
+              icon: 'fa-pause-circle',
+              title: 'Promote to stopover on click',
+              onClick: function(btn, map) {
+                setMode('promote');
+              },
+            },
+            {
+              stateName: 'active',
+              icon: 'fa-pause-circle',
+              title: 'Promote to stopover on click',
+              onClick: function(btn, map) {
+                setMode(null);
+              },
+            },
+          ],
+        });
+        var demoteBtn = L.easyButton({
+          states: [
+            {
+              stateName: 'loaded',
+              icon: 'fa-map-signs',
+              title: 'Demote to waypoint on click',
+              onClick: function(btn, map) {
+                setMode('demote');
+              },
+            },
+            {
+              stateName: 'active',
+              icon: 'fa-map-signs',
+              title: 'Demote to waypoint on click',
+              onClick: function(btn, map) {
+                setMode(null);
+              },
+            },
+          ],
+        });
+        L.easyBar([deleteBtn, promoteBtn, demoteBtn]).addTo(map);
+
+        var cleanBtn = L.easyButton({
+          states: [
+            {
+              icon: 'fa-trash',
+              title: 'Remove everything now',
+              onClick: function(btn, map) {
+                drawRoute.clean();
+              },
+            },
+          ],
+        });
+        var importBtn = L.easyButton({
+          states: [
+            {
+              icon: 'fa-map-marker',
+              title: 'Clean and import some markers now',
+              onClick: function(btn, map) {
+                drawRoute.clean();
+                restoreState();
+              },
+            },
+          ],
+        });
+        L.easyBar([cleanBtn, importBtn]).addTo(map);
+
+        var drawRoute = L.TrackDrawer.track({
+          routingCallback: function(previousMarker, marker, done) {
+            $('#console').prepend(
+              '[' +
+                new Date().toLocaleTimeString() +
+                '] Asked for route between ' +
+                previousMarker.getLatLng() +
+                ' and ' +
+                marker.getLatLng() +
+                '<br>'
+            );
+            done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+          },
+        }).addTo(map);
+
+        var onClickHandler = function(e) {
+          var marker = e.target;
+          if (mode === 'delete') drawRoute.removeNode(marker);
+          else if (mode === 'promote') drawRoute.promoteNodeToStopover(marker);
+          else if (mode === 'demote') drawRoute.demoteNodeToWaypoint(marker);
+        };
+
+        map.on('click', function(e) {
+          var marker = L.TrackDrawer.node(e.latlng).addTo(drawRoute);
+          marker.on('moveend', function(e) {
+            drawRoute.onMoveNode(marker);
+          });
+          marker.on('click', onClickHandler);
+        });
+
+        drawRoute.on('TrackDrawer:done', function(e) {
+          var state = drawRoute.getState();
+          $('#console').prepend(
+            '[' + new Date().toLocaleTimeString() + '] Track has now ' + state.length + ' segments<br>'
+          );
+        });
+
+        var state = [
+          [
+            {
+              start: [44.974635142416496, 6.064453125000001],
+              end: [44.95301534523602, 6.098098754882813],
+              edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            },
+          ],
+          [
+            {
+              start: [44.95301534523602, 6.098098754882813],
+              end: [44.982406561242584, 6.120929718017578],
+              edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            },
+            {
+              start: [44.982406561242584, 6.120929718017578],
+              end: [44.98859865651695, 6.075782775878906],
+              edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            },
+            {
+              start: [44.98859865651695, 6.075782775878906],
+              end: [44.98119234648246, 6.040935516357423],
+              edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            },
+          ],
+          [
+            {
+              start: [44.98119234648246, 6.040935516357423],
+              end: [44.962976039238825, 6.023254394531251],
+              edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            },
+          ],
+          [
+            {
+              start: [44.962976039238825, 6.023254394531251],
+              end: [44.94924926661153, 6.041107177734376],
+              edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            },
+            {
+              start: [44.94924926661153, 6.041107177734376],
+              end: [44.943660436460185, 6.06548309326172],
+              edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            },
+            {
+              start: [44.943660436460185, 6.06548309326172],
+              end: [44.9439034403902, 6.1049652099609375],
+              edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            },
+          ],
+        ];
+
+        function restoreState() {
+          drawRoute.restoreState(state, function(latlng) {
+            var marker = L.TrackDrawer.node(latlng);
+            $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Restored ' + latlng + '<br>');
+            marker.on('moveend', function(e) {
+              drawRoute.onMoveNode(marker);
+            });
+            marker.on('click', onClickHandler);
+            return marker;
+          });
+        }
+        restoreState();
+      };
+    </script>
+  </body>
+</html>
