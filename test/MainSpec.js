@@ -48,6 +48,74 @@ describe('Main', () => {
       const newState = track.getState();
       expect(newState).to.deep.equal(expectedNewState);
     });
+
+    it('adding marker via routingCallback option', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+        },
+      }).addTo(map);
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+
+      await track.addNode(marker1);
+      await track.addNode(marker2);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('adding marker via router option', async () => {
+      const hasRouting = L.Routing !== undefined;
+
+      if (!hasRouting) {
+        L.Routing = {
+          waypoint(latlng) {
+            return { latLng: latlng };
+          },
+        };
+      }
+      const track = L.TrackDrawer.track({
+        router: {
+          route(waypoints, done) {
+            const res = [{ coordinates: [waypoints[0].latLng, waypoints[1].latLng] }];
+            done(null, res);
+          },
+        },
+      }).addTo(map);
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+
+      await track.addNode(marker1);
+      await track.addNode(marker2);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+
+      if (!hasRouting) {
+        delete L.Routing;
+      }
+    });
   });
 
   describe('Restoring state', () => {

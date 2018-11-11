@@ -65,6 +65,7 @@ function decodeLatLng(latlng) {
 module.exports = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
+    router: undefined,
     debug: true,
   },
 
@@ -116,6 +117,18 @@ module.exports = L.LayerGroup.extend({
     this._lastNodeId = undefined;
     this._currentColorIndex = 0;
     this._fireEvents = true;
+
+    if (this.options.router !== undefined) {
+      this.options.routingCallback = (previousMarker, marker, done) => {
+        this.options.router.route(
+          [L.Routing.waypoint(previousMarker.getLatLng()), L.Routing.waypoint(marker.getLatLng())],
+          (err, result) => {
+            done(err, result ? result[0].coordinates : null);
+          },
+        );
+      };
+    }
+  },
   },
 
   getState() {
