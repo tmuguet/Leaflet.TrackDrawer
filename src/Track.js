@@ -365,7 +365,7 @@ module.exports = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then((values) => {
-      if (this._fireEvents) {
+      if (this._fireEvents && values.length > 0) {
         this.fire('TrackDrawer:done', { routes: values });
       }
     });

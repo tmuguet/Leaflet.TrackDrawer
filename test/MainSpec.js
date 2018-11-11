@@ -698,6 +698,22 @@ describe('Main', () => {
       expect(newState).to.deep.equal(expectedNewState);
     });
 
+    it('moving lonely marker should not trigger event', async () => {
+      const drawRoute = L.TrackDrawer.track().addTo(map);
+
+      let eventsTriggered = 0;
+      drawRoute.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+      const latlng = L.latLng(44.974635142416496, 6.064453125000001);
+      const marker = L.TrackDrawer.node(latlng);
+      marker.addTo(drawRoute);
+      expect(eventsTriggered).to.be.equal(0);
+
+      marker.setLatLng(L.latLng(latlng.lat + 1, latlng.lng - 1));
+      await drawRoute.onMoveNode(marker);
+      expect(eventsTriggered).to.be.equal(0);
+    });
+
     it('deleting markers should alter state', async () => {
       const drawRoute = L.TrackDrawer.track({
         routingCallback(previousMarker, marker, done) {
