@@ -129,6 +129,27 @@ module.exports = L.LayerGroup.extend({
       };
     }
   },
+
+  getNodes() {
+    const nodes = [];
+
+    this._nodesContainers.forEach((container) => {
+      const group = container.getLayers();
+      if (group.length > 0) nodes.push({ container, markers: group });
+    });
+
+    return nodes;
+  },
+
+  getSteps() {
+    const steps = [];
+
+    this._edgesContainers.forEach((container) => {
+      const group = container.getLayers();
+      if (group.length > 0) steps.push({ container, edges: group });
+    });
+
+    return steps;
   },
 
   getState() {
