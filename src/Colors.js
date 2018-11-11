@@ -49,4 +49,8 @@ module.exports = {
   nameToRgb(name) {
     return colorMap[name];
   },
+
+  rgbToName(rgb) {
+    return Object.keys(colorMap).find(key => colorMap[key] === rgb);
+  },
 };
