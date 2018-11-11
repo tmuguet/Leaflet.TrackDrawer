@@ -49,6 +49,30 @@ describe('Main', () => {
       expect(newState).to.deep.equal(expectedNewState);
     });
 
+    it('adding marker with loss of precision in route', async () => {
+      const track = L.TrackDrawer.track().addTo(map);
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+
+      await track.addNode(marker1);
+      await track.addNode(marker2, (previousMarker, currentMarker, done) => {
+        done(null, [L.latLng(44.974635, 6.06445313), L.latLng(44.967774, 6.06823)]);
+      });
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635, 6.06445313],
+            end: [44.967774, 6.06823],
+            edge: [44.974635, 6.06445313, 44.967774, 6.06823],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
     it('adding marker via routingCallback option', async () => {
       const track = L.TrackDrawer.track({
         routingCallback: (previousMarker, currentMarker, done) => {

@@ -268,6 +268,11 @@ module.exports = L.LayerGroup.extend({
             return;
           }
 
+          // Route can give different precision than initial markers
+          // Use precision given by the route to be consistent
+          previousNode.setLatLng(L.latLng(route[0]));
+          node.setLatLng(L.latLng(route[route.length - 1]));
+
           const edge = L.polyline(route, { color: Colors.nameToRgb(node.options.colorName) }).addTo(edgesContainer);
           const id = edgesContainer.getLayerId(edge);
 
@@ -334,6 +339,7 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
+            marker.setLatLng(L.latLng(route[route.length - 1]));
             previousEdge.setLatLngs(route);
             resolve({ from: previousNode, to: marker, edge: previousEdge });
           });
@@ -350,6 +356,7 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
+            marker.setLatLng(L.latLng(route[0]));
             nextEdge.setLatLngs(route);
             resolve({ from: marker, to: nextNode, edge: nextEdge });
           });
