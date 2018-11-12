@@ -65,6 +65,7 @@ function decodeLatLng(latlng) {
 module.exports = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
+    router: undefined,
     debug: true,
   },
 
@@ -116,6 +117,39 @@ module.exports = L.LayerGroup.extend({
     this._lastNodeId = undefined;
     this._currentColorIndex = 0;
     this._fireEvents = true;
+
+    if (this.options.router !== undefined) {
+      this.options.routingCallback = (previousMarker, marker, done) => {
+        this.options.router.route(
+          [L.Routing.waypoint(previousMarker.getLatLng()), L.Routing.waypoint(marker.getLatLng())],
+          (err, result) => {
+            done(err, result ? result[0].coordinates : null);
+          },
+        );
+      };
+    }
+  },
+
+  getNodes() {
+    const nodes = [];
+
+    this._nodesContainers.forEach((container) => {
+      const group = container.getLayers();
+      if (group.length > 0) nodes.push({ container, markers: group });
+    });
+
+    return nodes;
+  },
+
+  getSteps() {
+    const steps = [];
+
+    this._edgesContainers.forEach((container) => {
+      const group = container.getLayers();
+      if (group.length > 0) steps.push({ container, edges: group });
+    });
+
+    return steps;
   },
 
   getState() {
@@ -255,6 +289,11 @@ module.exports = L.LayerGroup.extend({
             return;
           }
 
+          // Route can give different precision than initial markers
+          // Use precision given by the route to be consistent
+          previousNode.setLatLng(L.latLng(route[0]));
+          node.setLatLng(L.latLng(route[route.length - 1]));
+
           const edge = L.polyline(route, { color: Colors.nameToRgb(node.options.colorName) }).addTo(edgesContainer);
           const id = edgesContainer.getLayerId(edge);
 
@@ -321,6 +360,7 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
+            marker.setLatLng(L.latLng(route[route.length - 1]));
             previousEdge.setLatLngs(route);
             resolve({ from: previousNode, to: marker, edge: previousEdge });
           });
@@ -337,6 +377,7 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
+            marker.setLatLng(L.latLng(route[0]));
             nextEdge.setLatLngs(route);
             resolve({ from: marker, to: nextNode, edge: nextEdge });
           });
@@ -345,7 +386,7 @@ module.exports = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then((values) => {
-      if (this._fireEvents) {
+      if (this._fireEvents && values.length > 0) {
         this.fire('TrackDrawer:done', { routes: values });
       }
     });
