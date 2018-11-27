@@ -283,6 +283,11 @@ module.exports = L.LayerGroup.extend({
       const resolveImmediately = this._lastNodeId === undefined;
 
       if (this._lastNodeId !== undefined) {
+        if (this._fireEvents && this._computing === 1) {
+          // TODO: set this '1' to '0'
+          this.fire('TrackDrawer:start', {});
+        }
+
         const previousNode = this._getNode(this._lastNodeId);
 
         node.setStyle({ colorName: previousNode.options.colorName });
@@ -357,6 +362,10 @@ module.exports = L.LayerGroup.extend({
     const { previousEdge, previousNode } = this._getPrevious(marker);
     const { nextEdge, nextNode } = this._getNext(marker);
 
+    if (this._fireEvents && this._computing === 0) {
+      this.fire('TrackDrawer:start', {});
+    }
+
     this._computing += 1;
 
     if (previousEdge !== undefined) {
@@ -399,9 +408,9 @@ module.exports = L.LayerGroup.extend({
       })
       .then((values) => {
         if (this._fireEvents && values.length > 0 && this._computing === 0) {
-        this.fire('TrackDrawer:done', { routes: values });
-      }
-    });
+          this.fire('TrackDrawer:done', { routes: values });
+        }
+      });
   },
 
   removeNode(node, routingCallback) {
@@ -409,6 +418,9 @@ module.exports = L.LayerGroup.extend({
 
     const promises = [];
 
+    if (this._fireEvents && this._computing === 0) {
+      this.fire('TrackDrawer:start', {});
+    }
     this._computing += 1;
 
     const oldValue = this._fireEvents;
@@ -466,17 +478,17 @@ module.exports = L.LayerGroup.extend({
         this._computing -= 1;
       })
       .then((routes) => {
-      if (nodeContainerIndex > 0 && nodeContainer.getLayers().length === 0) {
-        // Last marker of this layer
-        this._nodesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-        this._edgesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-        this._currentContainerIndex -= 1;
-      }
+        if (nodeContainerIndex > 0 && nodeContainer.getLayers().length === 0) {
+          // Last marker of this layer
+          this._nodesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
+          this._edgesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
+          this._currentContainerIndex -= 1;
+        }
 
         if (this._fireEvents && this._computing === 0) {
-        this.fire('TrackDrawer:done', { routes });
-      }
-    });
+          this.fire('TrackDrawer:done', { routes });
+        }
+      });
   },
 
   promoteNodeToStopover(node) {
@@ -489,6 +501,10 @@ module.exports = L.LayerGroup.extend({
       node._promoted = true;
       node._demoted = false;
       return this;
+    }
+
+    if (this._fireEvents && this._computing === 0) {
+      this.fire('TrackDrawer:start', {});
     }
 
     const index = this._getNodeContainerIndex(node);
@@ -550,6 +566,10 @@ module.exports = L.LayerGroup.extend({
     const index = this._getNodeContainerIndex(node);
     if (index === 0) {
       return this;
+    }
+
+    if (this._fireEvents && this._computing === 0) {
+      this.fire('TrackDrawer:start', {});
     }
 
     const nodes = [];
