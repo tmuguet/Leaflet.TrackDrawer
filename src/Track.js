@@ -514,13 +514,6 @@ module.exports = L.LayerGroup.extend({
       node.removeFrom(nodeContainer);
     }
 
-    if (nodeContainerIndex > 0 && nodeContainer.getLayers().length === 0) {
-      // Last marker of this layer
-      this._nodesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-      this._edgesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-      this._currentContainerIndex -= 1;
-    }
-
     return Promise.all(promises)
       .finally(() => {
         this._computing -= 1;
