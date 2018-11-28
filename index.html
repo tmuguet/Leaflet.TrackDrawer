@@ -160,7 +160,9 @@
                 marker.getLatLng() +
                 '<br>'
             );
-            done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+            setTimeout(function() {
+              done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+            }, 500);
           },
         }).addTo(map);
 
