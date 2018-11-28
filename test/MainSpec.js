@@ -26,7 +26,7 @@ describe('Main', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
       const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { type: 'stopover' });
 
       await track.addNode(marker1);
       expect(eventsTriggered).to.be.equal(0);
@@ -44,6 +44,23 @@ describe('Main', () => {
           },
         ],
       ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('adding twice same marker should have no effect', async () => {
+      const track = L.TrackDrawer.track().addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+
+      await track.addNode(marker1);
+      expect(eventsTriggered).to.be.equal(0);
+      await track.addNode(marker1);
+      expect(eventsTriggered).to.be.equal(0);
+
+      const expectedNewState = [];
 
       const newState = track.getState();
       expect(newState).to.deep.equal(expectedNewState);
@@ -796,7 +813,7 @@ describe('Main', () => {
       await drawRoute.removeNode(markers.splice(0, 1)[0], routingCallback);
       expect(eventsTriggered).to.be.equal(5);
 
-      for (let i=0; i < markers.length; i+=1) {
+      for (let i = 0; i < markers.length; i += 1) {
         await drawRoute.removeNode(markers[i], routingCallback);
       }
       expect(eventsTriggered).to.be.equal(10);
@@ -808,6 +825,206 @@ describe('Main', () => {
       const newState = drawRoute.getState();
       expect(newState).to.be.an('array');
       expect(newState).to.be.empty;
+    });
+  });
+
+  describe('Concurrently modifying state', () => {
+    it('adding marker', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+
+      const promise1 = track.addNode(marker1);
+      const promise2 = track.addNode(marker2);
+      const promise3 = track.addNode(marker3);
+
+      await Promise.all([promise1, promise2, promise3]);
+      expect(eventsTriggered).to.be.equal(1);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+          {
+            start: [44.96777356135154, 6.06822967529297],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('moving marker', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+
+      const promise1 = track.addNode(marker1);
+      const promise2 = track.addNode(marker2);
+      marker2.setLatLng(L.latLng(44.98859865651695, 6.075782775878906));
+      const promise3 = track.onMoveNode(marker2);
+
+      await Promise.all([promise1, promise2, promise3]);
+      expect(eventsTriggered).to.be.equal(1);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.974635142416496, 6.064453125000001, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('deleting marker', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+
+      const promise1 = track.addNode(marker1);
+      const promise2 = track.addNode(marker2);
+      const promise3 = track.addNode(marker3);
+      const promise4 = track.removeNode(marker2);
+
+      await Promise.all([promise1, promise2, promise3, promise4]);
+      expect(eventsTriggered).to.be.equal(1);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.974635142416496, 6.064453125000001, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('promoting marker', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+
+      const promise1 = track.addNode(marker1);
+      const promise2 = track.addNode(marker2);
+      const promise3 = track.addNode(marker3);
+      track.promoteNodeToStopover(marker2);
+
+      await Promise.all([promise1, promise2, promise3]);
+      expect(eventsTriggered).to.be.equal(1);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+        ],
+        [
+          {
+            start: [44.96777356135154, 6.06822967529297],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('demoting marker', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+
+      await track.addNode(marker1);
+      await track.addNode(marker2);
+      track.promoteNodeToStopover(marker2);
+      expect(eventsTriggered).to.be.equal(2);
+
+      const promise = track.addNode(marker3);
+      track.demoteNodeToWaypoint(marker2);
+
+      await promise;
+      expect(eventsTriggered).to.be.equal(3);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+          {
+            start: [44.96777356135154, 6.06822967529297],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
     });
   });
 });

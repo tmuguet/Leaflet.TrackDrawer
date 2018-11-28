@@ -257,6 +257,17 @@ module.exports = L.LayerGroup.extend({
   addNode(node, routingCallback) {
     const callback = routingCallback || this.options.routingCallback;
 
+    const lastNodeId = this._lastNodeId;
+
+    if (lastNodeId !== undefined) {
+      const previousNode = this._getNode(this._lastNodeId);
+      if (previousNode.getLatLng().equals(node.getLatLng())) {
+        return new Promise((resolve) => {
+          resolve();
+        });
+      }
+    }
+
     const nodesContainer = this._nodesContainers[this._currentContainerIndex];
     const edgesContainer = this._edgesContainers[this._currentContainerIndex];
 
@@ -277,81 +288,91 @@ module.exports = L.LayerGroup.extend({
     }
     node.addTo(nodesContainer);
 
+    if (lastNodeId !== undefined) {
+      const previousNode = this._getNode(lastNodeId);
+      node.setStyle({ colorName: previousNode.options.colorName });
+
+      const edge = L.polyline([previousNode.getLatLng(), node.getLatLng()], {
+        color: Colors.nameToRgb(node.options.colorName),
+        dashArray: '4',
+      }).addTo(edgesContainer);
+      const id = edgesContainer.getLayerId(edge);
+
+      previousNode._routeIdNext = id;
+      node._routeIdPrevious = id;
+      edge._startMarkerId = this._getNodeId(previousNode);
+      edge._endMarkerId = this._getNodeId(node);
+      edge._computation = 0;
+
+      if (this.options.debug) {
+        edge.on('tooltipopen', () => {
+          const startNodeId = edge._startMarkerId;
+          const endNodeId = edge._endMarkerId;
+
+          edge.setTooltipContent(
+            `id: ${this._getEdgeId(edge)} (on #${this._getEdgeContainerIndex(edge)})<br>`
+              + `previous node: ${startNodeId}`
+              + ` (on #${this._getNodeContainerIndex(this._getNode(startNodeId))})<br>`
+              + `next node: ${endNodeId}`
+              + ` (on #${this._getNodeContainerIndex(this._getNode(endNodeId))})`,
+          );
+        });
+        edge.bindTooltip('<>');
+      }
+
+      if (this._fireEvents && this._computing === 0) {
+        this.fire('TrackDrawer:start', {});
+      }
+    } else {
+      node.setStyle({ colorName: Colors.nameOf(this._currentColorIndex) });
+    }
+
+    this._lastNodeId = this._getNodeId(node);
+    if (this._firstNodeId === undefined) {
+      this._firstNodeId = this._lastNodeId;
+    }
+
+    const oldValue = this._fireEvents;
+    this._fireEvents = false;
+    if (node.options.type === 'stopover') {
+      this.promoteNodeToStopover(node);
+    }
+    this._fireEvents = oldValue;
+
+    if (lastNodeId === undefined) {
+      return new Promise((resolve) => {
+        resolve();
+      });
+    }
+
     this._computing += 1;
+    const { previousEdge, previousNode } = this._getPrevious(node);
+    previousEdge._computation += 1;
+    const currentComputation = previousEdge._computation;
 
     return new Promise((resolve, reject) => {
-      const resolveImmediately = this._lastNodeId === undefined;
+      callback.call(null, previousNode, node, (err, route) => {
+        this._computing -= 1;
 
-      if (this._lastNodeId !== undefined) {
-        if (this._fireEvents && this._computing === 1) {
-          // TODO: set this '1' to '0'
-          this.fire('TrackDrawer:start', {});
+        if (err !== null) {
+          reject(err);
+          return;
         }
 
-        const previousNode = this._getNode(this._lastNodeId);
-
-        node.setStyle({ colorName: previousNode.options.colorName });
-        callback.call(null, previousNode, node, (err, route) => {
-          if (err !== null) {
-            this._computing -= 1;
-            reject(err);
-            return;
-          }
-
+        if (previousEdge._computation === currentComputation) {
           // Route can give different precision than initial markers
           // Use precision given by the route to be consistent
           previousNode.setLatLng(L.latLng(route[0]));
           node.setLatLng(L.latLng(route[route.length - 1]));
+          previousEdge.setLatLngs(route);
+          previousEdge.setStyle({ dashArray: null });
+        }
 
-          const edge = L.polyline(route, { color: Colors.nameToRgb(node.options.colorName) }).addTo(edgesContainer);
-          const id = edgesContainer.getLayerId(edge);
-
-          previousNode._routeIdNext = id;
-          node._routeIdPrevious = id;
-          edge._startMarkerId = this._getNodeId(previousNode);
-          edge._endMarkerId = this._getNodeId(node);
-
-          if (this.options.debug) {
-            edge.on('tooltipopen', () => {
-              const startNodeId = edge._startMarkerId;
-              const endNodeId = edge._endMarkerId;
-
-              edge.setTooltipContent(
-                `id: ${this._getEdgeId(edge)} (on #${this._getEdgeContainerIndex(edge)})<br>`
-                  + `previous node: ${startNodeId}`
-                  + ` (on #${this._getNodeContainerIndex(this._getNode(startNodeId))})<br>`
-                  + `next node: ${endNodeId}`
-                  + ` (on #${this._getNodeContainerIndex(this._getNode(endNodeId))})`,
-              );
-            });
-            edge.bindTooltip('<>');
-          }
-
-          this._computing -= 1;
-          if (this._fireEvents && this._computing === 0) {
-            this.fire('TrackDrawer:done', { routes: [{ from: previousNode, to: node, edge }] });
-          }
-          resolve();
-        });
-      } else {
-        node.setStyle({ colorName: Colors.nameOf(this._currentColorIndex) });
-      }
-
-      this._lastNodeId = this._getNodeId(node);
-      if (this._firstNodeId === undefined) {
-        this._firstNodeId = this._lastNodeId;
-      }
-
-      const oldValue = this._fireEvents;
-      this._fireEvents = false;
-      if (node.options.type === 'stopover') {
-        this.promoteNodeToStopover(node);
-      }
-      this._fireEvents = oldValue;
-      if (resolveImmediately) {
-        this._computing -= 1;
+        if (this._fireEvents && this._computing === 0) {
+          this.fire('TrackDrawer:done', { routes: [{ from: previousNode, to: node, previousEdge }] });
+        }
         resolve();
-      }
+      });
     });
   },
 
@@ -369,6 +390,9 @@ module.exports = L.LayerGroup.extend({
     this._computing += 1;
 
     if (previousEdge !== undefined) {
+      previousEdge._computation += 1;
+      const currentComputation = previousEdge._computation;
+
       promises.push(
         new Promise((resolve, reject) => {
           callback.call(null, previousNode, marker, (err, route) => {
@@ -377,8 +401,11 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
-            marker.setLatLng(L.latLng(route[route.length - 1]));
-            previousEdge.setLatLngs(route);
+            if (previousEdge._computation === currentComputation) {
+              marker.setLatLng(L.latLng(route[route.length - 1]));
+              previousEdge.setLatLngs(route);
+            }
+
             resolve({ from: previousNode, to: marker, edge: previousEdge });
           });
         }),
@@ -386,6 +413,9 @@ module.exports = L.LayerGroup.extend({
     }
 
     if (nextEdge !== undefined) {
+      nextEdge._computation += 1;
+      const currentComputation = nextEdge._computation;
+
       promises.push(
         new Promise((resolve, reject) => {
           callback.call(null, marker, nextNode, (err, route) => {
@@ -394,8 +424,11 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
-            marker.setLatLng(L.latLng(route[0]));
-            nextEdge.setLatLngs(route);
+            if (nextEdge._computation === currentComputation) {
+              marker.setLatLng(L.latLng(route[0]));
+              nextEdge.setLatLngs(route);
+            }
+
             resolve({ from: marker, to: nextNode, edge: nextEdge });
           });
         }),
@@ -436,6 +469,16 @@ module.exports = L.LayerGroup.extend({
 
     if (previousEdge !== undefined && nextEdge !== undefined) {
       // Intermediate marker
+      nextNode._routeIdPrevious = node._routeIdPrevious;
+      previousEdge._endMarkerId = nextEdge._endMarkerId;
+
+      nextEdge.removeFrom(this._getEdgeContainer(nextEdge));
+      node.removeFrom(nodeContainer);
+      previousEdge.setLatLngs([previousNode.getLatLng(), nextNode.getLatLng()]).setStyle({ dashArray: '4' });
+
+      previousEdge._computation += 1;
+      const currentComputation = previousEdge._computation;
+
       promises.push(
         new Promise((resolve, reject) => {
           callback.call(null, previousNode, nextNode, (err, route) => {
@@ -444,11 +487,9 @@ module.exports = L.LayerGroup.extend({
               return;
             }
 
-            previousEdge.setLatLngs(route);
-            nextNode._routeIdPrevious = node._routeIdPrevious;
-            previousEdge._endMarkerId = nextEdge._endMarkerId;
-            nextEdge.removeFrom(this._getEdgeContainer(nextEdge));
-            node.removeFrom(nodeContainer);
+            if (previousEdge._computation === currentComputation) {
+              previousEdge.setLatLngs(route).setStyle({ dashArray: null });
+            }
 
             resolve({ from: previousNode, to: nextNode, edge: previousEdge });
           });
@@ -473,18 +514,18 @@ module.exports = L.LayerGroup.extend({
       node.removeFrom(nodeContainer);
     }
 
+    if (nodeContainerIndex > 0 && nodeContainer.getLayers().length === 0) {
+      // Last marker of this layer
+      this._nodesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
+      this._edgesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
+      this._currentContainerIndex -= 1;
+    }
+
     return Promise.all(promises)
       .finally(() => {
         this._computing -= 1;
       })
       .then((routes) => {
-        if (nodeContainerIndex > 0 && nodeContainer.getLayers().length === 0) {
-          // Last marker of this layer
-          this._nodesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-          this._edgesContainers.splice(nodeContainerIndex, 1)[0].removeFrom(this);
-          this._currentContainerIndex -= 1;
-        }
-
         if (this._fireEvents && this._computing === 0) {
           this.fire('TrackDrawer:done', { routes });
         }
