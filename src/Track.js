@@ -153,6 +153,19 @@ module.exports = L.LayerGroup.extend({
     return steps;
   },
 
+  getBounds() {
+    const bounds = L.latLngBounds([]);
+
+    this._nodesContainers.forEach((container) => {
+      bounds.extend(container.getBounds());
+    });
+
+    this._edgesContainers.forEach((container) => {
+      bounds.extend(container.getBounds());
+    });
+    return bounds;
+  },
+
   getState() {
     const state = [];
     let currentNode = this._getNode(this._firstNodeId);
