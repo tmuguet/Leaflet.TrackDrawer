@@ -166,6 +166,59 @@ module.exports = L.LayerGroup.extend({
     return bounds;
   },
 
+  getLatLngs() {
+    const hasTrackStats = L.TrackStats !== undefined;
+    const latlngs = [];
+
+    let currentNode = this._getNode(this._firstNodeId);
+    this._nodesContainers.forEach(() => {
+      const l = [];
+      do {
+        const { nextEdge, nextNode } = this._getNext(currentNode);
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        nextEdge.getLatLngs().forEach((e) => {
+          l.push(hasTrackStats ? L.TrackStats.cache.getAll(e) : e);
+        });
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+
+      latlngs.push(JSON.parse(JSON.stringify(l)));
+    });
+
+    return latlngs;
+  },
+
+  toGeoJSON() {
+    const geojson = {
+      type: 'FeatureCollection',
+      features: [],
+    };
+
+    this._nodesContainers.forEach((container) => {
+      geojson.features.push(...container.toGeoJSON().features);
+    });
+
+    const latlngs = this.getLatLngs();
+
+    latlngs.forEach((l, idx) => {
+      const feature = {
+        type: 'Feature',
+        properties: { index: idx },
+        geometry: {
+          type: 'LineString',
+          coordinates: l.map(e => ('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat])),
+        },
+      };
+      geojson.features.push(feature);
+    });
+
+    return geojson;
+  },
+
   getState() {
     const state = [];
     let currentNode = this._getNode(this._firstNodeId);
