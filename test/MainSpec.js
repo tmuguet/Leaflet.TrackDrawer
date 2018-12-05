@@ -226,7 +226,8 @@ describe('Main', () => {
 
       expect(drawRoute._nodesContainers).to.have.lengthOf(4);
       expect(drawRoute._edgesContainers).to.have.lengthOf(4);
-      expect(drawRoute._currentContainerIndex).to.equal(3);
+      expect(drawRoute._nodesContainers.get(-1)).to.equal(drawRoute._nodesContainers.get(3));
+      expect(drawRoute._edgesContainers.get(-1)).to.equal(drawRoute._edgesContainers.get(3));
 
       const newState = drawRoute.getState();
       expect(newState).to.deep.equal(state);
@@ -303,7 +304,8 @@ describe('Main', () => {
 
       expect(drawRoute._nodesContainers).to.have.lengthOf(1);
       expect(drawRoute._edgesContainers).to.have.lengthOf(1);
-      expect(drawRoute._currentContainerIndex).to.equal(0);
+      expect(drawRoute._nodesContainers.get(-1)).to.equal(drawRoute._nodesContainers.get(0));
+      expect(drawRoute._edgesContainers.get(-1)).to.equal(drawRoute._edgesContainers.get(0));
 
       const newState = drawRoute.getState();
       expect(newState).to.be.an('array');
@@ -433,7 +435,8 @@ describe('Main', () => {
 
       expect(drawRoute._nodesContainers).to.have.lengthOf(1);
       expect(drawRoute._edgesContainers).to.have.lengthOf(1);
-      expect(drawRoute._currentContainerIndex).to.equal(0);
+      expect(drawRoute._nodesContainers.get(-1)).to.equal(drawRoute._nodesContainers.get(0));
+      expect(drawRoute._edgesContainers.get(-1)).to.equal(drawRoute._edgesContainers.get(0));
 
       const newState = drawRoute.getState();
       expect(newState).to.deep.equal(expectedNewState);
@@ -574,9 +577,150 @@ describe('Main', () => {
 
       expect(drawRoute._nodesContainers).to.have.lengthOf(9);
       expect(drawRoute._edgesContainers).to.have.lengthOf(9);
-      expect(drawRoute._currentContainerIndex).to.equal(8);
+      expect(drawRoute._nodesContainers.get(-1)).to.equal(drawRoute._nodesContainers.get(8));
+      expect(drawRoute._edgesContainers.get(-1)).to.equal(drawRoute._edgesContainers.get(8));
 
       const newState = drawRoute.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    it('inserting a marker should alter state', async () => {
+      const drawRoute = L.TrackDrawer.track({
+        routingCallback(previousMarker, marker, done) {
+          done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+        },
+      }).addTo(map);
+
+      let eventsTriggered = 0;
+      drawRoute.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+      const state = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.95301534523602, 6.098098754882813],
+            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          },
+        ],
+        [
+          {
+            start: [44.95301534523602, 6.098098754882813],
+            end: [44.982406561242584, 6.120929718017578],
+            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          },
+          {
+            start: [44.982406561242584, 6.120929718017578],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          },
+          {
+            start: [44.98859865651695, 6.075782775878906],
+            end: [44.98119234648246, 6.040935516357423],
+            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          },
+        ],
+        [
+          {
+            start: [44.98119234648246, 6.040935516357423],
+            end: [44.962976039238825, 6.023254394531251],
+            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          },
+        ],
+        [
+          {
+            start: [44.962976039238825, 6.023254394531251],
+            end: [44.94924926661153, 6.041107177734376],
+            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          },
+          {
+            start: [44.94924926661153, 6.041107177734376],
+            end: [44.943660436460185, 6.06548309326172],
+            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          },
+          {
+            start: [44.943660436460185, 6.06548309326172],
+            end: [44.9439034403902, 6.1049652099609375],
+            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          },
+        ],
+      ];
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96274246792451, 6.073146737835567],
+            edge: [44.974635142416496, 6.064453125000001, 44.96274246792451,  6.073146737835567],
+          },
+          {
+            start: [44.96274246792451,  6.073146737835567],
+            end: [44.95301534523602, 6.098098754882813],
+            edge: [44.96274246792451,  6.073146737835567, 44.95301534523602, 6.098098754882813],
+          },
+        ],
+        [
+          {
+            start: [44.95301534523602, 6.098098754882813],
+            end: [44.982406561242584, 6.120929718017578],
+            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          },
+          {
+            start: [44.982406561242584, 6.120929718017578],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          },
+          {
+            start: [44.98859865651695, 6.075782775878906],
+            end: [44.98119234648246, 6.040935516357423],
+            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          },
+        ],
+        [
+          {
+            start: [44.98119234648246, 6.040935516357423],
+            end: [44.962976039238825, 6.023254394531251],
+            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          },
+        ],
+        [
+          {
+            start: [44.962976039238825, 6.023254394531251],
+            end: [44.94924926661153, 6.041107177734376],
+            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          },
+          {
+            start: [44.94924926661153, 6.041107177734376],
+            end: [44.943660436460185, 6.06548309326172],
+            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          },
+          {
+            start: [44.943660436460185, 6.06548309326172],
+            end: [44.9439034403902, 6.1049652099609375],
+            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          },
+        ],
+      ];
+
+      const markers = [];
+      await drawRoute.restoreState(state, (latlng) => {
+        const marker = L.TrackDrawer.node(latlng);
+        markers.push(marker);
+        return marker;
+      });
+      expect(eventsTriggered).to.be.equal(1);
+
+      const routingCallback = function (previousMarker, marker, done) {
+        done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+      };
+
+      const marker = L.TrackDrawer.node(L.latLng(44.96274246792451,  6.073146737835567));
+      const route = drawRoute.getStepsContainer().get(0).getLayers()[0];
+      await drawRoute.insertNode(marker, route, routingCallback);
+      
+      expect(eventsTriggered).to.be.equal(2);
+
+      const newState = drawRoute.getState();
+      console.log(newState);
       expect(newState).to.deep.equal(expectedNewState);
     });
 
@@ -820,7 +964,8 @@ describe('Main', () => {
 
       expect(drawRoute._nodesContainers).to.have.lengthOf(1);
       expect(drawRoute._edgesContainers).to.have.lengthOf(1);
-      expect(drawRoute._currentContainerIndex).to.equal(0);
+      expect(drawRoute._nodesContainers.get(-1)).to.equal(drawRoute._nodesContainers.get(0));
+      expect(drawRoute._edgesContainers.get(-1)).to.equal(drawRoute._edgesContainers.get(0));
 
       const newState = drawRoute.getState();
       expect(newState).to.be.an('array');
