@@ -1,10 +1,12 @@
 const L = require('leaflet');
 const Track = require('./Track');
+const LayerContainer = require('./LayerContainer');
 const Node = require('./Node');
 const colors = require('./Colors');
 
 L.TrackDrawer = {
   Track,
+  LayerContainer,
   Node,
   colors,
 
