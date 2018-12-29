@@ -92,7 +92,7 @@ module.exports = L.LayerGroup.extend({
   },
 
   initialize(options) {
-    L.setOptions(this, options);
+    this.setOptions(options);
     L.LayerGroup.prototype.initialize.call(this);
 
     this._nodesContainers = new LayerContainer(this);
@@ -102,6 +102,10 @@ module.exports = L.LayerGroup.extend({
     this._currentColorIndex = 0;
     this._fireEvents = true;
     this._computing = 0;
+  },
+
+  setOptions(options) {
+    L.setOptions(this, options);
 
     if (this.options.router !== undefined) {
       this.options.routingCallback = (previousMarker, marker, done) => {
@@ -113,6 +117,15 @@ module.exports = L.LayerGroup.extend({
         );
       };
     }
+  },
+
+  hasNodes(count = 1) {
+    let counter = 0;
+    this._nodesContainers.forEach((container) => {
+      const group = container.getLayers();
+      counter += group.length;
+    });
+    return counter >= count;
   },
 
   getNodes() {

@@ -39,23 +39,6 @@
 
     <script>
       window.onload = function() {
-        var mode = null;
-
-        function setMode(m) {
-          mode = m;
-          addBtn.state('loaded');
-          insertBtn.state('loaded');
-          deleteBtn.state('loaded');
-          promoteBtn.state('loaded');
-          demoteBtn.state('loaded');
-
-          if (mode === 'add') addBtn.state('active');
-          else if (mode === 'insert') insertBtn.state('active');
-          else if (mode === 'delete') deleteBtn.state('active');
-          else if (mode === 'promote') promoteBtn.state('active');
-          else if (mode === 'demote') demoteBtn.state('active');
-        }
-
         var map = L.map('map', {
           center: L.latLng(44.96777356135154, 6.06822967529297),
           zoom: 13,
@@ -66,119 +49,6 @@
         var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
         map.addLayer(osm);
 
-        var addBtn = L.easyButton({
-          states: [
-            {
-              stateName: 'loaded',
-              icon: 'fa-plus',
-              title: 'Add marker when clicking on map',
-              onClick: function(btn, map) {
-                setMode('add');
-              },
-            },
-            {
-              stateName: 'active',
-              icon: 'fa-plus',
-              title: 'Add marker when clicking on map',
-              onClick: function(btn, map) {
-                setMode(null);
-              },
-            },
-          ],
-        });
-        var insertBtn = L.easyButton({
-          states: [
-            {
-              stateName: 'loaded',
-              icon: 'fa-plus-circle',
-              title: 'Insert marker when clicking on track',
-              onClick: function(btn, map) {
-                setMode('insert');
-              },
-            },
-            {
-              stateName: 'active',
-              icon: 'fa-plus-circle',
-              title: 'Insert marker when clicking on track',
-              onClick: function(btn, map) {
-                setMode(null);
-              },
-            },
-          ],
-        });
-        var deleteBtn = L.easyButton({
-          states: [
-            {
-              stateName: 'loaded',
-              icon: 'fa-eraser',
-              title: 'Delete marker when clicking on marker',
-              onClick: function(btn, map) {
-                setMode('delete');
-              },
-            },
-            {
-              stateName: 'active',
-              icon: 'fa-eraser',
-              title: 'Delete marker when clicking on marker',
-              onClick: function(btn, map) {
-                setMode(null);
-              },
-            },
-          ],
-        });
-        var promoteBtn = L.easyButton({
-          states: [
-            {
-              stateName: 'loaded',
-              icon: 'fa-pause-circle',
-              title: 'Promote to stopover when clicking on marker',
-              onClick: function(btn, map) {
-                setMode('promote');
-              },
-            },
-            {
-              stateName: 'active',
-              icon: 'fa-pause-circle',
-              title: 'Promote to stopover when clicking on marker',
-              onClick: function(btn, map) {
-                setMode(null);
-              },
-            },
-          ],
-        });
-        var demoteBtn = L.easyButton({
-          states: [
-            {
-              stateName: 'loaded',
-              icon: 'fa-map-signs',
-              title: 'Demote to waypoint when clicking on marker',
-              onClick: function(btn, map) {
-                setMode('demote');
-              },
-            },
-            {
-              stateName: 'active',
-              icon: 'fa-map-signs',
-              title: 'Demote to waypoint when clicking on marker',
-              onClick: function(btn, map) {
-                setMode(null);
-              },
-            },
-          ],
-        });
-        L.easyBar([addBtn, insertBtn, deleteBtn, promoteBtn, demoteBtn]).addTo(map);
-
-        var cleanBtn = L.easyButton({
-          states: [
-            {
-              icon: 'fa-trash',
-              title: 'Remove everything now',
-              onClick: function(btn, map) {
-                drawRoute.clean();
-              },
-            },
-          ],
-        });
         var importBtn = L.easyButton({
           states: [
             {
@@ -191,7 +61,7 @@
             },
           ],
         });
-        L.easyBar([cleanBtn, importBtn]).addTo(map);
+        L.easyBar([importBtn]).addTo(map);
 
         var drawRoute = L.TrackDrawer.track({
           routingCallback: function(previousMarker, marker, done) {
@@ -209,34 +79,7 @@
             }, 500);
           },
         }).addTo(map);
-
-        var onClickHandler = function(e) {
-          var marker = e.target;
-          if (mode === 'delete') drawRoute.removeNode(marker);
-          else if (mode === 'promote') drawRoute.promoteNodeToStopover(marker);
-          else if (mode === 'demote') drawRoute.demoteNodeToWaypoint(marker);
-        };
-
-        map.on('click', function(e) {
-          if (mode === 'add') {
-            var marker = L.TrackDrawer.node(e.latlng).addTo(drawRoute);
-            marker.on('moveend', function(e) {
-              drawRoute.onMoveNode(marker);
-            });
-            marker.on('click', onClickHandler);
-          }
-        });
-        drawRoute.getStepsContainer().on('click', function(e) {
-          if (mode === 'insert') {
-            var marker = L.TrackDrawer.node(e.latlng);
-            marker.on('moveend', function(e) {
-              drawRoute.onMoveNode(marker);
-            });
-            marker.on('click', onClickHandler);
-            var route = e.layer;
-            drawRoute.insertNode(marker, route);
-          }
-        });
+        var ctrl = L.TrackDrawer.control(drawRoute).addTo(map);
 
         drawRoute.on('TrackDrawer:done', function(e) {
           var state = drawRoute.getState();
@@ -300,10 +143,7 @@
           drawRoute.restoreState(state, function(latlng) {
             var marker = L.TrackDrawer.node(latlng);
             $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Restored ' + latlng + '<br>');
-            marker.on('moveend', function(e) {
-              drawRoute.onMoveNode(marker);
-            });
-            marker.on('click', onClickHandler);
+            ctrl._bindMarkerEvents(marker);
             return marker;
           });
         }

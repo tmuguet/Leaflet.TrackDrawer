@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trackdrawer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Enables drawing tracks using custom routing",
   "main": "dist/leaflet.trackdrawer.min.js",
   "scripts": {
@@ -55,7 +55,6 @@
     "karma-mocha": "^1.3.0",
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sinon": "^1.0.5",
-    "leaflet-easybutton": "^2.3.0",
     "mocha": "^5.2.0",
     "mocha-sinon": "^2.1.0",
     "nyc": "^13.0.1",
@@ -66,6 +65,7 @@
     "install": "^0.12.1",
     "leaflet": "^1.3.4",
     "npm": "^6.4.1",
-    "leaflet.awesome-markers": "^2.0.4"
+    "leaflet.awesome-markers": "^2.0.4",
+    "leaflet-easybutton": "^2.3.0"
   }
 }
