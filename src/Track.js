@@ -257,6 +257,7 @@ module.exports = L.LayerGroup.extend({
     this._firstNodeId = undefined;
     this._lastNodeId = undefined;
     this._currentColorIndex = 0;
+    this._computing = 0;
 
     if (this._fireEvents) this.fire('TrackDrawer:done', {});
 
@@ -429,8 +430,6 @@ module.exports = L.LayerGroup.extend({
 
     return new Promise((resolve, reject) => {
       callback.call(null, previousNode, node, (err, route) => {
-        this._computing -= 1;
-
         if (err !== null) {
           reject(err);
           return;
@@ -445,12 +444,20 @@ module.exports = L.LayerGroup.extend({
           previousEdge.setStyle({ dashArray: null });
         }
 
-        if (this._fireEvents && this._computing === 0) {
-          this.fire('TrackDrawer:done', { routes: [{ from: previousNode, to: node, previousEdge }] });
-        }
-        resolve();
+        resolve({ routes: [{ from: previousNode, to: node, previousEdge }] });
       });
-    });
+    })
+      .finally(() => {
+        this._computing -= 1;
+      })
+      .then((routes) => {
+        if (this._fireEvents && this._computing === 0) {
+          this.fire('TrackDrawer:done', { routes });
+        }
+      })
+      .catch((e) => {
+        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
+      });
   },
 
   insertNode(node, route, routingCallback) {
@@ -517,6 +524,9 @@ module.exports = L.LayerGroup.extend({
         if (this._fireEvents && this._computing === 0) {
           this.fire('TrackDrawer:done', { routes });
         }
+      })
+      .catch((e) => {
+        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
       });
   },
 
@@ -548,6 +558,7 @@ module.exports = L.LayerGroup.extend({
             if (previousEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[route.length - 1]));
               previousEdge.setLatLngs(route);
+              previousEdge.setStyle({ dashArray: null });
             }
 
             resolve({ from: previousNode, to: marker, edge: previousEdge });
@@ -571,6 +582,7 @@ module.exports = L.LayerGroup.extend({
             if (nextEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[0]));
               nextEdge.setLatLngs(route);
+              nextEdge.setStyle({ dashArray: null });
             }
 
             resolve({ from: marker, to: nextNode, edge: nextEdge });
@@ -584,9 +596,12 @@ module.exports = L.LayerGroup.extend({
         this._computing -= 1;
       })
       .then((values) => {
-        if (this._fireEvents && values.length > 0 && this._computing === 0) {
+        if (this._fireEvents && this._computing === 0) {
           this.fire('TrackDrawer:done', { routes: values });
         }
+      })
+      .catch((e) => {
+        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
       });
   },
 
@@ -665,6 +680,9 @@ module.exports = L.LayerGroup.extend({
         if (this._fireEvents && this._computing === 0) {
           this.fire('TrackDrawer:done', { routes });
         }
+      })
+      .catch((e) => {
+        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
       });
   },
 

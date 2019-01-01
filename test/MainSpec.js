@@ -859,7 +859,7 @@ describe('Main', () => {
       expect(newState).to.deep.equal(expectedNewState);
     });
 
-    it('moving lonely marker should not trigger event', async () => {
+    it('moving lonely marker should trigger event', async () => {
       const drawRoute = L.TrackDrawer.track().addTo(map);
 
       let eventsTriggered = 0;
@@ -872,7 +872,7 @@ describe('Main', () => {
 
       marker.setLatLng(L.latLng(latlng.lat + 1, latlng.lng - 1));
       await drawRoute.onMoveNode(marker);
-      expect(eventsTriggered).to.be.equal(0);
+      expect(eventsTriggered).to.be.equal(1);
     });
 
     it('deleting markers should alter state', async () => {
