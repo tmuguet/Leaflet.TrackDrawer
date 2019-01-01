@@ -530,6 +530,28 @@ module.exports = L.LayerGroup.extend({
       });
   },
 
+  onDragStartNode(marker) {
+    const { previousEdge } = this._getPrevious(marker);
+    const { nextEdge } = this._getNext(marker);
+    if (previousEdge !== undefined) {
+      previousEdge.setStyle({ dashArray: '4' });
+    }
+    if (nextEdge !== undefined) {
+      nextEdge.setStyle({ dashArray: '4' });
+    }
+  },
+
+  onDragNode(marker) {
+    const { previousEdge, previousNode } = this._getPrevious(marker);
+    const { nextEdge, nextNode } = this._getNext(marker);
+    if (previousEdge !== undefined) {
+      previousEdge.setLatLngs([previousNode.getLatLng(), marker.getLatLng()]);
+    }
+    if (nextEdge !== undefined) {
+      nextEdge.setLatLngs([nextNode.getLatLng(), marker.getLatLng()]);
+    }
+  },
+
   onMoveNode(marker, routingCallback) {
     const callback = routingCallback || this.options.routingCallback;
 
