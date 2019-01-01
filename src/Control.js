@@ -108,10 +108,7 @@ if (L.Control.EasyBar === undefined) {
               if (this._track.hasNodes(2)) {
                 const nodes = this._track.getNodes();
                 const marker = L.TrackDrawer.node(nodes[0].markers[0].getLatLng()).addTo(this._track);
-                marker.on('moveend', () => {
-                  this._track.onMoveNode(marker);
-                });
-                marker.on('click', this._onMarkerClickHandler);
+                this._bindMarkerEvents(marker);
               }
             },
           },
