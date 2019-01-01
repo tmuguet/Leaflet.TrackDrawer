@@ -14,7 +14,7 @@
     "eslint": "eslint src/*.js",
     "test": "karma start karma.conf.js",
     "validate": "npm run bundle && npm run eslint && npm run test",
-    "prepublishOnly": "npm run validate"
+    "version": "npm run validate"
   },
   "repository": "github:tmuguet/Leaflet.TrackDrawer",
   "author": {
