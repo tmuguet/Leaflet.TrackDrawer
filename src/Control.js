@@ -6,11 +6,19 @@ if (L.Control.EasyBar === undefined) {
   module.exports = L.Control.EasyBar.extend({
     options: {
       mode: null,
+      labelAddMarker: 'Add marker on click',
+      labelInsertMarker: 'Insert marker when clicking on track',
+      labelCloseLoop: 'Close the loop',
+      labelDeleteMarker: 'Delete marker on click',
+      labelPromoteMarker: 'Promote to stopover on click',
+      labelDemoteMarker: 'Demote to waypoint on click',
+      labelClean: 'Remove everything now',
     },
 
     initialize(track, options) {
       this._track = track;
 
+      L.Util.setOptions(this, options);
       L.Control.EasyBar.prototype.initialize.call(this, this._initializeButtons(), options);
       this.setMode(this.options.mode);
 
@@ -58,11 +66,12 @@ if (L.Control.EasyBar === undefined) {
 
     _initializeButtons() {
       this._addBtn = L.easyButton({
+        id: 'trackdrawer-add',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-plus',
-            title: 'Add marker on click',
+            title: this.options.labelAddMarker,
             onClick: () => {
               this.setMode('add');
             },
@@ -70,7 +79,7 @@ if (L.Control.EasyBar === undefined) {
           {
             stateName: 'active',
             icon: 'fa-plus',
-            title: 'Add marker on click',
+            title: this.options.labelAddMarker,
             onClick: () => {
               this.setMode(null);
             },
@@ -78,11 +87,12 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._insertBtn = L.easyButton({
+        id: 'trackdrawer-insert',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-plus-circle',
-            title: 'Insert marker when clicking on track',
+            title: this.options.labelInsertMarker,
             onClick: () => {
               this.setMode('insert');
             },
@@ -90,7 +100,7 @@ if (L.Control.EasyBar === undefined) {
           {
             stateName: 'active',
             icon: 'fa-plus-circle',
-            title: 'Insert marker when clicking on track',
+            title: this.options.labelInsertMarker,
             onClick: () => {
               this.setMode(null);
             },
@@ -98,12 +108,12 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._closeLoop = L.easyButton({
-        id: 'btn-closeloop',
+        id: 'trackdrawer-closeloop',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-magic',
-            title: 'Close the loop',
+            title: this.options.labelCloseLoop,
             onClick: () => {
               if (this._track.hasNodes(2)) {
                 const nodes = this._track.getNodes();
@@ -115,11 +125,12 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._deleteBtn = L.easyButton({
+        id: 'trackdrawer-delete',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-eraser',
-            title: 'Delete marker on click',
+            title: this.options.labelDeleteMarker,
             onClick: () => {
               this.setMode('delete');
             },
@@ -127,7 +138,7 @@ if (L.Control.EasyBar === undefined) {
           {
             stateName: 'active',
             icon: 'fa-eraser',
-            title: 'Delete marker on click',
+            title: this.options.labelDeleteMarker,
             onClick: () => {
               this.setMode(null);
             },
@@ -135,11 +146,12 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._promoteBtn = L.easyButton({
+        id: 'trackdrawer-promote',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-pause-circle',
-            title: 'Promote to stopover on click',
+            title: this.options.labelPromoteMarker,
             onClick: () => {
               this.setMode('promote');
             },
@@ -147,7 +159,7 @@ if (L.Control.EasyBar === undefined) {
           {
             stateName: 'active',
             icon: 'fa-pause-circle',
-            title: 'Promote to stopover on click',
+            title: this.options.labelPromoteMarker,
             onClick: () => {
               this.setMode(null);
             },
@@ -155,11 +167,12 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._demoteBtn = L.easyButton({
+        id: 'trackdrawer-demote',
         states: [
           {
             stateName: 'loaded',
             icon: 'fa-map-signs',
-            title: 'Demote to waypoint on click',
+            title: this.options.labelDemoteMarker,
             onClick: () => {
               this.setMode('demote');
             },
@@ -167,7 +180,7 @@ if (L.Control.EasyBar === undefined) {
           {
             stateName: 'active',
             icon: 'fa-map-signs',
-            title: 'Demote to waypoint on click',
+            title: this.options.labelDemoteMarker,
             onClick: () => {
               this.setMode(null);
             },
@@ -175,10 +188,11 @@ if (L.Control.EasyBar === undefined) {
         ],
       });
       this._cleanBtn = L.easyButton({
+        id: 'trackdrawer-clean',
         states: [
           {
             icon: 'fa-trash',
-            title: 'Remove everything now',
+            title: this.options.labelClean,
             onClick: () => {
               this._track.clean();
             },
