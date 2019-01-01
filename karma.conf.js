@@ -16,6 +16,7 @@ module.exports = function (config) {
     files: [
       'node_modules/jquery/dist/jquery.min.js',
       'node_modules/leaflet/dist/leaflet.js',
+      'node_modules/leaflet-easybutton/src/easy-button.js',
       'node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js',
       'node_modules/@babel/polyfill/dist/polyfill.min.js',
       'dist/leaflet.trackdrawer.js',
