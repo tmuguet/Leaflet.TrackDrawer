@@ -49,6 +49,266 @@ module.exports = {
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
+if (L.Control.EasyBar === undefined) {
+  module.exports = null;
+} else {
+  module.exports = L.Control.EasyBar.extend({
+    options: {
+      mode: null,
+      labelAddMarker: 'Add marker on click',
+      labelInsertMarker: 'Insert marker when clicking on track',
+      labelCloseLoop: 'Close the loop',
+      labelDeleteMarker: 'Delete marker on click',
+      labelPromoteMarker: 'Promote to stopover on click',
+      labelDemoteMarker: 'Demote to waypoint on click',
+      labelClean: 'Remove everything now'
+    },
+    initialize: function initialize(track, options) {
+      var _this = this;
+
+      this._track = track;
+      L.Util.setOptions(this, options);
+      L.Control.EasyBar.prototype.initialize.call(this, this._initializeButtons(), options);
+      this.setMode(this.options.mode);
+
+      this._track.getStepsContainer().on('click', function (e) {
+        if (_this.options.mode === 'insert') {
+          var marker = L.TrackDrawer.node(e.latlng);
+          var route = e.layer;
+
+          _this._track.insertNode(marker, route);
+
+          _this._bindMarkerEvents(marker);
+        }
+      });
+    },
+    setMode: function setMode(m) {
+      this.options.mode = m;
+
+      this._addBtn.state('loaded');
+
+      this._insertBtn.state('loaded');
+
+      this._deleteBtn.state('loaded');
+
+      this._promoteBtn.state('loaded');
+
+      this._demoteBtn.state('loaded');
+
+      switch (this.options.mode) {
+        case 'add':
+          this._addBtn.state('active');
+
+          break;
+
+        case 'insert':
+          this._insertBtn.state('active');
+
+          break;
+
+        case 'delete':
+          this._deleteBtn.state('active');
+
+          break;
+
+        case 'promote':
+          this._promoteBtn.state('active');
+
+          break;
+
+        case 'demote':
+          this._demoteBtn.state('active');
+
+          break;
+
+        default: // Do nothing
+
+      }
+
+      return this;
+    },
+    _initializeButtons: function _initializeButtons() {
+      var _this2 = this;
+
+      this._addBtn = L.easyButton({
+        id: 'trackdrawer-add',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-plus',
+          title: this.options.labelAddMarker,
+          onClick: function onClick() {
+            _this2.setMode('add');
+          }
+        }, {
+          stateName: 'active',
+          icon: 'fa-plus',
+          title: this.options.labelAddMarker,
+          onClick: function onClick() {
+            _this2.setMode(null);
+          }
+        }]
+      });
+      this._insertBtn = L.easyButton({
+        id: 'trackdrawer-insert',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-plus-circle',
+          title: this.options.labelInsertMarker,
+          onClick: function onClick() {
+            _this2.setMode('insert');
+          }
+        }, {
+          stateName: 'active',
+          icon: 'fa-plus-circle',
+          title: this.options.labelInsertMarker,
+          onClick: function onClick() {
+            _this2.setMode(null);
+          }
+        }]
+      });
+      this._closeLoop = L.easyButton({
+        id: 'trackdrawer-closeloop',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-magic',
+          title: this.options.labelCloseLoop,
+          onClick: function onClick() {
+            if (_this2._track.hasNodes(2)) {
+              var nodes = _this2._track.getNodes();
+
+              var marker = L.TrackDrawer.node(nodes[0].markers[0].getLatLng()).addTo(_this2._track);
+
+              _this2._bindMarkerEvents(marker);
+            }
+          }
+        }]
+      });
+      this._deleteBtn = L.easyButton({
+        id: 'trackdrawer-delete',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-eraser',
+          title: this.options.labelDeleteMarker,
+          onClick: function onClick() {
+            _this2.setMode('delete');
+          }
+        }, {
+          stateName: 'active',
+          icon: 'fa-eraser',
+          title: this.options.labelDeleteMarker,
+          onClick: function onClick() {
+            _this2.setMode(null);
+          }
+        }]
+      });
+      this._promoteBtn = L.easyButton({
+        id: 'trackdrawer-promote',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-pause-circle',
+          title: this.options.labelPromoteMarker,
+          onClick: function onClick() {
+            _this2.setMode('promote');
+          }
+        }, {
+          stateName: 'active',
+          icon: 'fa-pause-circle',
+          title: this.options.labelPromoteMarker,
+          onClick: function onClick() {
+            _this2.setMode(null);
+          }
+        }]
+      });
+      this._demoteBtn = L.easyButton({
+        id: 'trackdrawer-demote',
+        states: [{
+          stateName: 'loaded',
+          icon: 'fa-map-signs',
+          title: this.options.labelDemoteMarker,
+          onClick: function onClick() {
+            _this2.setMode('demote');
+          }
+        }, {
+          stateName: 'active',
+          icon: 'fa-map-signs',
+          title: this.options.labelDemoteMarker,
+          onClick: function onClick() {
+            _this2.setMode(null);
+          }
+        }]
+      });
+      this._cleanBtn = L.easyButton({
+        id: 'trackdrawer-clean',
+        states: [{
+          icon: 'fa-trash',
+          title: this.options.labelClean,
+          onClick: function onClick() {
+            _this2._track.clean();
+          }
+        }]
+      });
+      return [this._addBtn, this._insertBtn, this._closeLoop, this._deleteBtn, this._promoteBtn, this._demoteBtn, this._cleanBtn];
+    },
+    _bindMarkerEvents: function _bindMarkerEvents(marker) {
+      marker.on('dragstart', this._onMarkerDragStartHandler);
+      marker.on('drag', this._onMarkerDragHandler);
+      marker.on('moveend', this._onMarkerMoveEndHandler);
+      marker.on('click', this._onMarkerClickHandler);
+      return this;
+    },
+    onAdd: function onAdd(map) {
+      var _this3 = this;
+
+      this._onMarkerMoveEndHandler = function (e) {
+        _this3._track.onMoveNode(e.target);
+      };
+
+      this._onMarkerDragStartHandler = function (e) {
+        _this3._track.onDragStartNode(e.target);
+      };
+
+      this._onMarkerDragHandler = function (e) {
+        _this3._track.onDragNode(e.target);
+      };
+
+      this._onMapClickHandler = function (e) {
+        if (_this3.options.mode === 'add') {
+          var marker = L.TrackDrawer.node(e.latlng).addTo(_this3._track);
+
+          _this3._bindMarkerEvents(marker);
+        }
+      };
+
+      this._onMarkerClickHandler = function (e) {
+        var marker = e.target;
+        if (_this3.options.mode === 'delete') _this3._track.removeNode(marker);else if (_this3.options.mode === 'promote') _this3._track.promoteNodeToStopover(marker);else if (_this3.options.mode === 'demote') _this3._track.demoteNodeToWaypoint(marker);
+      };
+
+      L.DomEvent.on(map, 'click', this._onMapClickHandler);
+      return L.Control.EasyBar.prototype.onAdd.call(this, map);
+    },
+    onRemove: function onRemove(map) {
+      var _this4 = this;
+
+      L.DomEvent.off(map, 'click', this._onMapClickHandler);
+
+      this._track.getNodes().forEach(function (nodes) {
+        nodes.markers.forEach(function (marker) {
+          marker.off('moveend', _this4._onMarkerMoveEndHandler);
+          marker.off('click', _this4._onMarkerClickHandler);
+        });
+      });
+    }
+  });
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
 module.exports = L.Evented.extend({
   initialize: function initialize(parent) {
     this._parent = parent;
@@ -114,7 +374,7 @@ module.exports = L.Evented.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -173,7 +433,87 @@ module.exports = L.Marker.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+if (L.Control.EasyBar === undefined) {
+  module.exports = null;
+} else {
+  module.exports = L.Control.EasyBar.extend({
+    options: {
+      mode: null
+    },
+    initialize: function initialize(track, modes, options) {
+      this._track = track;
+      this._buttonsMap = {};
+      L.Control.EasyBar.prototype.initialize.call(this, this._initializeButtons(modes), options);
+      this.setMode(this.options.mode);
+    },
+    setMode: function setMode(m) {
+      var _this = this;
+
+      var ids = Object.keys(this._buttonsMap);
+      var newMode = m;
+
+      if (newMode === null) {
+        var idx = this.options.mode === ids[0] ? 1 : 0;
+        newMode = ids[idx];
+      }
+
+      this.options.mode = newMode;
+      ids.forEach(function (key) {
+        _this._buttonsMap[key].btn.state('loaded');
+      });
+
+      this._buttonsMap[newMode].btn.state('active');
+
+      this._track.setOptions({
+        router: this._buttonsMap[newMode].router,
+        routingCallback: this._buttonsMap[newMode].routingCallback
+      });
+
+      return this;
+    },
+    _initializeButtons: function _initializeButtons(modes) {
+      var _this2 = this;
+
+      var buttons = [];
+      modes.forEach(function (m) {
+        var btn = L.easyButton({
+          id: "trackdrawer-mode-".concat(m.id),
+          states: [{
+            stateName: 'loaded',
+            icon: m.icon,
+            title: m.name,
+            onClick: function onClick() {
+              _this2.setMode(m.id);
+            }
+          }, {
+            stateName: 'active',
+            icon: m.icon,
+            title: m.name,
+            onClick: function onClick() {
+              _this2.setMode(null);
+            }
+          }]
+        });
+        buttons.push(btn);
+        _this2._buttonsMap[m.id] = {
+          router: m.router,
+          routingCallback: m.routingCallback,
+          btn: btn
+        };
+      });
+      return buttons;
+    }
+  });
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],6:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -285,9 +625,7 @@ module.exports = L.LayerGroup.extend({
     return this._edgesContainers.get(this._getEdgeContainerIndex(edge));
   },
   initialize: function initialize(options) {
-    var _this = this;
-
-    L.setOptions(this, options);
+    this.setOptions(options);
     L.LayerGroup.prototype.initialize.call(this);
     this._nodesContainers = new LayerContainer(this);
     this._edgesContainers = new LayerContainer(this);
@@ -296,6 +634,11 @@ module.exports = L.LayerGroup.extend({
     this._currentColorIndex = 0;
     this._fireEvents = true;
     this._computing = 0;
+  },
+  setOptions: function setOptions(options) {
+    var _this = this;
+
+    L.setOptions(this, options);
 
     if (this.options.router !== undefined) {
       this.options.routingCallback = function (previousMarker, marker, done) {
@@ -304,6 +647,17 @@ module.exports = L.LayerGroup.extend({
         });
       };
     }
+  },
+  hasNodes: function hasNodes() {
+    var count = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+    var counter = 0;
+
+    this._nodesContainers.forEach(function (container) {
+      var group = container.getLayers();
+      counter += group.length;
+    });
+
+    return counter >= count;
   },
   getNodes: function getNodes() {
     var nodes = [];
@@ -443,7 +797,25 @@ module.exports = L.LayerGroup.extend({
 
     return state;
   },
+  _fireStart: function _fireStart() {
+    var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:start', payload);
+    this._computing += 1;
+  },
+  _fireDone: function _fireDone() {
+    var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    this._computing -= 1;
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:done', payload);
+  },
+  _fireFailed: function _fireFailed(error) {
+    this._computing -= 1;
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:failed', {
+      message: error.message
+    });
+  },
   clean: function clean() {
+    this._fireStart();
+
     this._edgesContainers.clean();
 
     this._nodesContainers.clean();
@@ -451,7 +823,9 @@ module.exports = L.LayerGroup.extend({
     this._firstNodeId = undefined;
     this._lastNodeId = undefined;
     this._currentColorIndex = 0;
-    if (this._fireEvents) this.fire('TrackDrawer:done', {});
+
+    this._fireDone();
+
     return this;
   },
   restoreState: function () {
@@ -465,6 +839,8 @@ module.exports = L.LayerGroup.extend({
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
+              this._fireStart();
+
               oldValue = this._fireEvents;
               this._fireEvents = false;
               this.clean();
@@ -502,20 +878,22 @@ module.exports = L.LayerGroup.extend({
                 });
                 done(null, edge);
               }));
-              _context.next = 12;
+              _context.next = 13;
               return Promise.all(promises);
 
-            case 12:
+            case 13:
               stopovers.forEach(function (m) {
                 return _this4.promoteNodeToStopover(m);
               });
               this._fireEvents = oldValue;
-              if (this._fireEvents) this.fire('TrackDrawer:done', {
+
+              this._fireDone({
                 routes: routes
               });
+
               return _context.abrupt("return", this);
 
-            case 16:
+            case 17:
             case "end":
               return _context.stop();
           }
@@ -595,9 +973,10 @@ module.exports = L.LayerGroup.extend({
   addNode: function addNode(node, routingCallback) {
     var _this7 = this;
 
+    var skipChecks = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = routingCallback || this.options.routingCallback;
 
-    if (this._lastNodeId !== undefined) {
+    if (this._lastNodeId !== undefined && !skipChecks) {
       var _previousNode = this._getNode(this._lastNodeId);
 
       if (_previousNode.getLatLng().equals(node.getLatLng())) {
@@ -616,9 +995,7 @@ module.exports = L.LayerGroup.extend({
 
       this._createEdge(_previousNode2, node);
 
-      if (this._fireEvents && this._computing === 0) {
-        this.fire('TrackDrawer:start', {});
-      }
+      this._fireStart();
     }
 
     var lastNodeId = this._lastNodeId;
@@ -643,8 +1020,6 @@ module.exports = L.LayerGroup.extend({
       });
     }
 
-    this._computing += 1;
-
     var _this$_getPrevious = this._getPrevious(node),
         previousEdge = _this$_getPrevious.previousEdge,
         previousNode = _this$_getPrevious.previousNode;
@@ -653,8 +1028,6 @@ module.exports = L.LayerGroup.extend({
     var currentComputation = previousEdge._computation;
     return new Promise(function (resolve, reject) {
       callback.call(null, previousNode, node, function (err, route) {
-        _this7._computing -= 1;
-
         if (err !== null) {
           reject(err);
           return;
@@ -671,18 +1044,20 @@ module.exports = L.LayerGroup.extend({
           });
         }
 
-        if (_this7._fireEvents && _this7._computing === 0) {
-          _this7.fire('TrackDrawer:done', {
-            routes: [{
-              from: previousNode,
-              to: node,
-              previousEdge: previousEdge
-            }]
-          });
-        }
-
-        resolve();
+        resolve({
+          routes: [{
+            from: previousNode,
+            to: node,
+            previousEdge: previousEdge
+          }]
+        });
       });
+    }).then(function (routes) {
+      _this7._fireDone({
+        routes: routes
+      });
+    }).catch(function (e) {
+      _this7._fireFailed(e);
     });
   },
   insertNode: function insertNode(node, route, routingCallback) {
@@ -702,11 +1077,8 @@ module.exports = L.LayerGroup.extend({
 
     var edge2 = this._createEdge(node, endMarker);
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
-    this._computing += 1;
     edge1._computation += 1;
     edge2._computation += 1;
     var currentComputation1 = edge1._computation;
@@ -757,15 +1129,49 @@ module.exports = L.LayerGroup.extend({
         });
       });
     });
-    return Promise.all([promise1, promise2]).finally(function () {
-      _this8._computing -= 1;
-    }).then(function (routes) {
-      if (_this8._fireEvents && _this8._computing === 0) {
-        _this8.fire('TrackDrawer:done', {
-          routes: routes
-        });
-      }
+    return Promise.all([promise1, promise2]).then(function (routes) {
+      _this8._fireDone({
+        routes: routes
+      });
+    }).catch(function (e) {
+      _this8._fireFailed(e);
     });
+  },
+  onDragStartNode: function onDragStartNode(marker) {
+    var _this$_getPrevious2 = this._getPrevious(marker),
+        previousEdge = _this$_getPrevious2.previousEdge;
+
+    var _this$_getNext = this._getNext(marker),
+        nextEdge = _this$_getNext.nextEdge;
+
+    if (previousEdge !== undefined) {
+      previousEdge.setStyle({
+        dashArray: '4'
+      });
+    }
+
+    if (nextEdge !== undefined) {
+      nextEdge.setStyle({
+        dashArray: '4'
+      });
+    }
+  },
+  onDragNode: function onDragNode(marker) {
+    var _this$_getPrevious3 = this._getPrevious(marker),
+        previousEdge = _this$_getPrevious3.previousEdge,
+        previousNode = _this$_getPrevious3.previousNode;
+
+    var _this$_getNext2 = this._getNext(marker),
+        nextEdge = _this$_getNext2.nextEdge,
+        nextNode = _this$_getNext2.nextNode;
+
+    if (previousEdge !== undefined) {
+      previousEdge.setLatLngs([previousNode.getLatLng(), marker.getLatLng()]);
+    }
+
+    if (nextEdge !== undefined) {
+      nextEdge.setLatLngs([nextNode.getLatLng(), marker.getLatLng()]);
+    }
   },
   onMoveNode: function onMoveNode(marker, routingCallback) {
     var _this9 = this;
@@ -773,19 +1179,15 @@ module.exports = L.LayerGroup.extend({
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
 
-    var _this$_getPrevious2 = this._getPrevious(marker),
-        previousEdge = _this$_getPrevious2.previousEdge,
-        previousNode = _this$_getPrevious2.previousNode;
+    var _this$_getPrevious4 = this._getPrevious(marker),
+        previousEdge = _this$_getPrevious4.previousEdge,
+        previousNode = _this$_getPrevious4.previousNode;
 
-    var _this$_getNext = this._getNext(marker),
-        nextEdge = _this$_getNext.nextEdge,
-        nextNode = _this$_getNext.nextNode;
+    var _this$_getNext3 = this._getNext(marker),
+        nextEdge = _this$_getNext3.nextEdge,
+        nextNode = _this$_getNext3.nextNode;
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
-
-    this._computing += 1;
+    this._fireStart();
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;
@@ -800,6 +1202,9 @@ module.exports = L.LayerGroup.extend({
           if (previousEdge._computation === currentComputation) {
             marker.setLatLng(L.latLng(route[route.length - 1]));
             previousEdge.setLatLngs(route);
+            previousEdge.setStyle({
+              dashArray: null
+            });
           }
 
           resolve({
@@ -824,6 +1229,9 @@ module.exports = L.LayerGroup.extend({
           if (nextEdge._computation === _currentComputation) {
             marker.setLatLng(L.latLng(route[0]));
             nextEdge.setLatLngs(route);
+            nextEdge.setStyle({
+              dashArray: null
+            });
           }
 
           resolve({
@@ -835,14 +1243,12 @@ module.exports = L.LayerGroup.extend({
       }));
     }
 
-    return Promise.all(promises).finally(function () {
-      _this9._computing -= 1;
-    }).then(function (values) {
-      if (_this9._fireEvents && values.length > 0 && _this9._computing === 0) {
-        _this9.fire('TrackDrawer:done', {
-          routes: values
-        });
-      }
+    return Promise.all(promises).then(function (routes) {
+      _this9._fireDone({
+        routes: routes
+      });
+    }).catch(function (e) {
+      _this9._fireFailed(e);
     });
   },
   removeNode: function removeNode(node, routingCallback) {
@@ -851,11 +1257,8 @@ module.exports = L.LayerGroup.extend({
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
-    this._computing += 1;
     var oldValue = this._fireEvents;
     this._fireEvents = false;
     this.demoteNodeToWaypoint(node);
@@ -863,13 +1266,13 @@ module.exports = L.LayerGroup.extend({
 
     var nodeContainer = this._getNodeContainer(node);
 
-    var _this$_getPrevious3 = this._getPrevious(node),
-        previousEdge = _this$_getPrevious3.previousEdge,
-        previousNode = _this$_getPrevious3.previousNode;
+    var _this$_getPrevious5 = this._getPrevious(node),
+        previousEdge = _this$_getPrevious5.previousEdge,
+        previousNode = _this$_getPrevious5.previousNode;
 
-    var _this$_getNext2 = this._getNext(node),
-        nextEdge = _this$_getNext2.nextEdge,
-        nextNode = _this$_getNext2.nextNode;
+    var _this$_getNext4 = this._getNext(node),
+        nextEdge = _this$_getNext4.nextEdge,
+        nextNode = _this$_getNext4.nextNode;
 
     if (previousEdge !== undefined && nextEdge !== undefined) {
       // Intermediate marker
@@ -921,14 +1324,12 @@ module.exports = L.LayerGroup.extend({
       node.removeFrom(nodeContainer);
     }
 
-    return Promise.all(promises).finally(function () {
-      _this10._computing -= 1;
-    }).then(function (routes) {
-      if (_this10._fireEvents && _this10._computing === 0) {
-        _this10.fire('TrackDrawer:done', {
-          routes: routes
-        });
-      }
+    return Promise.all(promises).then(function (routes) {
+      _this10._fireDone({
+        routes: routes
+      });
+    }).catch(function (e) {
+      _this10._fireFailed(e);
     });
   },
   promoteNodeToStopover: function promoteNodeToStopover(node) {
@@ -945,9 +1346,7 @@ module.exports = L.LayerGroup.extend({
       return this;
     }
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
     var index = this._getNodeContainerIndex(node);
 
@@ -958,9 +1357,9 @@ module.exports = L.LayerGroup.extend({
     do {
       nodes.push(currentNode);
 
-      var _this$_getNext3 = this._getNext(currentNode),
-          nextEdge = _this$_getNext3.nextEdge,
-          nextNode = _this$_getNext3.nextNode;
+      var _this$_getNext5 = this._getNext(currentNode),
+          nextEdge = _this$_getNext5.nextEdge,
+          nextNode = _this$_getNext5.nextNode;
 
       if (nextEdge === undefined) {
         break;
@@ -995,9 +1394,7 @@ module.exports = L.LayerGroup.extend({
     node._promoted = true;
     node._demoted = false;
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:done', {});
-    }
+    this._fireDone();
 
     return this;
   },
@@ -1014,9 +1411,7 @@ module.exports = L.LayerGroup.extend({
       return this;
     }
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
     var nodes = [];
     var edges = [];
@@ -1025,9 +1420,9 @@ module.exports = L.LayerGroup.extend({
     do {
       nodes.push(currentNode);
 
-      var _this$_getNext4 = this._getNext(currentNode),
-          nextEdge = _this$_getNext4.nextEdge,
-          nextNode = _this$_getNext4.nextNode;
+      var _this$_getNext6 = this._getNext(currentNode),
+          nextEdge = _this$_getNext6.nextEdge,
+          nextNode = _this$_getNext6.nextNode;
 
       if (nextEdge === undefined) {
         break;
@@ -1053,9 +1448,9 @@ module.exports = L.LayerGroup.extend({
       e.removeFrom(_this12._getEdgeContainer(e)).addTo(previousEdgesContainer);
     });
 
-    var _this$_getPrevious4 = this._getPrevious(nodes[0]),
-        previousEdge = _this$_getPrevious4.previousEdge,
-        previousNode = _this$_getPrevious4.previousNode;
+    var _this$_getPrevious6 = this._getPrevious(nodes[0]),
+        previousEdge = _this$_getPrevious6.previousEdge,
+        previousNode = _this$_getPrevious6.previousNode;
 
     if (previousEdge !== undefined) {
       previousNodesContainer.setStyle({
@@ -1070,22 +1465,24 @@ module.exports = L.LayerGroup.extend({
     node._promoted = false;
     node._demoted = true;
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:done', {});
-    }
+    this._fireDone();
 
     return this;
   }
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":1,"./LayerContainer":2}],5:[function(_dereq_,module,exports){
+},{"./Colors":1,"./LayerContainer":3}],7:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
 var Track = _dereq_('./Track');
+
+var Control = _dereq_('./Control');
+
+var TraceModeBar = _dereq_('./TraceModeBar');
 
 var LayerContainer = _dereq_('./LayerContainer');
 
@@ -1095,11 +1492,19 @@ var colors = _dereq_('./Colors');
 
 L.TrackDrawer = {
   Track: Track,
+  Control: Control,
+  TraceModeBar: TraceModeBar,
   LayerContainer: LayerContainer,
   Node: Node,
   colors: colors,
   track: function track(options) {
     return new Track(options);
+  },
+  control: function control(track, options) {
+    return new Control(track, options);
+  },
+  traceModeBar: function traceModeBar(track, modes, options) {
+    return new TraceModeBar(track, modes, options);
   },
   node: function node(latlng, options) {
     return new Node(latlng, options);
@@ -1108,4 +1513,4 @@ L.TrackDrawer = {
 module.exports = L.TrackDrawer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":1,"./LayerContainer":2,"./Node":3,"./Track":4}]},{},[5]);
+},{"./Colors":1,"./Control":2,"./LayerContainer":3,"./Node":4,"./TraceModeBar":5,"./Track":6}]},{},[7]);
