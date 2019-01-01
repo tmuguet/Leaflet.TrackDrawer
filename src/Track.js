@@ -250,21 +250,37 @@ module.exports = L.LayerGroup.extend({
     return state;
   },
 
+  _fireStart(payload = {}) {
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:start', payload);
+    this._computing += 1;
+  },
+
+  _fireDone(payload = {}) {
+    this._computing -= 1;
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:done', payload);
+  },
+
+  _fireFailed(error) {
+    this._computing -= 1;
+    if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:failed', { message: error.message });
+  },
+
   clean() {
+    this._fireStart();
     this._edgesContainers.clean();
     this._nodesContainers.clean();
 
     this._firstNodeId = undefined;
     this._lastNodeId = undefined;
     this._currentColorIndex = 0;
-    this._computing = 0;
 
-    if (this._fireEvents) this.fire('TrackDrawer:done', {});
-
+    this._fireDone();
     return this;
   },
 
   async restoreState(state, nodeCallback) {
+    this._fireStart();
+
     const oldValue = this._fireEvents;
     this._fireEvents = false;
     this.clean();
@@ -307,8 +323,7 @@ module.exports = L.LayerGroup.extend({
     stopovers.forEach(m => this.promoteNodeToStopover(m));
 
     this._fireEvents = oldValue;
-    if (this._fireEvents) this.fire('TrackDrawer:done', { routes });
-
+    this._fireDone({ routes });
     return this;
   },
 
@@ -399,9 +414,7 @@ module.exports = L.LayerGroup.extend({
       const previousNode = this._getNode(this._lastNodeId);
       this._createEdge(previousNode, node);
 
-      if (this._fireEvents && this._computing === 0) {
-        this.fire('TrackDrawer:start', {});
-      }
+      this._fireStart();
     }
 
     const lastNodeId = this._lastNodeId;
@@ -423,7 +436,6 @@ module.exports = L.LayerGroup.extend({
       });
     }
 
-    this._computing += 1;
     const { previousEdge, previousNode } = this._getPrevious(node);
     previousEdge._computation += 1;
     const currentComputation = previousEdge._computation;
@@ -447,16 +459,11 @@ module.exports = L.LayerGroup.extend({
         resolve({ routes: [{ from: previousNode, to: node, previousEdge }] });
       });
     })
-      .finally(() => {
-        this._computing -= 1;
-      })
       .then((routes) => {
-        if (this._fireEvents && this._computing === 0) {
-          this.fire('TrackDrawer:done', { routes });
-        }
+        this._fireDone({ routes });
       })
       .catch((e) => {
-        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
+        this._fireFailed(e);
       });
   },
 
@@ -472,11 +479,8 @@ module.exports = L.LayerGroup.extend({
     const edge1 = this._createEdge(startMarker, node);
     const edge2 = this._createEdge(node, endMarker);
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
-    this._computing += 1;
     edge1._computation += 1;
     edge2._computation += 1;
     const currentComputation1 = edge1._computation;
@@ -517,16 +521,11 @@ module.exports = L.LayerGroup.extend({
     });
 
     return Promise.all([promise1, promise2])
-      .finally(() => {
-        this._computing -= 1;
-      })
       .then((routes) => {
-        if (this._fireEvents && this._computing === 0) {
-          this.fire('TrackDrawer:done', { routes });
-        }
+        this._fireDone({ routes });
       })
       .catch((e) => {
-        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
+        this._fireFailed(e);
       });
   },
 
@@ -559,11 +558,7 @@ module.exports = L.LayerGroup.extend({
     const { previousEdge, previousNode } = this._getPrevious(marker);
     const { nextEdge, nextNode } = this._getNext(marker);
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
-
-    this._computing += 1;
+    this._fireStart();
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;
@@ -614,16 +609,11 @@ module.exports = L.LayerGroup.extend({
     }
 
     return Promise.all(promises)
-      .finally(() => {
-        this._computing -= 1;
-      })
-      .then((values) => {
-        if (this._fireEvents && this._computing === 0) {
-          this.fire('TrackDrawer:done', { routes: values });
-        }
+      .then((routes) => {
+        this._fireDone({ routes });
       })
       .catch((e) => {
-        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
+        this._fireFailed(e);
       });
   },
 
@@ -632,10 +622,7 @@ module.exports = L.LayerGroup.extend({
 
     const promises = [];
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
-    this._computing += 1;
+    this._fireStart();
 
     const oldValue = this._fireEvents;
     this._fireEvents = false;
@@ -695,16 +682,11 @@ module.exports = L.LayerGroup.extend({
     }
 
     return Promise.all(promises)
-      .finally(() => {
-        this._computing -= 1;
-      })
       .then((routes) => {
-        if (this._fireEvents && this._computing === 0) {
-          this.fire('TrackDrawer:done', { routes });
-        }
+        this._fireDone({ routes });
       })
       .catch((e) => {
-        if (this._fireEvents) this.fire('TrackDrawer:failed', { message: e.message });
+        this._fireFailed(e);
       });
   },
 
@@ -720,9 +702,7 @@ module.exports = L.LayerGroup.extend({
       return this;
     }
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
     const index = this._getNodeContainerIndex(node);
 
@@ -764,10 +744,7 @@ module.exports = L.LayerGroup.extend({
     node._promoted = true;
     node._demoted = false;
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:done', {});
-    }
-
+    this._fireDone();
     return this;
   },
 
@@ -781,9 +758,7 @@ module.exports = L.LayerGroup.extend({
       return this;
     }
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:start', {});
-    }
+    this._fireStart();
 
     const nodes = [];
     const edges = [];
@@ -825,10 +800,7 @@ module.exports = L.LayerGroup.extend({
     node._promoted = false;
     node._demoted = true;
 
-    if (this._fireEvents && this._computing === 0) {
-      this.fire('TrackDrawer:done', {});
-    }
-
+    this._fireDone();
     return this;
   },
 });
