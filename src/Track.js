@@ -395,10 +395,10 @@ module.exports = L.LayerGroup.extend({
     node.addTo(nodesContainer);
   },
 
-  addNode(node, routingCallback) {
+  addNode(node, routingCallback, skipChecks = false) {
     const callback = routingCallback || this.options.routingCallback;
 
-    if (this._lastNodeId !== undefined) {
+    if (this._lastNodeId !== undefined && !skipChecks) {
       const previousNode = this._getNode(this._lastNodeId);
       if (previousNode.getLatLng().equals(node.getLatLng())) {
         return new Promise((resolve) => {
