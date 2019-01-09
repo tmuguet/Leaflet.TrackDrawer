@@ -13,10 +13,31 @@ if (L.Control.EasyBar === undefined) {
       labelPromoteMarker: 'Promote to stopover on click',
       labelDemoteMarker: 'Demote to waypoint on click',
       labelClean: 'Remove everything now',
+      labelUndo: 'Undo',
+      labelRedo: 'Redo',
     },
 
     initialize(track, options) {
       this._track = track;
+      this._states = [this._track.getState()];
+      this._currentState = 0;
+      this._undoing = false;
+
+      // Bind this event before creating the buttons so they will have the correct state
+      this._track.on('TrackDrawer:done', () => {
+        if (!this._undoing) {
+          if (this._currentState + 1 !== this._states.length) {
+            this._states.splice(this._currentState + 1);
+          }
+          this._currentState += 1;
+          this._states.push(this._track.getState());
+
+          if (this._states.length > 30) {
+            this._states.splice(0, 1);
+          }
+        }
+        this._undoing = false;
+      });
 
       L.Util.setOptions(this, options);
       L.Control.EasyBar.prototype.initialize.call(this, this._initializeButtons(), options);
@@ -199,6 +220,79 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      this._undoBtn = L.easyButton({
+        id: 'trackdrawer-undo',
+        states: [
+          {
+            icon: 'fa-undo',
+            title: this.options.labelUndo,
+            onClick: () => {
+              if (this._currentState > 0) {
+                this._currentState -= 1;
+                this._undoing = true;
+                this._track.restoreState(this._states[this._currentState], (latlng) => {
+                  const marker = L.TrackDrawer.node(latlng);
+                  this._bindMarkerEvents(marker);
+                  return marker;
+                });
+              }
+            },
+          },
+        ],
+      });
+      this._redoBtn = L.easyButton({
+        id: 'trackdrawer-redo',
+        states: [
+          {
+            icon: 'fa-repeat',
+            title: this.options.labelRedo,
+            onClick: () => {
+              if (this._currentState < this._states.length - 1) {
+                this._currentState += 1;
+                this._undoing = true;
+                this._track.restoreState(this._states[this._currentState], (latlng) => {
+                  const marker = L.TrackDrawer.node(latlng);
+                  this._bindMarkerEvents(marker);
+                  return marker;
+                });
+              }
+            },
+          },
+        ],
+      });
+
+      this._track.on('TrackDrawer:done', () => {
+        if (this._track.hasNodes(2)) {
+          this._closeLoop.enable();
+        } else {
+          this._closeLoop.disable();
+        }
+
+        if (this._track.hasNodes()) {
+          this._insertBtn.enable();
+          this._deleteBtn.enable();
+          this._promoteBtn.enable();
+          this._demoteBtn.enable();
+          this._cleanBtn.enable();
+        } else {
+          this._insertBtn.disable();
+          this._deleteBtn.disable();
+          this._promoteBtn.disable();
+          this._demoteBtn.disable();
+          this._cleanBtn.disable();
+        }
+
+        if (this._currentState > 0) {
+          this._undoBtn.enable();
+        } else {
+          this._undoBtn.disable();
+        }
+        if (this._currentState < this._states.length - 1) {
+          this._redoBtn.enable();
+        } else {
+          this._redoBtn.disable();
+        }
+      });
 
       return [
         this._addBtn,
@@ -208,6 +302,8 @@ if (L.Control.EasyBar === undefined) {
         this._promoteBtn,
         this._demoteBtn,
         this._cleanBtn,
+        this._undoBtn,
+        this._redoBtn,
       ];
     },
 
