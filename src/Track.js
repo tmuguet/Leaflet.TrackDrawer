@@ -302,21 +302,23 @@ module.exports = L.LayerGroup.extend({
             const edge = decodeLatLngs(previousSegment.edge);
             routes.push({ from, to, edge });
             done(null, edge);
-          }),
+          }, true),
         );
         previousSegment = segment;
       });
     });
 
-    const lastState = state[state.length - 1][state[state.length - 1].length - 1];
-    const marker = nodeCallback.call(null, decodeLatLng(lastState.end));
-    promises.push(
-      this.addNode(marker, (from, to, done) => {
-        const edge = decodeLatLngs(lastState.edge);
-        routes.push({ from, to, edge });
-        done(null, edge);
-      }),
-    );
+    if (state.length > 0) {
+      const lastState = state[state.length - 1][state[state.length - 1].length - 1];
+      const marker = nodeCallback.call(null, decodeLatLng(lastState.end));
+      promises.push(
+        this.addNode(marker, (from, to, done) => {
+          const edge = decodeLatLngs(lastState.edge);
+          routes.push({ from, to, edge });
+          done(null, edge);
+        }, true),
+      );
+    }
 
     await Promise.all(promises);
 
