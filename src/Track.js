@@ -52,6 +52,8 @@ module.exports = L.LayerGroup.extend({
     routingCallback: undefined,
     router: undefined,
     debug: true,
+    undoable: true,
+    undoDepth: 30,
   },
 
   _getPrevious(node) {
@@ -102,6 +104,14 @@ module.exports = L.LayerGroup.extend({
     this._currentColorIndex = 0;
     this._fireEvents = true;
     this._computing = 0;
+
+    this._states = [];
+    this._currentStateIndex = null;
+
+    if (this.options.undoable) {
+      this._states.push(this.getState());
+      this._currentStateIndex = 0;
+    }
   },
 
   setOptions(options) {
@@ -257,6 +267,7 @@ module.exports = L.LayerGroup.extend({
 
   _fireDone(payload = {}) {
     this._computing -= 1;
+    if (this._fireEvents) this._pushState();
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:done', payload);
   },
 
@@ -278,7 +289,12 @@ module.exports = L.LayerGroup.extend({
     return this;
   },
 
+  _createNode(latlng) {
+    return L.TrackDrawer.node(latlng);
+  },
+
   async restoreState(state, nodeCallback) {
+    const callback = nodeCallback || this._createNode;
     this._fireStart();
 
     const oldValue = this._fireEvents;
@@ -292,17 +308,21 @@ module.exports = L.LayerGroup.extend({
 
     state.forEach((group, i) => {
       group.forEach((segment, j) => {
-        const marker = nodeCallback.call(null, decodeLatLng(segment.start));
+        const marker = callback.call(null, decodeLatLng(segment.start));
         if (j === 0 && i > 0) {
           stopovers.push(marker);
         }
 
         promises.push(
-          this.addNode(marker, (from, to, done) => {
-            const edge = decodeLatLngs(previousSegment.edge);
-            routes.push({ from, to, edge });
-            done(null, edge);
-          }, true),
+          this.addNode(
+            marker,
+            (from, to, done) => {
+              const edge = decodeLatLngs(previousSegment.edge);
+              routes.push({ from, to, edge });
+              done(null, edge);
+            },
+            true,
+          ),
         );
         previousSegment = segment;
       });
@@ -310,13 +330,17 @@ module.exports = L.LayerGroup.extend({
 
     if (state.length > 0) {
       const lastState = state[state.length - 1][state[state.length - 1].length - 1];
-      const marker = nodeCallback.call(null, decodeLatLng(lastState.end));
+      const marker = callback.call(null, decodeLatLng(lastState.end));
       promises.push(
-        this.addNode(marker, (from, to, done) => {
-          const edge = decodeLatLngs(lastState.edge);
-          routes.push({ from, to, edge });
-          done(null, edge);
-        }, true),
+        this.addNode(
+          marker,
+          (from, to, done) => {
+            const edge = decodeLatLngs(lastState.edge);
+            routes.push({ from, to, edge });
+            done(null, edge);
+          },
+          true,
+        ),
       );
     }
 
@@ -327,6 +351,39 @@ module.exports = L.LayerGroup.extend({
     this._fireEvents = oldValue;
     this._fireDone({ routes });
     return this;
+  },
+
+  _pushState() {
+    if (!this._undoing) {
+      if (this._currentStateIndex + 1 !== this._states.length) {
+        this._states.splice(this._currentStateIndex + 1);
+      }
+      this._currentStateIndex += 1;
+      this._states.push(this.getState());
+
+      if (this._states.length - 1 > this.options.undoDepth) {
+        this._states.splice(0, 1);
+        this._currentStateIndex -= 1;
+      }
+    }
+  },
+
+  async undo(nodeCallback) {
+    if (this._currentStateIndex > 0) {
+      this._currentStateIndex -= 1;
+      this._undoing = true;
+      await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
+      this._undoing = false;
+    }
+  },
+
+  async redo(nodeCallback) {
+    if (this._currentStateIndex < this._states.length - 1) {
+      this._currentStateIndex += 1;
+      this._undoing = true;
+      await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
+      this._undoing = false;
+    }
   },
 
   addLayer(layer) {
