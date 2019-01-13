@@ -247,6 +247,13 @@ if (L.Control.EasyBar === undefined) {
         buttons.push(this._redoBtn);
       }
 
+      this._track.on('TrackDrawer:start', () => {
+        if (this._track.options.undoable) {
+          this._undoBtn.disable();
+          this._redoBtn.disable();
+        }
+      });
+
       this._track.on('TrackDrawer:done', () => {
         if (this._track.hasNodes(2)) {
           this._closeLoop.enable();

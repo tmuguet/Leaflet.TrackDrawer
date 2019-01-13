@@ -1731,6 +1731,64 @@ describe('Main', () => {
       const newState = track.getState();
       expect(newState).to.deep.equal(expectedNewState);
     });
+
+    it('restoring state', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, Math.random() * 200);
+        },
+      }).addTo(map);
+      
+      const state = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+          {
+            start: [44.96777356135154, 6.06822967529297],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+      const promise1 = track.addNode(L.TrackDrawer.node(L.latLng(44.977, 6.0667)));
+      const promise2 = track.addNode(L.TrackDrawer.node(L.latLng(44.978, 6.0668)));
+      const promise3 = track.restoreState(state);
+
+      await Promise.all([promise1, promise2, promise3]);
+      expect(eventsTriggered).to.be.equal(1);
+      expect(track.isUndoable()).to.be.true;
+      expect(track.isRedoable()).to.be.false;
+      expect(track._currentStateIndex).to.be.equal(1);
+
+      const expectedNewState = [
+        [
+          {
+            start: [44.974635142416496, 6.064453125000001],
+            end: [44.96777356135154, 6.06822967529297],
+            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          },
+          {
+            start: [44.96777356135154, 6.06822967529297],
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+          },
+        ],
+      ];
+
+      const newState = track.getState();
+      expect(newState).to.deep.equal(expectedNewState);
+    });
+
+    
   });
 
   describe('Bounds', () => {
@@ -2172,6 +2230,29 @@ describe('Main', () => {
       expect(track.isRedoable()).to.be.false;
       expect(track._currentStateIndex).to.be.equal(2);
       expect(track.getState()).to.deep.equal(state);
+    });
+
+    it('undoing while computation is going on should do nothing', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback: (previousMarker, currentMarker, done) => {
+          setTimeout(() => {
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+          }, 1000);
+        },
+      }).addTo(map);
+
+      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
+
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+      const promise1 = track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297)));
+      const promise2 = track.undo();
+      await Promise.all([promise1, promise2]);
+
+      expect(eventsTriggered).to.be.equal(1);
+      expect(track.isUndoable()).to.be.true;
+      expect(track.isRedoable()).to.be.false;
+      expect(track._currentStateIndex).to.be.equal(2);
     });
 
     it('undoing and adding new marker should remove redo stack', async () => {

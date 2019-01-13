@@ -371,12 +371,14 @@ module.exports = L.LayerGroup.extend({
   },
 
   async undo(nodeCallback) {
-    if (this.isUndoable()) {
+    if (this.isUndoable() && this._computing === 0) {
       this._currentStateIndex -= 1;
       this._undoing = true;
       await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
       this._undoing = false;
+      return true;
     }
+    return false;
   },
 
   isUndoable() {
@@ -388,12 +390,14 @@ module.exports = L.LayerGroup.extend({
   },
 
   async redo(nodeCallback) {
-    if (this.isRedoable()) {
+    if (this.isRedoable() && this._computing === 0) {
       this._currentStateIndex += 1;
       this._undoing = true;
       await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
       this._undoing = false;
+      return true;
     }
+    return false;
   },
 
   addLayer(layer) {
