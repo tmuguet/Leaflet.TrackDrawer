@@ -465,7 +465,15 @@ const Track = L.LayerGroup.extend({
       node.setStyle({ colorName: Colors.nameOf(this._currentColorIndex) });
     }
 
+    if (node.options.draggable) {
+      node.on('dragstart', e => this._onDragStartNode(e.target));
+      node.on('drag', e => this._onDragNode(e.target));
+      node.on('moveend', e => this.onMoveNode(e.target));
+    }
+
     node.addTo(nodesContainer);
+
+    return this;
   },
 
   addNode(node, routingCallback, skipChecks = false) {
@@ -604,7 +612,7 @@ const Track = L.LayerGroup.extend({
       });
   },
 
-  onDragStartNode(marker) {
+  _onDragStartNode(marker) {
     const { previousEdge } = this._getPrevious(marker);
     const { nextEdge } = this._getNext(marker);
     if (previousEdge !== undefined) {
@@ -613,9 +621,10 @@ const Track = L.LayerGroup.extend({
     if (nextEdge !== undefined) {
       nextEdge.setStyle({ dashArray: '4' });
     }
+    return this;
   },
 
-  onDragNode(marker) {
+  _onDragNode(marker) {
     const { previousEdge, previousNode } = this._getPrevious(marker);
     const { nextEdge, nextNode } = this._getNext(marker);
     if (previousEdge !== undefined) {
@@ -624,6 +633,7 @@ const Track = L.LayerGroup.extend({
     if (nextEdge !== undefined) {
       nextEdge.setLatLngs([nextNode.getLatLng(), marker.getLatLng()]);
     }
+    return this;
   },
 
   onMoveNode(marker, routingCallback) {
@@ -634,8 +644,8 @@ const Track = L.LayerGroup.extend({
     const { nextEdge, nextNode } = this._getNext(marker);
 
     this._fireStart();
-    this.onDragStartNode(marker);
-    this.onDragNode(marker);
+    this._onDragStartNode(marker);
+    this._onDragNode(marker);
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;

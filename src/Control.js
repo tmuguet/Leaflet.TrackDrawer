@@ -296,26 +296,11 @@ if (L.Control.EasyBar === undefined) {
     },
 
     _bindMarkerEvents(marker) {
-      marker.on('dragstart', this._onMarkerDragStartHandler);
-      marker.on('drag', this._onMarkerDragHandler);
-      marker.on('moveend', this._onMarkerMoveEndHandler);
       marker.on('click', this._onMarkerClickHandler);
       return this;
     },
 
     onAdd(map) {
-      this._onMarkerMoveEndHandler = (e) => {
-        this._track.onMoveNode(e.target);
-      };
-
-      this._onMarkerDragStartHandler = (e) => {
-        this._track.onDragStartNode(e.target);
-      };
-
-      this._onMarkerDragHandler = (e) => {
-        this._track.onDragNode(e.target);
-      };
-
       this._onMapClickHandler = (e) => {
         if (this.options.mode === 'add') {
           const marker = L.TrackDrawer.node(e.latlng).addTo(this._track);
@@ -338,7 +323,6 @@ if (L.Control.EasyBar === undefined) {
       L.DomEvent.off(map, 'click', this._onMapClickHandler);
       this._track.getNodes().forEach((nodes) => {
         nodes.markers.forEach((marker) => {
-          marker.off('moveend', this._onMarkerMoveEndHandler);
           marker.off('click', this._onMarkerClickHandler);
         });
       });
