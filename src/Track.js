@@ -105,10 +105,11 @@ module.exports = L.LayerGroup.extend({
     this._fireEvents = true;
     this._computing = 0;
 
-    this._states = [];
+    this._states = null;
     this._currentStateIndex = null;
 
     if (this.options.undoable) {
+      this._states = [];
       this._states.push(this.getState());
       this._currentStateIndex = 0;
     }
@@ -354,7 +355,7 @@ module.exports = L.LayerGroup.extend({
   },
 
   _pushState() {
-    if (!this._undoing) {
+    if (this.options.undoable && !this._undoing) {
       if (this._currentStateIndex + 1 !== this._states.length) {
         this._states.splice(this._currentStateIndex + 1);
       }
@@ -369,7 +370,7 @@ module.exports = L.LayerGroup.extend({
   },
 
   async undo(nodeCallback) {
-    if (this._currentStateIndex > 0) {
+    if (this.isUndoable()) {
       this._currentStateIndex -= 1;
       this._undoing = true;
       await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
@@ -386,7 +387,7 @@ module.exports = L.LayerGroup.extend({
   },
 
   async redo(nodeCallback) {
-    if (this._currentStateIndex < this._states.length - 1) {
+    if (this.isRedoable()) {
       this._currentStateIndex += 1;
       this._undoing = true;
       await this.restoreState(this._states[this._currentStateIndex], nodeCallback);
