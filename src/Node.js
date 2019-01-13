@@ -1,6 +1,6 @@
 const L = require('leaflet');
 
-module.exports = L.Marker.extend({
+const Node = L.Marker.extend({
   _routeIdPrevious: undefined,
   _routeIdNext: undefined,
   _promoted: false,
@@ -56,3 +56,10 @@ module.exports = L.Marker.extend({
     return this;
   },
 });
+
+module.exports = {
+  Node,
+  node(latlng, options) {
+    return new Node(latlng, options);
+  },
+};

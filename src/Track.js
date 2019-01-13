@@ -47,7 +47,7 @@ function decodeLatLng(latlng) {
   return L.latLng(latlng[0], latlng[1]);
 }
 
-module.exports = L.LayerGroup.extend({
+const Track = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
     router: undefined,
@@ -881,3 +881,10 @@ module.exports = L.LayerGroup.extend({
     return this;
   },
 });
+
+module.exports = {
+  Track,
+  track(options) {
+    return new Track(options);
+  },
+};

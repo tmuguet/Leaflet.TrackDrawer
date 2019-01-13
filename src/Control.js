@@ -1,9 +1,12 @@
 const L = require('leaflet');
 
 if (L.Control.EasyBar === undefined) {
-  module.exports = null;
+  module.exports = {
+    Control: undefined,
+    control: undefined,
+  };
 } else {
-  module.exports = L.Control.EasyBar.extend({
+  const Control = L.Control.EasyBar.extend({
     options: {
       mode: null,
       labelAddMarker: 'Add marker on click',
@@ -341,4 +344,11 @@ if (L.Control.EasyBar === undefined) {
       });
     },
   });
+
+  module.exports = {
+    Control,
+    control(track, options) {
+      return new Control(track, options);
+    },
+  };
 }

@@ -1,9 +1,12 @@
 const L = require('leaflet');
 
 if (L.Control.EasyBar === undefined) {
-  module.exports = null;
+  module.exports = {
+    TraceModeBar: undefined,
+    traceModeBar: undefined,
+  };
 } else {
-  module.exports = L.Control.EasyBar.extend({
+  const TraceModeBar = L.Control.EasyBar.extend({
     options: {
       mode: null,
     },
@@ -73,4 +76,11 @@ if (L.Control.EasyBar === undefined) {
       return buttons;
     },
   });
+
+  module.exports = {
+    TraceModeBar,
+    traceModeBar(track, modes, options) {
+      return new TraceModeBar(track, modes, options);
+    },
+  };
 }
