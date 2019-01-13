@@ -628,6 +628,8 @@ module.exports = L.LayerGroup.extend({
     const { nextEdge, nextNode } = this._getNext(marker);
 
     this._fireStart();
+    this.onDragStartNode(marker);
+    this.onDragNode(marker);
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;
