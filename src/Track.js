@@ -466,14 +466,14 @@ module.exports = L.LayerGroup.extend({
       }
     }
 
+    this._fireStart();
+
     const nodesContainer = this._nodesContainers.get(-1);
     this._prepareNode(node, nodesContainer);
 
     if (this._lastNodeId !== undefined) {
       const previousNode = this._getNode(this._lastNodeId);
       this._createEdge(previousNode, node);
-
-      this._fireStart();
     }
 
     const lastNodeId = this._lastNodeId;
@@ -492,6 +492,8 @@ module.exports = L.LayerGroup.extend({
     if (lastNodeId === undefined) {
       return new Promise((resolve) => {
         resolve();
+      }).then(() => {
+        this._fireDone({});
       });
     }
 

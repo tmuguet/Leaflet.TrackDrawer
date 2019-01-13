@@ -29,11 +29,11 @@ describe('Main', () => {
       const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { type: 'stopover' });
 
       await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(0);
+      expect(eventsTriggered).to.be.equal(1);
       await track.addNode(marker2, (previousMarker, currentMarker, done) => {
         done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
       });
-      expect(eventsTriggered).to.be.equal(1);
+      expect(eventsTriggered).to.be.equal(2);
 
       const expectedNewState = [
         [
@@ -56,9 +56,9 @@ describe('Main', () => {
       const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
 
       await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(0);
+      expect(eventsTriggered).to.be.equal(1);
       await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(0);
+      expect(eventsTriggered).to.be.equal(1);
 
       const expectedNewState = [];
 
@@ -1145,13 +1145,13 @@ describe('Main', () => {
       await track.addNode(marker1);
       await track.addNode(marker2);
       track.promoteNodeToStopover(marker2);
-      expect(eventsTriggered).to.be.equal(2);
+      expect(eventsTriggered).to.be.equal(3);
 
       const promise = track.addNode(marker3);
       track.demoteNodeToWaypoint(marker2);
 
       await promise;
-      expect(eventsTriggered).to.be.equal(3);
+      expect(eventsTriggered).to.be.equal(4);
 
       const expectedNewState = [
         [
