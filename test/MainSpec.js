@@ -19,6 +19,8 @@ describe('Main', () => {
       const state = track.getState();
       expect(state).to.be.an('array');
       expect(state).to.be.empty;
+      expect(track.isUndoable()).to.be.false;
+      expect(track.isRedoable()).to.be.false;
     });
 
     it('adding marker', async () => {
@@ -30,10 +32,14 @@ describe('Main', () => {
 
       await track.addNode(marker1);
       expect(eventsTriggered).to.be.equal(1);
+      expect(track.isUndoable()).to.be.true;
+      expect(track.isRedoable()).to.be.false;
       await track.addNode(marker2, (previousMarker, currentMarker, done) => {
         done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
       });
       expect(eventsTriggered).to.be.equal(2);
+      expect(track.isUndoable()).to.be.true;
+      expect(track.isRedoable()).to.be.false;
 
       const expectedNewState = [
         [

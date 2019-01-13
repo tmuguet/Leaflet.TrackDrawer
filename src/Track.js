@@ -377,6 +377,14 @@ module.exports = L.LayerGroup.extend({
     }
   },
 
+  isUndoable() {
+    return this.options.undoable && this._currentStateIndex > 0;
+  },
+
+  isRedoable() {
+    return this.options.undoable && this._currentStateIndex < this._states.length - 1;
+  },
+
   async redo(nodeCallback) {
     if (this._currentStateIndex < this._states.length - 1) {
       this._currentStateIndex += 1;

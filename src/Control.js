@@ -269,12 +269,12 @@ if (L.Control.EasyBar === undefined) {
         }
 
         if (this._track.options.undoable) {
-          if (this._track._currentStateIndex > 0) {
+          if (this._track.isUndoable()) {
             this._undoBtn.enable();
           } else {
             this._undoBtn.disable();
           }
-          if (this._track._currentStateIndex < this._track._states.length - 1) {
+          if (this._track.isRedoable()) {
             this._redoBtn.enable();
           } else {
             this._redoBtn.disable();
