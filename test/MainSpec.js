@@ -1540,7 +1540,7 @@ describe('Main', () => {
       expect(eventsTriggered).to.be.equal(1);
       expect(track.isUndoable()).to.be.true;
       expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(3);
+      expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
         [
@@ -1583,7 +1583,7 @@ describe('Main', () => {
       expect(eventsTriggered).to.be.equal(1);
       expect(track.isUndoable()).to.be.true;
       expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(3);
+      expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
         [
@@ -1622,7 +1622,7 @@ describe('Main', () => {
       expect(eventsTriggered).to.be.equal(1);
       expect(track.isUndoable()).to.be.true;
       expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(4);
+      expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
         [
@@ -1661,7 +1661,7 @@ describe('Main', () => {
       expect(eventsTriggered).to.be.equal(1);
       expect(track.isUndoable()).to.be.true;
       expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(4);
+      expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
         [
@@ -1711,7 +1711,7 @@ describe('Main', () => {
 
       await promise;
       expect(eventsTriggered).to.be.equal(2);
-      expect(track._currentStateIndex).to.be.equal(5);
+      expect(track._currentStateIndex).to.be.equal(4);
 
       const expectedNewState = [
         [

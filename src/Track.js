@@ -268,7 +268,8 @@ module.exports = L.LayerGroup.extend({
 
   _fireDone(payload = {}) {
     this._computing -= 1;
-    if (this._fireEvents) this._pushState();
+    // TODO: find a way to store states while computing
+    if (this._fireEvents && this._computing === 0) this._pushState();
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:done', payload);
   },
 
