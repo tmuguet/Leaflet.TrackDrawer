@@ -33,7 +33,7 @@ module.exports = L.Evented.extend({
   /* eslint-enable prefer-rest-params */
 
   forEach(cb) {
-    return this._elements.forEach(cb);
+    this._elements.forEach(cb);
   },
 
   clean() {

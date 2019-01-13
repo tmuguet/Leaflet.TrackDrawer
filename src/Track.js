@@ -1,6 +1,7 @@
 const L = require('leaflet');
 const Colors = require('./Colors');
 const LayerContainer = require('./LayerContainer');
+const { Edge } = require('./Edge');
 
 function encodeLatLngs(latlngs) {
   const array = [];
@@ -410,7 +411,7 @@ const Track = L.LayerGroup.extend({
 
   _createEdge(previousNode, node) {
     const edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
-    const edge = L.polyline([previousNode.getLatLng(), node.getLatLng()], {
+    const edge = new Edge([previousNode.getLatLng(), node.getLatLng()], {
       color: Colors.nameToRgb(previousNode.options.colorName),
       dashArray: '4',
     }).addTo(edgesContainer);

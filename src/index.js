@@ -1,21 +1,25 @@
 const L = require('leaflet');
 const { Track, track } = require('./Track');
-const { Control, control } = require('./Control');
+const { ToolBar, toolBar } = require('./ToolBar');
 const { TraceModeBar, traceModeBar } = require('./TraceModeBar');
 const LayerContainer = require('./LayerContainer');
 const { Node, node } = require('./Node');
+const { Edge, edge } = require('./Edge');
 const colors = require('./Colors');
 
+/** @module L.TrackDrawer */
 L.TrackDrawer = {
   Track,
   track,
-  Control,
-  control,
+  ToolBar,
+  toolBar,
   TraceModeBar,
   traceModeBar,
   LayerContainer,
   Node,
   node,
+  Edge,
+  edge,
   colors,
 };
 
