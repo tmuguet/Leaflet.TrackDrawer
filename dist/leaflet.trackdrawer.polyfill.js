@@ -908,7 +908,9 @@ if (L.Control.EasyBar === undefined) {
       labelDeleteMarker: 'Delete marker on click',
       labelPromoteMarker: 'Promote to stopover on click',
       labelDemoteMarker: 'Demote to waypoint on click',
-      labelClean: 'Remove everything now'
+      labelClean: 'Remove everything now',
+      labelUndo: 'Undo',
+      labelRedo: 'Redo'
     },
     initialize: function initialize(track, options) {
       var _this = this;
@@ -977,6 +979,7 @@ if (L.Control.EasyBar === undefined) {
     _initializeButtons: function _initializeButtons() {
       var _this2 = this;
 
+      var buttons = [];
       this._addBtn = L.easyButton({
         id: 'trackdrawer-add',
         states: [{
@@ -995,6 +998,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._addBtn);
       this._insertBtn = L.easyButton({
         id: 'trackdrawer-insert',
         states: [{
@@ -1013,6 +1017,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._insertBtn);
       this._closeLoop = L.easyButton({
         id: 'trackdrawer-closeloop',
         states: [{
@@ -1030,6 +1035,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._closeLoop);
       this._deleteBtn = L.easyButton({
         id: 'trackdrawer-delete',
         states: [{
@@ -1048,6 +1054,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._deleteBtn);
       this._promoteBtn = L.easyButton({
         id: 'trackdrawer-promote',
         states: [{
@@ -1066,6 +1073,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._promoteBtn);
       this._demoteBtn = L.easyButton({
         id: 'trackdrawer-demote',
         states: [{
@@ -1084,6 +1092,7 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
+      buttons.push(this._demoteBtn);
       this._cleanBtn = L.easyButton({
         id: 'trackdrawer-clean',
         states: [{
@@ -1094,7 +1103,98 @@ if (L.Control.EasyBar === undefined) {
           }
         }]
       });
-      return [this._addBtn, this._insertBtn, this._closeLoop, this._deleteBtn, this._promoteBtn, this._demoteBtn, this._cleanBtn];
+      buttons.push(this._cleanBtn);
+
+      if (this._track.options.undoable) {
+        this._undoBtn = L.easyButton({
+          id: 'trackdrawer-undo',
+          states: [{
+            icon: 'fa-undo',
+            title: this.options.labelUndo,
+            onClick: function onClick() {
+              _this2._track.undo(function (latlng) {
+                var marker = L.TrackDrawer.node(latlng);
+
+                _this2._bindMarkerEvents(marker);
+
+                return marker;
+              });
+            }
+          }]
+        });
+        buttons.push(this._undoBtn);
+        this._redoBtn = L.easyButton({
+          id: 'trackdrawer-redo',
+          states: [{
+            icon: 'fa-repeat',
+            title: this.options.labelRedo,
+            onClick: function onClick() {
+              _this2._track.redo(function (latlng) {
+                var marker = L.TrackDrawer.node(latlng);
+
+                _this2._bindMarkerEvents(marker);
+
+                return marker;
+              });
+            }
+          }]
+        });
+        buttons.push(this._redoBtn);
+      }
+
+      this._track.on('TrackDrawer:start', function () {
+        if (_this2._track.options.undoable) {
+          _this2._undoBtn.disable();
+
+          _this2._redoBtn.disable();
+        }
+      });
+
+      this._track.on('TrackDrawer:done', function () {
+        if (_this2._track.hasNodes(2)) {
+          _this2._closeLoop.enable();
+        } else {
+          _this2._closeLoop.disable();
+        }
+
+        if (_this2._track.hasNodes()) {
+          _this2._insertBtn.enable();
+
+          _this2._deleteBtn.enable();
+
+          _this2._promoteBtn.enable();
+
+          _this2._demoteBtn.enable();
+
+          _this2._cleanBtn.enable();
+        } else {
+          _this2._insertBtn.disable();
+
+          _this2._deleteBtn.disable();
+
+          _this2._promoteBtn.disable();
+
+          _this2._demoteBtn.disable();
+
+          _this2._cleanBtn.disable();
+        }
+
+        if (_this2._track.options.undoable) {
+          if (_this2._track.isUndoable()) {
+            _this2._undoBtn.enable();
+          } else {
+            _this2._undoBtn.disable();
+          }
+
+          if (_this2._track.isRedoable()) {
+            _this2._redoBtn.enable();
+          } else {
+            _this2._redoBtn.disable();
+          }
+        }
+      });
+
+      return buttons;
     },
     _bindMarkerEvents: function _bindMarkerEvents(marker) {
       marker.on('dragstart', this._onMarkerDragStartHandler);
@@ -1425,7 +1525,9 @@ module.exports = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
     router: undefined,
-    debug: true
+    debug: true,
+    undoable: true,
+    undoDepth: 30
   },
   _getPrevious: function _getPrevious(node) {
     var previousEdge = node !== undefined ? this._getEdge(node._routeIdPrevious) : undefined;
@@ -1477,6 +1579,16 @@ module.exports = L.LayerGroup.extend({
     this._currentColorIndex = 0;
     this._fireEvents = true;
     this._computing = 0;
+    this._states = null;
+    this._currentStateIndex = null;
+
+    if (this.options.undoable) {
+      this._states = [];
+
+      this._states.push(this.getState());
+
+      this._currentStateIndex = 0;
+    }
   },
   setOptions: function setOptions(options) {
     var _this = this;
@@ -1647,7 +1759,9 @@ module.exports = L.LayerGroup.extend({
   },
   _fireDone: function _fireDone() {
     var payload = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    this._computing -= 1;
+    this._computing -= 1; // TODO: find a way to store states while computing
+
+    if (this._fireEvents && this._computing === 0) this._pushState();
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:done', payload);
   },
   _fireFailed: function _fireFailed(error) {
@@ -1671,17 +1785,22 @@ module.exports = L.LayerGroup.extend({
 
     return this;
   },
+  _createNode: function _createNode(latlng) {
+    return L.TrackDrawer.node(latlng);
+  },
   restoreState: function () {
     var _restoreState = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
     _regenerator.default.mark(function _callee(state, nodeCallback) {
       var _this4 = this;
 
-      var oldValue, stopovers, routes, promises, previousSegment, lastState, marker;
+      var callback, oldValue, stopovers, routes, promises, previousSegment, lastState, marker;
       return _regenerator.default.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
+              callback = nodeCallback || this._createNode;
+
               this._fireStart();
 
               oldValue = this._fireEvents;
@@ -1692,7 +1811,7 @@ module.exports = L.LayerGroup.extend({
               promises = [];
               state.forEach(function (group, i) {
                 group.forEach(function (segment, j) {
-                  var marker = nodeCallback.call(null, decodeLatLng(segment.start));
+                  var marker = callback.call(null, decodeLatLng(segment.start));
 
                   if (j === 0 && i > 0) {
                     stopovers.push(marker);
@@ -1706,25 +1825,29 @@ module.exports = L.LayerGroup.extend({
                       edge: edge
                     });
                     done(null, edge);
-                  }));
+                  }, true));
                   previousSegment = segment;
                 });
               });
-              lastState = state[state.length - 1][state[state.length - 1].length - 1];
-              marker = nodeCallback.call(null, decodeLatLng(lastState.end));
-              promises.push(this.addNode(marker, function (from, to, done) {
-                var edge = decodeLatLngs(lastState.edge);
-                routes.push({
-                  from: from,
-                  to: to,
-                  edge: edge
-                });
-                done(null, edge);
-              }));
-              _context.next = 13;
+
+              if (state.length > 0) {
+                lastState = state[state.length - 1][state[state.length - 1].length - 1];
+                marker = callback.call(null, decodeLatLng(lastState.end));
+                promises.push(this.addNode(marker, function (from, to, done) {
+                  var edge = decodeLatLngs(lastState.edge);
+                  routes.push({
+                    from: from,
+                    to: to,
+                    edge: edge
+                  });
+                  done(null, edge);
+                }, true));
+              }
+
+              _context.next = 12;
               return Promise.all(promises);
 
-            case 13:
+            case 12:
               stopovers.forEach(function (m) {
                 return _this4.promoteNodeToStopover(m);
               });
@@ -1736,7 +1859,7 @@ module.exports = L.LayerGroup.extend({
 
               return _context.abrupt("return", this);
 
-            case 17:
+            case 16:
             case "end":
               return _context.stop();
           }
@@ -1746,6 +1869,103 @@ module.exports = L.LayerGroup.extend({
 
     return function restoreState(_x, _x2) {
       return _restoreState.apply(this, arguments);
+    };
+  }(),
+  _pushState: function _pushState() {
+    if (this.options.undoable && !this._undoing) {
+      if (this._currentStateIndex + 1 !== this._states.length) {
+        this._states.splice(this._currentStateIndex + 1);
+      }
+
+      this._currentStateIndex += 1;
+
+      this._states.push(this.getState());
+
+      if (this._states.length - 1 > this.options.undoDepth) {
+        this._states.splice(0, 1);
+
+        this._currentStateIndex -= 1;
+      }
+    }
+  },
+  undo: function () {
+    var _undo = (0, _asyncToGenerator2.default)(
+    /*#__PURE__*/
+    _regenerator.default.mark(function _callee2(nodeCallback) {
+      return _regenerator.default.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              if (!(this.isUndoable() && this._computing === 0)) {
+                _context2.next = 7;
+                break;
+              }
+
+              this._currentStateIndex -= 1;
+              this._undoing = true;
+              _context2.next = 5;
+              return this.restoreState(this._states[this._currentStateIndex], nodeCallback);
+
+            case 5:
+              this._undoing = false;
+              return _context2.abrupt("return", true);
+
+            case 7:
+              return _context2.abrupt("return", false);
+
+            case 8:
+            case "end":
+              return _context2.stop();
+          }
+        }
+      }, _callee2, this);
+    }));
+
+    return function undo(_x3) {
+      return _undo.apply(this, arguments);
+    };
+  }(),
+  isUndoable: function isUndoable() {
+    return this.options.undoable && this._currentStateIndex > 0;
+  },
+  isRedoable: function isRedoable() {
+    return this.options.undoable && this._currentStateIndex < this._states.length - 1;
+  },
+  redo: function () {
+    var _redo = (0, _asyncToGenerator2.default)(
+    /*#__PURE__*/
+    _regenerator.default.mark(function _callee3(nodeCallback) {
+      return _regenerator.default.wrap(function _callee3$(_context3) {
+        while (1) {
+          switch (_context3.prev = _context3.next) {
+            case 0:
+              if (!(this.isRedoable() && this._computing === 0)) {
+                _context3.next = 7;
+                break;
+              }
+
+              this._currentStateIndex += 1;
+              this._undoing = true;
+              _context3.next = 5;
+              return this.restoreState(this._states[this._currentStateIndex], nodeCallback);
+
+            case 5:
+              this._undoing = false;
+              return _context3.abrupt("return", true);
+
+            case 7:
+              return _context3.abrupt("return", false);
+
+            case 8:
+            case "end":
+              return _context3.stop();
+          }
+        }
+      }, _callee3, this);
+    }));
+
+    return function redo(_x4) {
+      return _redo.apply(this, arguments);
     };
   }(),
   addLayer: function addLayer(layer) {
@@ -1829,6 +2049,8 @@ module.exports = L.LayerGroup.extend({
       }
     }
 
+    this._fireStart();
+
     var nodesContainer = this._nodesContainers.get(-1);
 
     this._prepareNode(node, nodesContainer);
@@ -1837,8 +2059,6 @@ module.exports = L.LayerGroup.extend({
       var _previousNode2 = this._getNode(this._lastNodeId);
 
       this._createEdge(_previousNode2, node);
-
-      this._fireStart();
     }
 
     var lastNodeId = this._lastNodeId;
@@ -1860,6 +2080,8 @@ module.exports = L.LayerGroup.extend({
     if (lastNodeId === undefined) {
       return new Promise(function (resolve) {
         resolve();
+      }).then(function () {
+        _this7._fireDone({});
       });
     }
 
@@ -2031,6 +2253,9 @@ module.exports = L.LayerGroup.extend({
         nextNode = _this$_getNext3.nextNode;
 
     this._fireStart();
+
+    this.onDragStartNode(marker);
+    this.onDragNode(marker);
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;

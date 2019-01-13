@@ -13,6 +13,8 @@ if (L.Control.EasyBar === undefined) {
       labelPromoteMarker: 'Promote to stopover on click',
       labelDemoteMarker: 'Demote to waypoint on click',
       labelClean: 'Remove everything now',
+      labelUndo: 'Undo',
+      labelRedo: 'Redo',
     },
 
     initialize(track, options) {
@@ -65,6 +67,7 @@ if (L.Control.EasyBar === undefined) {
     },
 
     _initializeButtons() {
+      const buttons = [];
       this._addBtn = L.easyButton({
         id: 'trackdrawer-add',
         states: [
@@ -86,6 +89,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._addBtn);
       this._insertBtn = L.easyButton({
         id: 'trackdrawer-insert',
         states: [
@@ -107,6 +111,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._insertBtn);
       this._closeLoop = L.easyButton({
         id: 'trackdrawer-closeloop',
         states: [
@@ -124,6 +129,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._closeLoop);
       this._deleteBtn = L.easyButton({
         id: 'trackdrawer-delete',
         states: [
@@ -145,6 +151,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._deleteBtn);
       this._promoteBtn = L.easyButton({
         id: 'trackdrawer-promote',
         states: [
@@ -166,6 +173,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._promoteBtn);
       this._demoteBtn = L.easyButton({
         id: 'trackdrawer-demote',
         states: [
@@ -187,6 +195,7 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._demoteBtn);
       this._cleanBtn = L.easyButton({
         id: 'trackdrawer-clean',
         states: [
@@ -199,16 +208,88 @@ if (L.Control.EasyBar === undefined) {
           },
         ],
       });
+      buttons.push(this._cleanBtn);
 
-      return [
-        this._addBtn,
-        this._insertBtn,
-        this._closeLoop,
-        this._deleteBtn,
-        this._promoteBtn,
-        this._demoteBtn,
-        this._cleanBtn,
-      ];
+      if (this._track.options.undoable) {
+        this._undoBtn = L.easyButton({
+          id: 'trackdrawer-undo',
+          states: [
+            {
+              icon: 'fa-undo',
+              title: this.options.labelUndo,
+              onClick: () => {
+                this._track.undo((latlng) => {
+                  const marker = L.TrackDrawer.node(latlng);
+                  this._bindMarkerEvents(marker);
+                  return marker;
+                });
+              },
+            },
+          ],
+        });
+        buttons.push(this._undoBtn);
+        this._redoBtn = L.easyButton({
+          id: 'trackdrawer-redo',
+          states: [
+            {
+              icon: 'fa-repeat',
+              title: this.options.labelRedo,
+              onClick: () => {
+                this._track.redo((latlng) => {
+                  const marker = L.TrackDrawer.node(latlng);
+                  this._bindMarkerEvents(marker);
+                  return marker;
+                });
+              },
+            },
+          ],
+        });
+        buttons.push(this._redoBtn);
+      }
+
+      this._track.on('TrackDrawer:start', () => {
+        if (this._track.options.undoable) {
+          this._undoBtn.disable();
+          this._redoBtn.disable();
+        }
+      });
+
+      this._track.on('TrackDrawer:done', () => {
+        if (this._track.hasNodes(2)) {
+          this._closeLoop.enable();
+        } else {
+          this._closeLoop.disable();
+        }
+
+        if (this._track.hasNodes()) {
+          this._insertBtn.enable();
+          this._deleteBtn.enable();
+          this._promoteBtn.enable();
+          this._demoteBtn.enable();
+          this._cleanBtn.enable();
+        } else {
+          this._insertBtn.disable();
+          this._deleteBtn.disable();
+          this._promoteBtn.disable();
+          this._demoteBtn.disable();
+          this._cleanBtn.disable();
+        }
+
+        if (this._track.options.undoable) {
+          if (this._track.isUndoable()) {
+            this._undoBtn.enable();
+          } else {
+            this._undoBtn.disable();
+          }
+          if (this._track.isRedoable()) {
+            this._redoBtn.enable();
+          } else {
+            this._redoBtn.disable();
+          }
+        }
+      });
+
+      return buttons;
     },
 
     _bindMarkerEvents(marker) {
