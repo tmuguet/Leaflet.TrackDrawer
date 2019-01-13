@@ -63,6 +63,7 @@
         L.easyBar([importBtn]).addTo(map);
 
         var drawRoute = L.TrackDrawer.track({
+          debug: true,
           routingCallback: function(previousMarker, marker, done) {
             $('#console').prepend(
               '[' +

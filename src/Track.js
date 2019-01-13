@@ -51,7 +51,7 @@ const Track = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
     router: undefined,
-    debug: true,
+    debug: false,
     undoable: true,
     undoDepth: 30,
   },
