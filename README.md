@@ -12,6 +12,10 @@ If you wish to have multiple routing algorithms, there is an additional toolbar 
 
 A real-case usage of this plugin is for [map2gpx](http://map2gpx.eu/).
 
+## API
+
+See [doc](docs/modules/_leaflet_.trackdrawer.md).
+
 ## Extending TrackDrawer
 
 Other plugins are available to extend/use TrackDrawer:

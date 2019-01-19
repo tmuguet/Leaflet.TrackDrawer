@@ -14,7 +14,7 @@
     "bundle": "npm run bundle:polyfill && npm run bundle:noruntime",
     "eslint": "eslint src/*.js",
     "test": "karma start karma.conf.js",
-    "doc": "typedoc --out docs/ --ignoreCompilerErrors --includeDeclarations --excludeExternals --name \"Leaflet.TrackDrawer\" --theme minimal --mode file src/index.d.ts",
+    "doc": "typedoc --out docs/ --ignoreCompilerErrors --includeDeclarations --excludeExternals --name \"Leaflet.TrackDrawer\" --theme markdown --mdHideSources --readme none --mode file src/index.d.ts",
     "validate": "npm run bundle && npm run eslint && npm run test",
     "version": "npm run validate && npm run doc"
   },
@@ -62,7 +62,8 @@
     "mocha-sinon": "^2.1.0",
     "nyc": "^13.0.1",
     "sinon": "^6.1.5",
-    "typedoc": "^0.14.1",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.1.22",
     "uglify-js": "^3.4.9"
   },
   "dependencies": {
