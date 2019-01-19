@@ -1,4 +1,4 @@
-describe('Control', () => {
+describe('ToolBar', () => {
   let map;
   let track;
 
@@ -21,7 +21,7 @@ describe('Control', () => {
 
   describe('Initialization', () => {
     it('constructor should correctly initialize structures', () => {
-      const ctrl = L.TrackDrawer.control(track, { mode: 'add' }).addTo(map);
+      const ctrl = L.TrackDrawer.toolBar(track, { mode: 'add' }).addTo(map);
       expect(ctrl._addBtn._currentState.stateName).to.be.equal('active');
 
       ctrl.remove();
@@ -30,7 +30,7 @@ describe('Control', () => {
 
   describe('Map events', () => {
     it('Clicking on map should not do anything if mode is not "add"', () => {
-      const ctrl = L.TrackDrawer.control(track, { mode: null }).addTo(map);
+      const ctrl = L.TrackDrawer.toolBar(track, { mode: null }).addTo(map);
       expect(ctrl._addBtn._currentState.stateName).to.be.equal('loaded');
 
       const f = sinon.fake();
@@ -41,7 +41,7 @@ describe('Control', () => {
     });
 
     it('Clicking on map should add marker if mode is "add"', () => {
-      const ctrl = L.TrackDrawer.control(track, { mode: 'add' }).addTo(map);
+      const ctrl = L.TrackDrawer.toolBar(track, { mode: 'add' }).addTo(map);
       expect(ctrl._addBtn._currentState.stateName).to.be.equal('active');
 
       const f = sinon.fake();
@@ -54,7 +54,7 @@ describe('Control', () => {
 
   describe('Marker events', () => {
     it('Clicking on marker should not do anything if mode is not supported', async () => {
-      const ctrl = L.TrackDrawer.control(track, { mode: null }).addTo(map);
+      const ctrl = L.TrackDrawer.toolBar(track, { mode: null }).addTo(map);
       const marker1 = L.TrackDrawer.node(L.latLng(0, 0));
       await track.addNode(marker1);
       marker1.on('click', ctrl._onMarkerClickHandler);
@@ -67,7 +67,7 @@ describe('Control', () => {
     });
 
     it('Clicking on marker should remove marker if mode is "delete"', async () => {
-      const ctrl = L.TrackDrawer.control(track, { mode: 'delete' }).addTo(map);
+      const ctrl = L.TrackDrawer.toolBar(track, { mode: 'delete' }).addTo(map);
       const marker1 = L.TrackDrawer.node(L.latLng(0, 0));
       await track.addNode(marker1);
       marker1.on('click', ctrl._onMarkerClickHandler);

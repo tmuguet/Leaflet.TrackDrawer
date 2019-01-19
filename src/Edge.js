@@ -1,8 +1,11 @@
 const L = require('leaflet');
 
-module.exports = L.Polyline.extend({
+const Edge = L.Polyline.extend({
   _startMarkerId: undefined,
   _endMarkerId: undefined,
+  _promoted: false,
+  _demoted: true,
+  _computation: 0,
 
   options: {},
 
@@ -11,3 +14,10 @@ module.exports = L.Polyline.extend({
     L.setOptions(this, options);
   },
 });
+
+module.exports = {
+  Edge,
+  edge(latlngs, options) {
+    return new Edge(latlngs, options);
+  },
+};

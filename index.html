@@ -63,6 +63,7 @@
         L.easyBar([importBtn]).addTo(map);
 
         var drawRoute = L.TrackDrawer.track({
+          debug: true,
           routingCallback: function(previousMarker, marker, done) {
             $('#console').prepend(
               '[' +
@@ -78,7 +79,7 @@
             }, 500);
           },
         }).addTo(map);
-        var ctrl = L.TrackDrawer.control(drawRoute).addTo(map);
+        var ctrl = L.TrackDrawer.toolBar(drawRoute).addTo(map);
 
         drawRoute.on('TrackDrawer:done', function(e) {
           var state = drawRoute.getState();

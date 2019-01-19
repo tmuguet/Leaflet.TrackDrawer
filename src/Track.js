@@ -1,6 +1,7 @@
 const L = require('leaflet');
 const Colors = require('./Colors');
 const LayerContainer = require('./LayerContainer');
+const { Edge } = require('./Edge');
 
 function encodeLatLngs(latlngs) {
   const array = [];
@@ -47,11 +48,11 @@ function decodeLatLng(latlng) {
   return L.latLng(latlng[0], latlng[1]);
 }
 
-module.exports = L.LayerGroup.extend({
+const Track = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
     router: undefined,
-    debug: true,
+    debug: false,
     undoable: true,
     undoDepth: 30,
   },
@@ -410,7 +411,7 @@ module.exports = L.LayerGroup.extend({
 
   _createEdge(previousNode, node) {
     const edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
-    const edge = L.polyline([previousNode.getLatLng(), node.getLatLng()], {
+    const edge = new Edge([previousNode.getLatLng(), node.getLatLng()], {
       color: Colors.nameToRgb(previousNode.options.colorName),
       dashArray: '4',
     }).addTo(edgesContainer);
@@ -465,7 +466,15 @@ module.exports = L.LayerGroup.extend({
       node.setStyle({ colorName: Colors.nameOf(this._currentColorIndex) });
     }
 
+    if (node.options.draggable) {
+      node.on('dragstart', e => this._onDragStartNode(e.target));
+      node.on('drag', e => this._onDragNode(e.target));
+      node.on('moveend', e => this.onMoveNode(e.target));
+    }
+
     node.addTo(nodesContainer);
+
+    return this;
   },
 
   addNode(node, routingCallback, skipChecks = false) {
@@ -604,7 +613,7 @@ module.exports = L.LayerGroup.extend({
       });
   },
 
-  onDragStartNode(marker) {
+  _onDragStartNode(marker) {
     const { previousEdge } = this._getPrevious(marker);
     const { nextEdge } = this._getNext(marker);
     if (previousEdge !== undefined) {
@@ -613,9 +622,10 @@ module.exports = L.LayerGroup.extend({
     if (nextEdge !== undefined) {
       nextEdge.setStyle({ dashArray: '4' });
     }
+    return this;
   },
 
-  onDragNode(marker) {
+  _onDragNode(marker) {
     const { previousEdge, previousNode } = this._getPrevious(marker);
     const { nextEdge, nextNode } = this._getNext(marker);
     if (previousEdge !== undefined) {
@@ -624,6 +634,7 @@ module.exports = L.LayerGroup.extend({
     if (nextEdge !== undefined) {
       nextEdge.setLatLngs([nextNode.getLatLng(), marker.getLatLng()]);
     }
+    return this;
   },
 
   onMoveNode(marker, routingCallback) {
@@ -634,8 +645,8 @@ module.exports = L.LayerGroup.extend({
     const { nextEdge, nextNode } = this._getNext(marker);
 
     this._fireStart();
-    this.onDragStartNode(marker);
-    this.onDragNode(marker);
+    this._onDragStartNode(marker);
+    this._onDragNode(marker);
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;
@@ -881,3 +892,10 @@ module.exports = L.LayerGroup.extend({
     return this;
   },
 });
+
+module.exports = {
+  Track,
+  track(options) {
+    return new Track(options);
+  },
+};

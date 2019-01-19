@@ -49,10 +49,175 @@ module.exports = {
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
+var Edge = L.Polyline.extend({
+  _startMarkerId: undefined,
+  _endMarkerId: undefined,
+  _promoted: false,
+  _demoted: true,
+  _computation: 0,
+  options: {},
+  initialize: function initialize(latlngs, options) {
+    L.Polyline.prototype.initialize.call(this, latlngs, options);
+    L.setOptions(this, options);
+  }
+});
+module.exports = {
+  Edge: Edge,
+  edge: function edge(latlngs, options) {
+    return new Edge(latlngs, options);
+  }
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+module.exports = L.Evented.extend({
+  initialize: function initialize(parent) {
+    this._parent = parent;
+    var f = L.featureGroup().addTo(parent).addEventParent(this);
+    this._elements = [f];
+    this.length = 1;
+  },
+  get: function get(i) {
+    var idx = i < 0 ? this._elements.length + i : i;
+    return this._elements[idx];
+  },
+
+  /* eslint-disable prefer-rest-params */
+  splice: function splice() {
+    var _this$_elements,
+        _this = this;
+
+    var ret = (_this$_elements = this._elements).splice.apply(_this$_elements, arguments);
+
+    ret.forEach(function (x) {
+      return x.removeFrom(_this._parent).removeEventParent(_this);
+    });
+
+    if (arguments.length > 2) {
+      var args = Array.prototype.slice.call(arguments, 2);
+      args.forEach(function (x) {
+        x.addTo(_this._parent).addEventParent(_this);
+      });
+    }
+
+    this.length = this._elements.length;
+    return ret;
+  },
+
+  /* eslint-enable prefer-rest-params */
+  forEach: function forEach(cb) {
+    this._elements.forEach(cb);
+  },
+  clean: function clean() {
+    this._elements[0].clearLayers();
+
+    this.splice(1);
+  },
+  getLayer: function getLayer(id) {
+    var parentLayer = this._elements.find(function (x) {
+      return x.getLayer(id) !== undefined;
+    });
+
+    return parentLayer !== undefined ? parentLayer.getLayer(id) : undefined;
+  },
+  getLayerId: function getLayerId(layer) {
+    var parentLayer = this._elements.find(function (x) {
+      return x.hasLayer(layer);
+    });
+
+    return parentLayer !== undefined ? parentLayer.getLayerId(layer) : undefined;
+  },
+  getLayerIndex: function getLayerIndex(layer) {
+    return this._elements.findIndex(function (x) {
+      return x.hasLayer(layer);
+    });
+  }
+});
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],4:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
+var Node = L.Marker.extend({
+  _routeIdPrevious: undefined,
+  _routeIdNext: undefined,
+  _promoted: false,
+  _demoted: true,
+  options: {
+    type: 'waypoint',
+    // Or 'stopover',
+    colorName: 'blue',
+    opacity: 1,
+    draggable: true
+  },
+  initialize: function initialize(latlng, options) {
+    L.Marker.prototype.initialize.call(this, latlng, options);
+    L.setOptions(this, options);
+    this.setType(this.options.type);
+  },
+  setType: function setType(type) {
+    this.options.type = type;
+
+    if (type === 'stopover') {
+      this.setIcon(L.AwesomeMarkers.icon({
+        icon: 'pause-circle',
+        markerColor: this.options.colorName,
+        prefix: 'fa'
+      }));
+    } else {
+      this.setIcon(L.AwesomeMarkers.icon({
+        icon: 'map-signs',
+        markerColor: this.options.colorName,
+        prefix: 'fa'
+      }));
+    }
+
+    return this;
+  },
+  setStyle: function setStyle(style) {
+    L.Util.setOptions(this, style);
+
+    if ('colorName' in style) {
+      // Colors is set only via the icon and there's no setter on L.AwesomeMarkers
+      this.setType(this.options.type);
+    }
+
+    if ('opacity' in style) {
+      this.setOpacity(this.options.opacity);
+    }
+
+    return this;
+  }
+});
+module.exports = {
+  Node: Node,
+  node: function node(latlng, options) {
+    return new Node(latlng, options);
+  }
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],5:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+
 if (L.Control.EasyBar === undefined) {
-  module.exports = null;
+  module.exports = {
+    ToolBar: undefined,
+    toolBar: undefined
+  };
 } else {
-  module.exports = L.Control.EasyBar.extend({
+  var ToolBar = L.Control.EasyBar.extend({
     options: {
       mode: null,
       labelAddMarker: 'Add marker on click',
@@ -350,26 +515,11 @@ if (L.Control.EasyBar === undefined) {
       return buttons;
     },
     _bindMarkerEvents: function _bindMarkerEvents(marker) {
-      marker.on('dragstart', this._onMarkerDragStartHandler);
-      marker.on('drag', this._onMarkerDragHandler);
-      marker.on('moveend', this._onMarkerMoveEndHandler);
       marker.on('click', this._onMarkerClickHandler);
       return this;
     },
     onAdd: function onAdd(map) {
       var _this3 = this;
-
-      this._onMarkerMoveEndHandler = function (e) {
-        _this3._track.onMoveNode(e.target);
-      };
-
-      this._onMarkerDragStartHandler = function (e) {
-        _this3._track.onDragStartNode(e.target);
-      };
-
-      this._onMarkerDragHandler = function (e) {
-        _this3._track.onDragNode(e.target);
-      };
 
       this._onMapClickHandler = function (e) {
         if (_this3.options.mode === 'add') {
@@ -394,155 +544,33 @@ if (L.Control.EasyBar === undefined) {
 
       this._track.getNodes().forEach(function (nodes) {
         nodes.markers.forEach(function (marker) {
-          marker.off('moveend', _this4._onMarkerMoveEndHandler);
           marker.off('click', _this4._onMarkerClickHandler);
         });
       });
     }
   });
+  module.exports = {
+    ToolBar: ToolBar,
+    toolBar: function toolBar(track, options) {
+      return new ToolBar(track, options);
+    }
+  };
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(_dereq_,module,exports){
-(function (global){
-"use strict";
-
-var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
-
-module.exports = L.Evented.extend({
-  initialize: function initialize(parent) {
-    this._parent = parent;
-    var f = L.featureGroup().addTo(parent).addEventParent(this);
-    this._elements = [f];
-    this.length = 1;
-  },
-  get: function get(i) {
-    var idx = i < 0 ? this._elements.length + i : i;
-    return this._elements[idx];
-  },
-
-  /* eslint-disable prefer-rest-params */
-  splice: function splice() {
-    var _this$_elements,
-        _this = this;
-
-    var ret = (_this$_elements = this._elements).splice.apply(_this$_elements, arguments);
-
-    ret.forEach(function (x) {
-      return x.removeFrom(_this._parent).removeEventParent(_this);
-    });
-
-    if (arguments.length > 2) {
-      var args = Array.prototype.slice.call(arguments, 2);
-      args.forEach(function (x) {
-        x.addTo(_this._parent).addEventParent(_this);
-      });
-    }
-
-    this.length = this._elements.length;
-    return ret;
-  },
-
-  /* eslint-enable prefer-rest-params */
-  forEach: function forEach(cb) {
-    return this._elements.forEach(cb);
-  },
-  clean: function clean() {
-    this._elements[0].clearLayers();
-
-    this.splice(1);
-  },
-  getLayer: function getLayer(id) {
-    var parentLayer = this._elements.find(function (x) {
-      return x.getLayer(id) !== undefined;
-    });
-
-    return parentLayer !== undefined ? parentLayer.getLayer(id) : undefined;
-  },
-  getLayerId: function getLayerId(layer) {
-    var parentLayer = this._elements.find(function (x) {
-      return x.hasLayer(layer);
-    });
-
-    return parentLayer !== undefined ? parentLayer.getLayerId(layer) : undefined;
-  },
-  getLayerIndex: function getLayerIndex(layer) {
-    return this._elements.findIndex(function (x) {
-      return x.hasLayer(layer);
-    });
-  }
-});
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(_dereq_,module,exports){
-(function (global){
-"use strict";
-
-var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
-
-module.exports = L.Marker.extend({
-  _routeIdPrevious: undefined,
-  _routeIdNext: undefined,
-  _promoted: false,
-  _demoted: true,
-  options: {
-    type: 'waypoint',
-    // Or 'stopover',
-    colorName: 'blue',
-    opacity: 1,
-    draggable: true
-  },
-  initialize: function initialize(latlng, options) {
-    L.Marker.prototype.initialize.call(this, latlng, options);
-    L.setOptions(this, options);
-    this.setType(this.options.type);
-  },
-  setType: function setType(type) {
-    this.options.type = type;
-
-    if (type === 'stopover') {
-      this.setIcon(L.AwesomeMarkers.icon({
-        icon: 'pause-circle',
-        markerColor: this.options.colorName,
-        prefix: 'fa'
-      }));
-    } else {
-      this.setIcon(L.AwesomeMarkers.icon({
-        icon: 'map-signs',
-        markerColor: this.options.colorName,
-        prefix: 'fa'
-      }));
-    }
-
-    return this;
-  },
-  setStyle: function setStyle(style) {
-    L.Util.setOptions(this, style);
-
-    if ('colorName' in style) {
-      // Colors is set only via the icon and there's no setter on L.AwesomeMarkers
-      this.setType(this.options.type);
-    }
-
-    if ('opacity' in style) {
-      this.setOpacity(this.options.opacity);
-    }
-
-    return this;
-  }
-});
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],5:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
 if (L.Control.EasyBar === undefined) {
-  module.exports = null;
+  module.exports = {
+    TraceModeBar: undefined,
+    traceModeBar: undefined
+  };
 } else {
-  module.exports = L.Control.EasyBar.extend({
+  var TraceModeBar = L.Control.EasyBar.extend({
     options: {
       mode: null
     },
@@ -610,10 +638,16 @@ if (L.Control.EasyBar === undefined) {
       return buttons;
     }
   });
+  module.exports = {
+    TraceModeBar: TraceModeBar,
+    traceModeBar: function traceModeBar(track, modes, options) {
+      return new TraceModeBar(track, modes, options);
+    }
+  };
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],6:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -634,6 +668,9 @@ var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefi
 var Colors = _dereq_('./Colors');
 
 var LayerContainer = _dereq_('./LayerContainer');
+
+var _require = _dereq_('./Edge'),
+    Edge = _require.Edge;
 
 function encodeLatLngs(latlngs) {
   var array = [];
@@ -678,11 +715,11 @@ function decodeLatLng(latlng) {
   return L.latLng(latlng[0], latlng[1]);
 }
 
-module.exports = L.LayerGroup.extend({
+var Track = L.LayerGroup.extend({
   options: {
     routingCallback: undefined,
     router: undefined,
-    debug: true,
+    debug: false,
     undoable: true,
     undoDepth: 30
   },
@@ -1137,7 +1174,7 @@ module.exports = L.LayerGroup.extend({
 
     var edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
 
-    var edge = L.polyline([previousNode.getLatLng(), node.getLatLng()], {
+    var edge = new Edge([previousNode.getLatLng(), node.getLatLng()], {
       color: Colors.nameToRgb(previousNode.options.colorName),
       dashArray: '4'
     }).addTo(edgesContainer);
@@ -1188,7 +1225,20 @@ module.exports = L.LayerGroup.extend({
       });
     }
 
+    if (node.options.draggable) {
+      node.on('dragstart', function (e) {
+        return _this6._onDragStartNode(e.target);
+      });
+      node.on('drag', function (e) {
+        return _this6._onDragNode(e.target);
+      });
+      node.on('moveend', function (e) {
+        return _this6.onMoveNode(e.target);
+      });
+    }
+
     node.addTo(nodesContainer);
+    return this;
   },
   addNode: function addNode(node, routingCallback) {
     var _this7 = this;
@@ -1359,7 +1409,7 @@ module.exports = L.LayerGroup.extend({
       _this8._fireFailed(e);
     });
   },
-  onDragStartNode: function onDragStartNode(marker) {
+  _onDragStartNode: function _onDragStartNode(marker) {
     var _this$_getPrevious2 = this._getPrevious(marker),
         previousEdge = _this$_getPrevious2.previousEdge;
 
@@ -1377,8 +1427,10 @@ module.exports = L.LayerGroup.extend({
         dashArray: '4'
       });
     }
+
+    return this;
   },
-  onDragNode: function onDragNode(marker) {
+  _onDragNode: function _onDragNode(marker) {
     var _this$_getPrevious3 = this._getPrevious(marker),
         previousEdge = _this$_getPrevious3.previousEdge,
         previousNode = _this$_getPrevious3.previousNode;
@@ -1394,6 +1446,8 @@ module.exports = L.LayerGroup.extend({
     if (nextEdge !== undefined) {
       nextEdge.setLatLngs([nextNode.getLatLng(), marker.getLatLng()]);
     }
+
+    return this;
   },
   onMoveNode: function onMoveNode(marker, routingCallback) {
     var _this9 = this;
@@ -1411,8 +1465,9 @@ module.exports = L.LayerGroup.extend({
 
     this._fireStart();
 
-    this.onDragStartNode(marker);
-    this.onDragNode(marker);
+    this._onDragStartNode(marker);
+
+    this._onDragNode(marker);
 
     if (previousEdge !== undefined) {
       previousEdge._computation += 1;
@@ -1695,47 +1750,61 @@ module.exports = L.LayerGroup.extend({
     return this;
   }
 });
+module.exports = {
+  Track: Track,
+  track: function track(options) {
+    return new Track(options);
+  }
+};
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":1,"./LayerContainer":3}],7:[function(_dereq_,module,exports){
+},{"./Colors":1,"./Edge":2,"./LayerContainer":3}],8:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
-var Track = _dereq_('./Track');
+var _require = _dereq_('./Track'),
+    Track = _require.Track,
+    track = _require.track;
 
-var Control = _dereq_('./Control');
+var _require2 = _dereq_('./ToolBar'),
+    ToolBar = _require2.ToolBar,
+    toolBar = _require2.toolBar;
 
-var TraceModeBar = _dereq_('./TraceModeBar');
+var _require3 = _dereq_('./TraceModeBar'),
+    TraceModeBar = _require3.TraceModeBar,
+    traceModeBar = _require3.traceModeBar;
 
 var LayerContainer = _dereq_('./LayerContainer');
 
-var Node = _dereq_('./Node');
+var _require4 = _dereq_('./Node'),
+    Node = _require4.Node,
+    node = _require4.node;
+
+var _require5 = _dereq_('./Edge'),
+    Edge = _require5.Edge,
+    edge = _require5.edge;
 
 var colors = _dereq_('./Colors');
+/** @module L.TrackDrawer */
+
 
 L.TrackDrawer = {
   Track: Track,
-  Control: Control,
+  track: track,
+  ToolBar: ToolBar,
+  toolBar: toolBar,
   TraceModeBar: TraceModeBar,
+  traceModeBar: traceModeBar,
   LayerContainer: LayerContainer,
   Node: Node,
-  colors: colors,
-  track: function track(options) {
-    return new Track(options);
-  },
-  control: function control(track, options) {
-    return new Control(track, options);
-  },
-  traceModeBar: function traceModeBar(track, modes, options) {
-    return new TraceModeBar(track, modes, options);
-  },
-  node: function node(latlng, options) {
-    return new Node(latlng, options);
-  }
+  node: node,
+  Edge: Edge,
+  edge: edge,
+  colors: colors
 };
 module.exports = L.TrackDrawer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":1,"./Control":2,"./LayerContainer":3,"./Node":4,"./TraceModeBar":5,"./Track":6}]},{},[7]);
+},{"./Colors":1,"./Edge":2,"./LayerContainer":3,"./Node":4,"./ToolBar":5,"./TraceModeBar":6,"./Track":7}]},{},[8]);
