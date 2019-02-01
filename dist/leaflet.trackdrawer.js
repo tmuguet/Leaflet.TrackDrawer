@@ -1061,9 +1061,11 @@ var Track = L.LayerGroup.extend({
       }, _callee, this);
     }));
 
-    return function restoreState(_x, _x2) {
+    function restoreState(_x, _x2) {
       return _restoreState.apply(this, arguments);
-    };
+    }
+
+    return restoreState;
   }(),
   _pushState: function _pushState() {
     if (this.options.undoable && !this._undoing) {
@@ -1115,9 +1117,11 @@ var Track = L.LayerGroup.extend({
       }, _callee2, this);
     }));
 
-    return function undo(_x3) {
+    function undo(_x3) {
       return _undo.apply(this, arguments);
-    };
+    }
+
+    return undo;
   }(),
   isUndoable: function isUndoable() {
     return this.options.undoable && this._currentStateIndex > 0;
@@ -1158,9 +1162,11 @@ var Track = L.LayerGroup.extend({
       }, _callee3, this);
     }));
 
-    return function redo(_x4) {
+    function redo(_x4) {
       return _redo.apply(this, arguments);
-    };
+    }
+
+    return redo;
   }(),
   addLayer: function addLayer(layer) {
     if (layer instanceof L.Marker) {
