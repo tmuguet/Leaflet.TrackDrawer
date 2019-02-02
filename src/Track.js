@@ -235,8 +235,17 @@ const Track = L.LayerGroup.extend({
   },
 
   getState() {
-    const state = [];
+    const state = [
+      {
+        version: 1,
+        start: undefined,
+      },
+    ];
     let currentNode = this._getNode(this._firstNodeId);
+
+    if (currentNode !== undefined) {
+      state[0].start = encodeLatLng(currentNode.getLatLng());
+    }
 
     this._nodesContainers.forEach(() => {
       const group = [];
@@ -248,7 +257,6 @@ const Track = L.LayerGroup.extend({
         }
 
         group.push({
-          start: encodeLatLng(currentNode.getLatLng()),
           end: encodeLatLng(nextNode.getLatLng()),
           edge: encodeLatLngs(nextEdge.getLatLngs()),
         });
@@ -307,12 +315,27 @@ const Track = L.LayerGroup.extend({
     const stopovers = [];
     const routes = [];
     const promises = [];
-    let previousSegment;
 
     state.forEach((group, i) => {
+      if (i === 0) {
+        if (group.start) {
+          const marker = callback.call(null, decodeLatLng(group.start));
+          promises.push(
+            this.addNode(
+              marker,
+              () => {
+                throw new Error('Should not be called');
+              },
+              true,
+            ),
+          );
+        }
+        return;
+      }
+
       group.forEach((segment, j) => {
-        const marker = callback.call(null, decodeLatLng(segment.start));
-        if (j === 0 && i > 0) {
+        const marker = callback.call(null, decodeLatLng(segment.end));
+        if (j === group.length - 1 && i < state.length - 1) {
           stopovers.push(marker);
         }
 
@@ -320,32 +343,15 @@ const Track = L.LayerGroup.extend({
           this.addNode(
             marker,
             (from, to, done) => {
-              const edge = decodeLatLngs(previousSegment.edge);
+              const edge = decodeLatLngs(segment.edge);
               routes.push({ from, to, edge });
               done(null, edge);
             },
             true,
           ),
         );
-        previousSegment = segment;
       });
     });
-
-    if (state.length > 0) {
-      const lastState = state[state.length - 1][state[state.length - 1].length - 1];
-      const marker = callback.call(null, decodeLatLng(lastState.end));
-      promises.push(
-        this.addNode(
-          marker,
-          (from, to, done) => {
-            const edge = decodeLatLngs(lastState.edge);
-            routes.push({ from, to, edge });
-            done(null, edge);
-          },
-          true,
-        ),
-      );
-    }
 
     await Promise.all(promises);
 
