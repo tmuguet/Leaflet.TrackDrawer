@@ -1,5 +1,6 @@
 import * as L from 'leaflet';
 import * as Routing from 'leaflet-routing-machine';
+import * as geojson from 'geojson';
 
 declare module 'leaflet' {
   /**
@@ -198,7 +199,7 @@ function(previousMarker, marker, done) {
     type RoutingCallback = (
       previousMarker: Node,
       marker: Node,
-      done: ((err: null | Routing.IError, result: LatLng[]) => void),
+      done: (err: null | Routing.IError, result: LatLng[]) => void,
     ) => void;
     /**
      * Function that can be implemented to create a custom node.
@@ -259,7 +260,7 @@ function(latlng) {
       setOptions(options: TrackOptions): this;
 
       /** Returns `true` if the track has at least `count` nodes. */
-      hasNodes(count: number = 1): boolean;
+      hasNodes(count?: number): boolean;
 
       getNodes(): NodesList[];
 
@@ -276,7 +277,7 @@ function(latlng) {
       getLatLngs(): LatLng[];
 
       /** Returns a GeoJSON representation of the track. */
-      toGeoJSON(): geojson.FeatureCollection<geojson.GeometryObject, P>;
+      toGeoJSON(): geojson.FeatureCollection<geojson.GeometryObject, any>;
 
       /** Gets the serializable state of the track. */
       getState(): State;
