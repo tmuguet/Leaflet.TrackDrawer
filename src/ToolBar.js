@@ -46,9 +46,16 @@ if (L.Control.EasyBar === undefined) {
       this._promoteBtn.state('loaded');
       this._demoteBtn.state('loaded');
 
+      if (this._map) {
+        this._map.getContainer().style.cursor = '';
+      }
+
       switch (this.options.mode) {
         case 'add':
           this._addBtn.state('active');
+          if (this._map) {
+            this._map.getContainer().style.cursor = 'pointer';
+          }
           break;
         case 'insert':
           this._insertBtn.state('active');
@@ -320,6 +327,8 @@ if (L.Control.EasyBar === undefined) {
     },
 
     onRemove(map) {
+      if (this.options.mode === 'add') map.getContainer().style.cursor = '';
+
       L.DomEvent.off(map, 'click', this._onMapClickHandler);
       this._track.getNodes().forEach((nodes) => {
         nodes.markers.forEach((marker) => {
