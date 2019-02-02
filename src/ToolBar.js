@@ -32,8 +32,21 @@ if (L.Control.EasyBar === undefined) {
           const marker = L.TrackDrawer.node(e.latlng);
           const route = e.layer;
 
+          route.setStyle({ weight: 3 });
           this._track.insertNode(marker, route);
           this._bindMarkerEvents(marker);
+        }
+      });
+
+      this._track.getStepsContainer().on('mouseover', (e) => {
+        if (this.options.mode === 'insert') {
+          e.layer.setStyle({ weight: 5 });
+        }
+      });
+
+      this._track.getStepsContainer().on('mouseout', (e) => {
+        if (this.options.mode === 'insert') {
+          e.layer.setStyle({ weight: 3 });
         }
       });
     },
@@ -46,22 +59,34 @@ if (L.Control.EasyBar === undefined) {
       this._promoteBtn.state('loaded');
       this._demoteBtn.state('loaded');
 
+      if (this._map) {
+        this._map.getContainer().style.cursor = '';
+      }
+
       switch (this.options.mode) {
-        case 'add':
+        case 'add': {
           this._addBtn.state('active');
+          if (this._map) {
+            this._map.getContainer().style.cursor = 'pointer';
+          }
           break;
-        case 'insert':
+        }
+        case 'insert': {
           this._insertBtn.state('active');
           break;
-        case 'delete':
+        }
+        case 'delete': {
           this._deleteBtn.state('active');
           break;
-        case 'promote':
+        }
+        case 'promote': {
           this._promoteBtn.state('active');
           break;
-        case 'demote':
+        }
+        case 'demote': {
           this._demoteBtn.state('active');
           break;
+        }
         default:
         // Do nothing
       }
@@ -297,6 +322,8 @@ if (L.Control.EasyBar === undefined) {
 
     _bindMarkerEvents(marker) {
       marker.on('click', this._onMarkerClickHandler);
+      marker.on('mouseover', this._onMarkerMouseOverHandler);
+      marker.on('mouseout', this._onMarkerMouseOutHandler);
       return this;
     },
 
@@ -310,9 +337,47 @@ if (L.Control.EasyBar === undefined) {
 
       this._onMarkerClickHandler = (e) => {
         const marker = e.target;
-        if (this.options.mode === 'delete') this._track.removeNode(marker);
-        else if (this.options.mode === 'promote') this._track.promoteNodeToStopover(marker);
-        else if (this.options.mode === 'demote') this._track.demoteNodeToWaypoint(marker);
+        switch (this.options.mode) {
+          case 'delete': {
+            const { previousEdge } = this._track._getPrevious(marker);
+            const { nextEdge } = this._track._getNext(marker);
+
+            if (previousEdge) previousEdge.setStyle({ weight: 3 });
+            if (nextEdge) nextEdge.setStyle({ weight: 3 });
+
+            this._track.removeNode(marker);
+            break;
+          }
+          case 'promote': {
+            this._track.promoteNodeToStopover(marker);
+            break;
+          }
+          case 'demote': {
+            this._track.demoteNodeToWaypoint(marker);
+            break;
+          }
+          default:
+        }
+      };
+
+      this._onMarkerMouseOverHandler = (e) => {
+        if (this.options.mode === 'delete' || this.options.mode === 'promote' || this.options.mode === 'demote') {
+          const marker = e.target;
+          const { previousEdge } = this._track._getPrevious(marker);
+          const { nextEdge } = this._track._getNext(marker);
+
+          if (previousEdge) previousEdge.setStyle({ weight: 5 });
+          if (nextEdge) nextEdge.setStyle({ weight: 5 });
+        }
+      };
+
+      this._onMarkerMouseOutHandler = (e) => {
+        const marker = e.target;
+        const { previousEdge } = this._track._getPrevious(marker);
+        const { nextEdge } = this._track._getNext(marker);
+
+        if (previousEdge) previousEdge.setStyle({ weight: 3 });
+        if (nextEdge) nextEdge.setStyle({ weight: 3 });
       };
 
       L.DomEvent.on(map, 'click', this._onMapClickHandler);
@@ -320,10 +385,14 @@ if (L.Control.EasyBar === undefined) {
     },
 
     onRemove(map) {
+      if (this.options.mode === 'add') map.getContainer().style.cursor = '';
+
       L.DomEvent.off(map, 'click', this._onMapClickHandler);
       this._track.getNodes().forEach((nodes) => {
         nodes.markers.forEach((marker) => {
           marker.off('click', this._onMarkerClickHandler);
+          marker.off('mouseover', this._onMarkerMouseOverHandler);
+          marker.off('mouseout', this._onMarkerMouseOutHandler);
         });
       });
     },
