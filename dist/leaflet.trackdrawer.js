@@ -242,10 +242,29 @@ if (L.Control.EasyBar === undefined) {
         if (_this.options.mode === 'insert') {
           var marker = L.TrackDrawer.node(e.latlng);
           var route = e.layer;
+          route.setStyle({
+            weight: 3
+          });
 
           _this._track.insertNode(marker, route);
 
           _this._bindMarkerEvents(marker);
+        }
+      });
+
+      this._track.getStepsContainer().on('mouseover', function (e) {
+        if (_this.options.mode === 'insert') {
+          e.layer.setStyle({
+            weight: 5
+          });
+        }
+      });
+
+      this._track.getStepsContainer().on('mouseout', function (e) {
+        if (_this.options.mode === 'insert') {
+          e.layer.setStyle({
+            weight: 3
+          });
         }
       });
     },
@@ -262,31 +281,49 @@ if (L.Control.EasyBar === undefined) {
 
       this._demoteBtn.state('loaded');
 
+      if (this._map) {
+        this._map.getContainer().style.cursor = '';
+      }
+
       switch (this.options.mode) {
         case 'add':
-          this._addBtn.state('active');
+          {
+            this._addBtn.state('active');
 
-          break;
+            if (this._map) {
+              this._map.getContainer().style.cursor = 'pointer';
+            }
+
+            break;
+          }
 
         case 'insert':
-          this._insertBtn.state('active');
+          {
+            this._insertBtn.state('active');
 
-          break;
+            break;
+          }
 
         case 'delete':
-          this._deleteBtn.state('active');
+          {
+            this._deleteBtn.state('active');
 
-          break;
+            break;
+          }
 
         case 'promote':
-          this._promoteBtn.state('active');
+          {
+            this._promoteBtn.state('active');
 
-          break;
+            break;
+          }
 
         case 'demote':
-          this._demoteBtn.state('active');
+          {
+            this._demoteBtn.state('active');
 
-          break;
+            break;
+          }
 
         default: // Do nothing
 
@@ -516,6 +553,8 @@ if (L.Control.EasyBar === undefined) {
     },
     _bindMarkerEvents: function _bindMarkerEvents(marker) {
       marker.on('click', this._onMarkerClickHandler);
+      marker.on('mouseover', this._onMarkerMouseOverHandler);
+      marker.on('mouseout', this._onMarkerMouseOutHandler);
       return this;
     },
     onAdd: function onAdd(map) {
@@ -531,7 +570,80 @@ if (L.Control.EasyBar === undefined) {
 
       this._onMarkerClickHandler = function (e) {
         var marker = e.target;
-        if (_this3.options.mode === 'delete') _this3._track.removeNode(marker);else if (_this3.options.mode === 'promote') _this3._track.promoteNodeToStopover(marker);else if (_this3.options.mode === 'demote') _this3._track.demoteNodeToWaypoint(marker);
+
+        switch (_this3.options.mode) {
+          case 'delete':
+            {
+              var _this3$_track$_getPre = _this3._track._getPrevious(marker),
+                  previousEdge = _this3$_track$_getPre.previousEdge;
+
+              var _this3$_track$_getNex = _this3._track._getNext(marker),
+                  nextEdge = _this3$_track$_getNex.nextEdge;
+
+              if (previousEdge) previousEdge.setStyle({
+                weight: 3
+              });
+              if (nextEdge) nextEdge.setStyle({
+                weight: 3
+              });
+
+              _this3._track.removeNode(marker);
+
+              break;
+            }
+
+          case 'promote':
+            {
+              _this3._track.promoteNodeToStopover(marker);
+
+              break;
+            }
+
+          case 'demote':
+            {
+              _this3._track.demoteNodeToWaypoint(marker);
+
+              break;
+            }
+
+          default:
+        }
+      };
+
+      this._onMarkerMouseOverHandler = function (e) {
+        if (_this3.options.mode === 'delete' || _this3.options.mode === 'promote' || _this3.options.mode === 'demote') {
+          var marker = e.target;
+
+          var _this3$_track$_getPre2 = _this3._track._getPrevious(marker),
+              previousEdge = _this3$_track$_getPre2.previousEdge;
+
+          var _this3$_track$_getNex2 = _this3._track._getNext(marker),
+              nextEdge = _this3$_track$_getNex2.nextEdge;
+
+          if (previousEdge) previousEdge.setStyle({
+            weight: 5
+          });
+          if (nextEdge) nextEdge.setStyle({
+            weight: 5
+          });
+        }
+      };
+
+      this._onMarkerMouseOutHandler = function (e) {
+        var marker = e.target;
+
+        var _this3$_track$_getPre3 = _this3._track._getPrevious(marker),
+            previousEdge = _this3$_track$_getPre3.previousEdge;
+
+        var _this3$_track$_getNex3 = _this3._track._getNext(marker),
+            nextEdge = _this3$_track$_getNex3.nextEdge;
+
+        if (previousEdge) previousEdge.setStyle({
+          weight: 3
+        });
+        if (nextEdge) nextEdge.setStyle({
+          weight: 3
+        });
       };
 
       L.DomEvent.on(map, 'click', this._onMapClickHandler);
@@ -540,11 +652,14 @@ if (L.Control.EasyBar === undefined) {
     onRemove: function onRemove(map) {
       var _this4 = this;
 
+      if (this.options.mode === 'add') map.getContainer().style.cursor = '';
       L.DomEvent.off(map, 'click', this._onMapClickHandler);
 
       this._track.getNodes().forEach(function (nodes) {
         nodes.markers.forEach(function (marker) {
           marker.off('click', _this4._onMarkerClickHandler);
+          marker.off('mouseover', _this4._onMarkerMouseOverHandler);
+          marker.off('mouseout', _this4._onMarkerMouseOutHandler);
         });
       });
     }
@@ -917,9 +1032,16 @@ var Track = L.LayerGroup.extend({
   getState: function getState() {
     var _this3 = this;
 
-    var state = [];
+    var state = [{
+      version: 1,
+      start: undefined
+    }];
 
     var currentNode = this._getNode(this._firstNodeId);
+
+    if (currentNode !== undefined) {
+      state[0].start = encodeLatLng(currentNode.getLatLng());
+    }
 
     this._nodesContainers.forEach(function () {
       var group = [];
@@ -934,7 +1056,6 @@ var Track = L.LayerGroup.extend({
         }
 
         group.push({
-          start: encodeLatLng(currentNode.getLatLng()),
           end: encodeLatLng(nextNode.getLatLng()),
           edge: encodeLatLngs(nextEdge.getLatLngs())
         });
@@ -988,7 +1109,7 @@ var Track = L.LayerGroup.extend({
     regeneratorRuntime.mark(function _callee(state, nodeCallback) {
       var _this4 = this;
 
-      var callback, oldValue, stopovers, routes, promises, previousSegment, lastState, marker;
+      var callback, oldValue, stopovers, routes, promises;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
@@ -1004,15 +1125,26 @@ var Track = L.LayerGroup.extend({
               routes = [];
               promises = [];
               state.forEach(function (group, i) {
-                group.forEach(function (segment, j) {
-                  var marker = callback.call(null, decodeLatLng(segment.start));
+                if (i === 0) {
+                  if (group.start) {
+                    var marker = callback.call(null, decodeLatLng(group.start));
+                    promises.push(_this4.addNode(marker, function () {
+                      throw new Error('Should not be called');
+                    }, true));
+                  }
 
-                  if (j === 0 && i > 0) {
+                  return;
+                }
+
+                group.forEach(function (segment, j) {
+                  var marker = callback.call(null, decodeLatLng(segment.end));
+
+                  if (j === group.length - 1 && i < state.length - 1) {
                     stopovers.push(marker);
                   }
 
                   promises.push(_this4.addNode(marker, function (from, to, done) {
-                    var edge = decodeLatLngs(previousSegment.edge);
+                    var edge = decodeLatLngs(segment.edge);
                     routes.push({
                       from: from,
                       to: to,
@@ -1020,28 +1152,12 @@ var Track = L.LayerGroup.extend({
                     });
                     done(null, edge);
                   }, true));
-                  previousSegment = segment;
                 });
               });
-
-              if (state.length > 0) {
-                lastState = state[state.length - 1][state[state.length - 1].length - 1];
-                marker = callback.call(null, decodeLatLng(lastState.end));
-                promises.push(this.addNode(marker, function (from, to, done) {
-                  var edge = decodeLatLngs(lastState.edge);
-                  routes.push({
-                    from: from,
-                    to: to,
-                    edge: edge
-                  });
-                  done(null, edge);
-                }, true));
-              }
-
-              _context.next = 12;
+              _context.next = 11;
               return Promise.all(promises);
 
-            case 12:
+            case 11:
               stopovers.forEach(function (m) {
                 return _this4.promoteNodeToStopover(m);
               });
@@ -1053,7 +1169,7 @@ var Track = L.LayerGroup.extend({
 
               return _context.abrupt("return", this);
 
-            case 16:
+            case 15:
             case "end":
               return _context.stop();
           }
