@@ -359,9 +359,15 @@ ___
 
 ###  toGeoJSON
 
-▸ **toGeoJSON**(): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
+▸ **toGeoJSON**(exportStopovers: *`boolean`*): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 
 Returns a GeoJSON representation of the track.
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| exportStopovers | `boolean` |  \`true\` to also export stop-over markers (default), \`false\` to ignore them |
 
 **Returns:** `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 

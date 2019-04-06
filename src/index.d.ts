@@ -276,8 +276,11 @@ function(latlng) {
       /** Returns an array of the points in the track. */
       getLatLngs(): LatLng[];
 
-      /** Returns a GeoJSON representation of the track. */
-      toGeoJSON(): geojson.FeatureCollection<geojson.GeometryObject, any>;
+      /**
+       * Returns a GeoJSON representation of the track.
+       * @param exportStopovers `true` to also export stop-over markers (default), `false` to ignore them
+       */
+      toGeoJSON(exportStopovers: boolean): geojson.FeatureCollection<geojson.GeometryObject, any>;
 
       /** Gets the serializable state of the track. */
       getState(): State;

@@ -994,51 +994,55 @@ var Track = L.LayerGroup.extend({
   toGeoJSON: function toGeoJSON() {
     var _this3 = this;
 
+    var exportStopovers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
     var geojson = {
       type: 'FeatureCollection',
       features: []
     };
 
-    var currentNode = this._getNode(this._firstNodeId);
+    if (exportStopovers) {
+      var currentNode = this._getNode(this._firstNodeId);
 
-    var stopovers = [];
-
-    if (currentNode !== undefined) {
-      stopovers.push(currentNode);
-    }
-
-    this._nodesContainers.forEach(function () {
-      do {
-        var _this3$_getNext = _this3._getNext(currentNode),
-            nextEdge = _this3$_getNext.nextEdge,
-            nextNode = _this3$_getNext.nextNode;
-
-        if (currentNode === undefined || nextEdge === undefined) {
-          break;
-        }
-
-        currentNode = nextNode;
-      } while (currentNode.options.type !== 'stopover');
+      var stopovers = [];
 
       if (currentNode !== undefined) {
         stopovers.push(currentNode);
       }
-    });
 
-    var hasTrackStats = L.TrackStats !== undefined;
-    stopovers.forEach(function (node, idx) {
-      var e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
-      geojson.features.push({
-        type: 'Feature',
-        properties: {
-          index: idx
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]
+      this._nodesContainers.forEach(function () {
+        do {
+          var _this3$_getNext = _this3._getNext(currentNode),
+              nextEdge = _this3$_getNext.nextEdge,
+              nextNode = _this3$_getNext.nextNode;
+
+          if (currentNode === undefined || nextEdge === undefined) {
+            break;
+          }
+
+          currentNode = nextNode;
+        } while (currentNode.options.type !== 'stopover');
+
+        if (currentNode !== undefined) {
+          stopovers.push(currentNode);
         }
       });
-    });
+
+      var hasTrackStats = L.TrackStats !== undefined;
+      stopovers.forEach(function (node, idx) {
+        var e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
+        geojson.features.push({
+          type: 'Feature',
+          properties: {
+            index: idx
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]
+          }
+        });
+      });
+    }
+
     var latlngs = this.getLatLngs();
     latlngs.forEach(function (l, idx) {
       var feature = {

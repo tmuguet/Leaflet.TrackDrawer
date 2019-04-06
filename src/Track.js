@@ -207,44 +207,46 @@ const Track = L.LayerGroup.extend({
     return latlngs;
   },
 
-  toGeoJSON() {
+  toGeoJSON(exportStopovers = true) {
     const geojson = {
       type: 'FeatureCollection',
       features: [],
     };
 
-    let currentNode = this._getNode(this._firstNodeId);
-    const stopovers = [];
-    if (currentNode !== undefined) {
-      stopovers.push(currentNode);
-    }
-    this._nodesContainers.forEach(() => {
-      do {
-        const { nextEdge, nextNode } = this._getNext(currentNode);
-        if (currentNode === undefined || nextEdge === undefined) {
-          break;
-        }
-
-        currentNode = nextNode;
-      } while (currentNode.options.type !== 'stopover');
-
+    if (exportStopovers) {
+      let currentNode = this._getNode(this._firstNodeId);
+      const stopovers = [];
       if (currentNode !== undefined) {
         stopovers.push(currentNode);
       }
-    });
+      this._nodesContainers.forEach(() => {
+        do {
+          const { nextEdge, nextNode } = this._getNext(currentNode);
+          if (currentNode === undefined || nextEdge === undefined) {
+            break;
+          }
 
-    const hasTrackStats = L.TrackStats !== undefined;
-    stopovers.forEach((node, idx) => {
-      const e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
-      geojson.features.push({
-        type: 'Feature',
-        properties: { index: idx },
-        geometry: {
-          type: 'Point',
-          coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat],
-        },
+          currentNode = nextNode;
+        } while (currentNode.options.type !== 'stopover');
+
+        if (currentNode !== undefined) {
+          stopovers.push(currentNode);
+        }
       });
-    });
+
+      const hasTrackStats = L.TrackStats !== undefined;
+      stopovers.forEach((node, idx) => {
+        const e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
+        geojson.features.push({
+          type: 'Feature',
+          properties: { index: idx },
+          geometry: {
+            type: 'Point',
+            coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat],
+          },
+        });
+      });
+    }
 
     const latlngs = this.getLatLngs();
 
