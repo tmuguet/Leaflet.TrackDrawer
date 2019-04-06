@@ -1876,74 +1876,42 @@ describe('Main', () => {
         features: [
           {
             type: 'Feature',
-            properties: {},
+            properties: { index: 0 },
             geometry: {
               type: 'Point',
-              coordinates: [6.064453, 44.974635],
+              coordinates: [6.064453125000001, 44.974635142416496],
             },
           },
           {
             type: 'Feature',
-            properties: {},
+            properties: { index: 1 },
             geometry: {
               type: 'Point',
-              coordinates: [6.098099, 44.953015],
+              coordinates: [6.098098754882813, 44.95301534523602],
             },
           },
           {
             type: 'Feature',
-            properties: {},
+            properties: { index: 2 },
             geometry: {
               type: 'Point',
-              coordinates: [6.12093, 44.982407],
+              coordinates: [6.040935516357423, 44.98119234648246],
             },
           },
           {
             type: 'Feature',
-            properties: {},
+            properties: { index: 3 },
             geometry: {
               type: 'Point',
-              coordinates: [6.075783, 44.988599],
+              coordinates: [6.023254394531251, 44.962976039238825],
             },
           },
           {
             type: 'Feature',
-            properties: {},
+            properties: { index: 4 },
             geometry: {
               type: 'Point',
-              coordinates: [6.040936, 44.981192],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [6.023254, 44.962976],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [6.041107, 44.949249],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [6.065483, 44.94366],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [6.104965, 44.943903],
+              coordinates: [6.1049652099609375, 44.9439034403902],
             },
           },
           {

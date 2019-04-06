@@ -1,16 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
-function _arrayWithoutHoles(arr) {
-  if (Array.isArray(arr)) {
-    for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) {
-      arr2[i] = arr[i];
-    }
-
-    return arr2;
-  }
-}
-
-module.exports = _arrayWithoutHoles;
-},{}],2:[function(_dereq_,module,exports){
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
     var info = gen[key](arg);
@@ -48,7 +36,7 @@ function _asyncToGenerator(fn) {
 }
 
 module.exports = _asyncToGenerator;
-},{}],3:[function(_dereq_,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
     default: obj
@@ -56,34 +44,10 @@ function _interopRequireDefault(obj) {
 }
 
 module.exports = _interopRequireDefault;
-},{}],4:[function(_dereq_,module,exports){
-function _iterableToArray(iter) {
-  if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
-}
-
-module.exports = _iterableToArray;
-},{}],5:[function(_dereq_,module,exports){
-function _nonIterableSpread() {
-  throw new TypeError("Invalid attempt to spread non-iterable instance");
-}
-
-module.exports = _nonIterableSpread;
-},{}],6:[function(_dereq_,module,exports){
-var arrayWithoutHoles = _dereq_("./arrayWithoutHoles");
-
-var iterableToArray = _dereq_("./iterableToArray");
-
-var nonIterableSpread = _dereq_("./nonIterableSpread");
-
-function _toConsumableArray(arr) {
-  return arrayWithoutHoles(arr) || iterableToArray(arr) || nonIterableSpread();
-}
-
-module.exports = _toConsumableArray;
-},{"./arrayWithoutHoles":1,"./iterableToArray":4,"./nonIterableSpread":5}],7:[function(_dereq_,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 module.exports = _dereq_("regenerator-runtime");
 
-},{"regenerator-runtime":8}],8:[function(_dereq_,module,exports){
+},{"regenerator-runtime":4}],4:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -122,7 +86,7 @@ if (hadRuntime) {
   }
 }
 
-},{"./runtime":9}],9:[function(_dereq_,module,exports){
+},{"./runtime":5}],5:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -845,7 +809,7 @@ if (hadRuntime) {
   })() || Function("return this")()
 );
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 "use strict";
 
 var colorMap = {
@@ -890,7 +854,7 @@ module.exports = {
   }
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -916,7 +880,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -987,7 +951,7 @@ module.exports = L.Evented.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1052,7 +1016,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1520,7 +1484,7 @@ if (L.Control.EasyBar === undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1609,7 +1573,7 @@ if (L.Control.EasyBar === undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1618,8 +1582,6 @@ var _interopRequireDefault = _dereq_("@babel/runtime/helpers/interopRequireDefau
 var _regenerator = _interopRequireDefault(_dereq_("@babel/runtime/regenerator"));
 
 var _asyncToGenerator2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/asyncToGenerator"));
-
-var _toConsumableArray2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/toConsumableArray"));
 
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
@@ -1843,17 +1805,53 @@ var Track = L.LayerGroup.extend({
     return latlngs;
   },
   toGeoJSON: function toGeoJSON() {
+    var _this3 = this;
+
     var geojson = {
       type: 'FeatureCollection',
       features: []
     };
 
-    this._nodesContainers.forEach(function (container) {
-      var _geojson$features;
+    var currentNode = this._getNode(this._firstNodeId);
 
-      (_geojson$features = geojson.features).push.apply(_geojson$features, (0, _toConsumableArray2.default)(container.toGeoJSON().features));
+    var stopovers = [];
+
+    if (currentNode !== undefined) {
+      stopovers.push(currentNode);
+    }
+
+    this._nodesContainers.forEach(function () {
+      do {
+        var _this3$_getNext = _this3._getNext(currentNode),
+            nextEdge = _this3$_getNext.nextEdge,
+            nextNode = _this3$_getNext.nextNode;
+
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+
+      if (currentNode !== undefined) {
+        stopovers.push(currentNode);
+      }
     });
 
+    var hasTrackStats = L.TrackStats !== undefined;
+    stopovers.forEach(function (node, idx) {
+      var e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
+      geojson.features.push({
+        type: 'Feature',
+        properties: {
+          index: idx
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]
+        }
+      });
+    });
     var latlngs = this.getLatLngs();
     latlngs.forEach(function (l, idx) {
       var feature = {
@@ -1873,7 +1871,7 @@ var Track = L.LayerGroup.extend({
     return geojson;
   },
   getState: function getState() {
-    var _this3 = this;
+    var _this4 = this;
 
     var state = [{
       version: 1,
@@ -1890,9 +1888,9 @@ var Track = L.LayerGroup.extend({
       var group = [];
 
       do {
-        var _this3$_getNext = _this3._getNext(currentNode),
-            nextEdge = _this3$_getNext.nextEdge,
-            nextNode = _this3$_getNext.nextNode;
+        var _this4$_getNext = _this4._getNext(currentNode),
+            nextEdge = _this4$_getNext.nextEdge,
+            nextNode = _this4$_getNext.nextNode;
 
         if (currentNode === undefined || nextEdge === undefined) {
           break;
@@ -1950,7 +1948,7 @@ var Track = L.LayerGroup.extend({
     var _restoreState = (0, _asyncToGenerator2.default)(
     /*#__PURE__*/
     _regenerator.default.mark(function _callee(state, nodeCallback) {
-      var _this4 = this;
+      var _this5 = this;
 
       var callback, oldValue, stopovers, routes, promises;
       return _regenerator.default.wrap(function _callee$(_context) {
@@ -1971,7 +1969,7 @@ var Track = L.LayerGroup.extend({
                 if (i === 0) {
                   if (group.start) {
                     var marker = callback.call(null, decodeLatLng(group.start));
-                    promises.push(_this4.addNode(marker, function () {
+                    promises.push(_this5.addNode(marker, function () {
                       throw new Error('Should not be called');
                     }, true));
                   }
@@ -1986,7 +1984,7 @@ var Track = L.LayerGroup.extend({
                     stopovers.push(marker);
                   }
 
-                  promises.push(_this4.addNode(marker, function (from, to, done) {
+                  promises.push(_this5.addNode(marker, function (from, to, done) {
                     var edge = decodeLatLngs(segment.edge);
                     routes.push({
                       from: from,
@@ -2002,7 +2000,7 @@ var Track = L.LayerGroup.extend({
 
             case 11:
               stopovers.forEach(function (m) {
-                return _this4.promoteNodeToStopover(m);
+                return _this5.promoteNodeToStopover(m);
               });
               this._fireEvents = oldValue;
 
@@ -2135,7 +2133,7 @@ var Track = L.LayerGroup.extend({
     }
   },
   _createEdge: function _createEdge(previousNode, node) {
-    var _this5 = this;
+    var _this6 = this;
 
     var edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
 
@@ -2154,7 +2152,7 @@ var Track = L.LayerGroup.extend({
       edge.on('tooltipopen', function () {
         var startNodeId = edge._startMarkerId;
         var endNodeId = edge._endMarkerId;
-        edge.setTooltipContent("id: ".concat(_this5._getEdgeId(edge), " (on #").concat(_this5._getEdgeContainerIndex(edge), ")<br>") + "previous node: ".concat(startNodeId) + " (on #".concat(_this5._getNodeContainerIndex(_this5._getNode(startNodeId)), ")<br>") + "next node: ".concat(endNodeId) + " (on #".concat(_this5._getNodeContainerIndex(_this5._getNode(endNodeId)), ")"));
+        edge.setTooltipContent("id: ".concat(_this6._getEdgeId(edge), " (on #").concat(_this6._getEdgeContainerIndex(edge), ")<br>") + "previous node: ".concat(startNodeId) + " (on #".concat(_this6._getNodeContainerIndex(_this6._getNode(startNodeId)), ")<br>") + "next node: ".concat(endNodeId) + " (on #".concat(_this6._getNodeContainerIndex(_this6._getNode(endNodeId)), ")"));
       });
       edge.bindTooltip('<>');
     }
@@ -2162,19 +2160,19 @@ var Track = L.LayerGroup.extend({
     return edge;
   },
   _prepareNode: function _prepareNode(node, nodesContainer) {
-    var _this6 = this;
+    var _this7 = this;
 
     if (this.options.debug) {
       node.on('tooltipopen', function () {
-        var _this6$_getPrevious = _this6._getPrevious(node),
-            previousEdge = _this6$_getPrevious.previousEdge,
-            previousNode = _this6$_getPrevious.previousNode;
+        var _this7$_getPrevious = _this7._getPrevious(node),
+            previousEdge = _this7$_getPrevious.previousEdge,
+            previousNode = _this7$_getPrevious.previousNode;
 
-        var _this6$_getNext = _this6._getNext(node),
-            nextEdge = _this6$_getNext.nextEdge,
-            nextNode = _this6$_getNext.nextNode;
+        var _this7$_getNext = _this7._getNext(node),
+            nextEdge = _this7$_getNext.nextEdge,
+            nextNode = _this7$_getNext.nextNode;
 
-        node.setTooltipContent("id: ".concat(_this6._getNodeId(node), " (on #").concat(_this6._getNodeContainerIndex(node), ")<br>") + "previous edge: ".concat(_this6._getEdgeId(previousEdge)) + " (on #".concat(_this6._getEdgeContainerIndex(previousEdge), ") to ").concat(_this6._getNodeId(previousNode), "<br>") + "next edge: ".concat(_this6._getEdgeId(nextEdge)) + " (on #".concat(_this6._getEdgeContainerIndex(nextEdge), ") to ").concat(_this6._getNodeId(nextNode)));
+        node.setTooltipContent("id: ".concat(_this7._getNodeId(node), " (on #").concat(_this7._getNodeContainerIndex(node), ")<br>") + "previous edge: ".concat(_this7._getEdgeId(previousEdge)) + " (on #".concat(_this7._getEdgeContainerIndex(previousEdge), ") to ").concat(_this7._getNodeId(previousNode), "<br>") + "next edge: ".concat(_this7._getEdgeId(nextEdge)) + " (on #".concat(_this7._getEdgeContainerIndex(nextEdge), ") to ").concat(_this7._getNodeId(nextNode)));
       });
       node.bindTooltip('<>');
     }
@@ -2192,13 +2190,13 @@ var Track = L.LayerGroup.extend({
 
     if (node.options.draggable) {
       node.on('dragstart', function (e) {
-        return _this6._onDragStartNode(e.target);
+        return _this7._onDragStartNode(e.target);
       });
       node.on('drag', function (e) {
-        return _this6._onDragNode(e.target);
+        return _this7._onDragNode(e.target);
       });
       node.on('moveend', function (e) {
-        return _this6.onMoveNode(e.target);
+        return _this7.onMoveNode(e.target);
       });
     }
 
@@ -2206,7 +2204,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   addNode: function addNode(node, routingCallback) {
-    var _this7 = this;
+    var _this8 = this;
 
     var skipChecks = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = routingCallback || this.options.routingCallback;
@@ -2253,7 +2251,7 @@ var Track = L.LayerGroup.extend({
       return new Promise(function (resolve) {
         resolve();
       }).then(function () {
-        _this7._fireDone({});
+        _this8._fireDone({});
       });
     }
 
@@ -2290,15 +2288,15 @@ var Track = L.LayerGroup.extend({
         });
       });
     }).then(function (routes) {
-      _this7._fireDone({
+      _this8._fireDone({
         routes: routes
       });
     }).catch(function (e) {
-      _this7._fireFailed(e);
+      _this8._fireFailed(e);
     });
   },
   insertNode: function insertNode(node, route, routingCallback) {
-    var _this8 = this;
+    var _this9 = this;
 
     var callback = routingCallback || this.options.routingCallback;
 
@@ -2367,11 +2365,11 @@ var Track = L.LayerGroup.extend({
       });
     });
     return Promise.all([promise1, promise2]).then(function (routes) {
-      _this8._fireDone({
+      _this9._fireDone({
         routes: routes
       });
     }).catch(function (e) {
-      _this8._fireFailed(e);
+      _this9._fireFailed(e);
     });
   },
   _onDragStartNode: function _onDragStartNode(marker) {
@@ -2415,7 +2413,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   onMoveNode: function onMoveNode(marker, routingCallback) {
-    var _this9 = this;
+    var _this10 = this;
 
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
@@ -2489,15 +2487,15 @@ var Track = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then(function (routes) {
-      _this9._fireDone({
+      _this10._fireDone({
         routes: routes
       });
     }).catch(function (e) {
-      _this9._fireFailed(e);
+      _this10._fireFailed(e);
     });
   },
   removeNode: function removeNode(node, routingCallback) {
-    var _this10 = this;
+    var _this11 = this;
 
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
@@ -2570,15 +2568,15 @@ var Track = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then(function (routes) {
-      _this10._fireDone({
+      _this11._fireDone({
         routes: routes
       });
     }).catch(function (e) {
-      _this10._fireFailed(e);
+      _this11._fireFailed(e);
     });
   },
   promoteNodeToStopover: function promoteNodeToStopover(node) {
-    var _this11 = this;
+    var _this12 = this;
 
     if (node._promoted) {
       return this;
@@ -2624,10 +2622,10 @@ var Track = L.LayerGroup.extend({
 
     this._currentColorIndex += 1;
     nodes.forEach(function (e) {
-      e.removeFrom(_this11._getNodeContainer(e)).addTo(newNodesContainer);
+      e.removeFrom(_this12._getNodeContainer(e)).addTo(newNodesContainer);
     });
     edges.forEach(function (e) {
-      e.removeFrom(_this11._getEdgeContainer(e)).addTo(newEdgesContainer);
+      e.removeFrom(_this12._getEdgeContainer(e)).addTo(newEdgesContainer);
     });
     newNodesContainer.setStyle({
       colorName: Colors.nameOf(this._currentColorIndex)
@@ -2644,7 +2642,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   demoteNodeToWaypoint: function demoteNodeToWaypoint(node) {
-    var _this12 = this;
+    var _this13 = this;
 
     if (node._demoted) {
       return this;
@@ -2687,10 +2685,10 @@ var Track = L.LayerGroup.extend({
     this._edgesContainers.splice(index, 1);
 
     nodes.forEach(function (e) {
-      e.removeFrom(_this12._getNodeContainer(e)).addTo(previousNodesContainer);
+      e.removeFrom(_this13._getNodeContainer(e)).addTo(previousNodesContainer);
     });
     edges.forEach(function (e) {
-      e.removeFrom(_this12._getEdgeContainer(e)).addTo(previousEdgesContainer);
+      e.removeFrom(_this13._getEdgeContainer(e)).addTo(previousEdgesContainer);
     });
 
     var _this$_getPrevious6 = this._getPrevious(nodes[0]),
@@ -2723,7 +2721,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":10,"./Edge":11,"./LayerContainer":12,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/toConsumableArray":6,"@babel/runtime/regenerator":7}],17:[function(_dereq_,module,exports){
+},{"./Colors":6,"./Edge":7,"./LayerContainer":8,"@babel/runtime/helpers/asyncToGenerator":1,"@babel/runtime/helpers/interopRequireDefault":2,"@babel/runtime/regenerator":3}],13:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2772,4 +2770,4 @@ L.TrackDrawer = {
 module.exports = L.TrackDrawer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":10,"./Edge":11,"./LayerContainer":12,"./Node":13,"./ToolBar":14,"./TraceModeBar":15,"./Track":16}]},{},[17]);
+},{"./Colors":6,"./Edge":7,"./LayerContainer":8,"./Node":9,"./ToolBar":10,"./TraceModeBar":11,"./Track":12}]},{},[13]);
