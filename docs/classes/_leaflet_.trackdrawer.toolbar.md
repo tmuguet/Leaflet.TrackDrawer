@@ -53,7 +53,7 @@ ___
 
 ###  setMode
 
-▸ **setMode**(m: *[ToolBarMode](../interfaces/_leaflet_.trackdrawer.toolbarmode.md) | `null`*): `this`
+▸ **setMode**(m: *[ToolBarMode](../interfaces/_leaflet_.trackdrawer.toolbarmode.md) \| `null`*): `this`
 
 Sets a new mode, or unselects all if `null`.
 
@@ -61,7 +61,7 @@ Sets a new mode, or unselects all if `null`.
 
 | Name | Type | Description |
 | ------ | ------ | ------ |
-| m | [ToolBarMode](../interfaces/_leaflet_.trackdrawer.toolbarmode.md) | `null` |  New mode |
+| m | [ToolBarMode](../interfaces/_leaflet_.trackdrawer.toolbarmode.md) \| `null` |  New mode |
 
 **Returns:** `this`
 

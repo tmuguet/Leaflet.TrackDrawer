@@ -3,6 +3,7 @@
 # Class: Track
 
 Main entry point.
+
 *__emits__*: TrackDrawer:start Fired when an edit has started
 
 *__emits__*: TrackDrawer:done Fired when all pending edits are done
@@ -208,9 +209,9 @@ Returns `true` if the track has at least `count` nodes.
 
 **Parameters:**
 
-| Name | Type | Default value |
-| ------ | ------ | ------ |
-| `Default value` count | `number` | 1 |
+| Name | Type |
+| ------ | ------ |
+| `Optional` count | `number` |
 
 **Returns:** `boolean`
 
@@ -324,6 +325,7 @@ ___
 ▸ **restoreState**(state: *[State](../modules/_leaflet_.trackdrawer.md#state)*, nodeCallback?: *[NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback)*): `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
 
 Restores a state saved via `getState`.
+
 *__see__*: getState
 
 **Parameters:**
@@ -357,11 +359,11 @@ ___
 
 ###  toGeoJSON
 
-▸ **toGeoJSON**(): `geojson.FeatureCollection`<`geojson.GeometryObject`, `P`>
+▸ **toGeoJSON**(): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 
 Returns a GeoJSON representation of the track.
 
-**Returns:** `geojson.FeatureCollection`<`geojson.GeometryObject`, `P`>
+**Returns:** `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 
 ___
 

@@ -79,7 +79,7 @@ ___
 
 ###  setMode
 
-▸ **setMode**(m: *`String` | `null`*): `this`
+▸ **setMode**(m: *`String` \| `null`*): `this`
 
 Sets a new mode. If `null` is provided, will switch back to the first mode (or second if first one was active).
 
@@ -87,7 +87,7 @@ Sets a new mode. If `null` is provided, will switch back to the first mode (or s
 
 | Name | Type | Description |
 | ------ | ------ | ------ |
-| m | `String` | `null` |  New mode |
+| m | `String` \| `null` |  New mode |
 
 **Returns:** `this`
 

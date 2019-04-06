@@ -154,7 +154,7 @@ ___
 
 ###  TrackLayer
 
-**Ƭ TrackLayer**: *[Node](../classes/_leaflet_.trackdrawer.node.md) | [Edge](../classes/_leaflet_.trackdrawer.edge.md)*
+**Ƭ TrackLayer**: *[Node](../classes/_leaflet_.trackdrawer.node.md) \| [Edge](../classes/_leaflet_.trackdrawer.edge.md)*
 
 Layers handled by this plugin
 

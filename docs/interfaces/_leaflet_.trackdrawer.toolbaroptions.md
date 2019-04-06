@@ -94,7 +94,7 @@ ___
 
 ###  mode
 
-**● mode**: *[ToolBarMode](_leaflet_.trackdrawer.toolbarmode.md) | `null`*
+**● mode**: *[ToolBarMode](_leaflet_.trackdrawer.toolbarmode.md) \| `null`*
 
 ___
 
