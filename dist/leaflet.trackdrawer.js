@@ -1504,7 +1504,7 @@ var Track = L.LayerGroup.extend({
       _this8._fireDone({
         routes: routes
       });
-    }).catch(function (e) {
+    })["catch"](function (e) {
       _this8._fireFailed(e);
     });
   },
@@ -1581,7 +1581,7 @@ var Track = L.LayerGroup.extend({
       _this9._fireDone({
         routes: routes
       });
-    }).catch(function (e) {
+    })["catch"](function (e) {
       _this9._fireFailed(e);
     });
   },
@@ -1703,7 +1703,7 @@ var Track = L.LayerGroup.extend({
       _this10._fireDone({
         routes: routes
       });
-    }).catch(function (e) {
+    })["catch"](function (e) {
       _this10._fireFailed(e);
     });
   },
@@ -1784,7 +1784,7 @@ var Track = L.LayerGroup.extend({
       _this11._fireDone({
         routes: routes
       });
-    }).catch(function (e) {
+    })["catch"](function (e) {
       _this11._fireFailed(e);
     });
   },
