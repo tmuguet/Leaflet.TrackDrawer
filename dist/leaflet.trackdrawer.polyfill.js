@@ -1808,6 +1808,7 @@ var Track = L.LayerGroup.extend({
     var _this3 = this;
 
     var exportStopovers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    var exportAsFlat = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var geojson = {
       type: 'FeatureCollection',
       features: []
@@ -1857,21 +1858,42 @@ var Track = L.LayerGroup.extend({
     }
 
     var latlngs = this.getLatLngs();
-    latlngs.forEach(function (l, idx) {
+
+    if (exportAsFlat) {
       var feature = {
         type: 'Feature',
         properties: {
-          index: idx
+          index: 0
         },
         geometry: {
           type: 'LineString',
-          coordinates: l.map(function (e) {
-            return 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat];
-          })
+          coordinates: []
         }
       };
+      latlngs.forEach(function (l) {
+        l.forEach(function (e) {
+          feature.geometry.coordinates.push('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]);
+        });
+      });
       geojson.features.push(feature);
-    });
+    } else {
+      latlngs.forEach(function (l, idx) {
+        var feature = {
+          type: 'Feature',
+          properties: {
+            index: idx
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: l.map(function (e) {
+              return 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat];
+            })
+          }
+        };
+        geojson.features.push(feature);
+      });
+    }
+
     return geojson;
   },
   getState: function getState() {

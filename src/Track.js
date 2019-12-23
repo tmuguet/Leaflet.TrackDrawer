@@ -207,7 +207,7 @@ const Track = L.LayerGroup.extend({
     return latlngs;
   },
 
-  toGeoJSON(exportStopovers = true) {
+  toGeoJSON(exportStopovers = true, exportAsFlat = false) {
     const geojson = {
       type: 'FeatureCollection',
       features: [],
@@ -250,17 +250,34 @@ const Track = L.LayerGroup.extend({
 
     const latlngs = this.getLatLngs();
 
-    latlngs.forEach((l, idx) => {
+    if (exportAsFlat) {
       const feature = {
         type: 'Feature',
-        properties: { index: idx },
+        properties: { index: 0 },
         geometry: {
           type: 'LineString',
-          coordinates: l.map(e => ('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat])),
+          coordinates: [],
         },
       };
+      latlngs.forEach((l) => {
+        l.forEach((e) => {
+          feature.geometry.coordinates.push('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]);
+        });
+      });
       geojson.features.push(feature);
-    });
+    } else {
+      latlngs.forEach((l, idx) => {
+        const feature = {
+          type: 'Feature',
+          properties: { index: idx },
+          geometry: {
+            type: 'LineString',
+            coordinates: l.map(e => ('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat])),
+          },
+        };
+        geojson.features.push(feature);
+      });
+    }
 
     return geojson;
   },
@@ -467,10 +484,10 @@ const Track = L.LayerGroup.extend({
 
         edge.setTooltipContent(
           `id: ${this._getEdgeId(edge)} (on #${this._getEdgeContainerIndex(edge)})<br>`
-            + `previous node: ${startNodeId}`
-            + ` (on #${this._getNodeContainerIndex(this._getNode(startNodeId))})<br>`
-            + `next node: ${endNodeId}`
-            + ` (on #${this._getNodeContainerIndex(this._getNode(endNodeId))})`,
+          + `previous node: ${startNodeId}`
+          + ` (on #${this._getNodeContainerIndex(this._getNode(startNodeId))})<br>`
+          + `next node: ${endNodeId}`
+          + ` (on #${this._getNodeContainerIndex(this._getNode(endNodeId))})`,
         );
       });
       edge.bindTooltip('<>');
@@ -487,10 +504,10 @@ const Track = L.LayerGroup.extend({
 
         node.setTooltipContent(
           `id: ${this._getNodeId(node)} (on #${this._getNodeContainerIndex(node)})<br>`
-            + `previous edge: ${this._getEdgeId(previousEdge)}`
-            + ` (on #${this._getEdgeContainerIndex(previousEdge)}) to ${this._getNodeId(previousNode)}<br>`
-            + `next edge: ${this._getEdgeId(nextEdge)}`
-            + ` (on #${this._getEdgeContainerIndex(nextEdge)}) to ${this._getNodeId(nextNode)}`,
+          + `previous edge: ${this._getEdgeId(previousEdge)}`
+          + ` (on #${this._getEdgeContainerIndex(previousEdge)}) to ${this._getNodeId(previousNode)}<br>`
+          + `next edge: ${this._getEdgeId(nextEdge)}`
+          + ` (on #${this._getEdgeContainerIndex(nextEdge)}) to ${this._getNodeId(nextNode)}`,
         );
       });
       node.bindTooltip('<>');
