@@ -49,6 +49,11 @@ if (L.Control.EasyBar === undefined) {
           e.layer.setStyle({ weight: 3 });
         }
       });
+
+      this._track._toolbar = this;
+      this._track._bindMarkerEvents = (marker) => {
+        this._bindMarkerEvents(marker);
+      };
     },
 
     setMode(m) {

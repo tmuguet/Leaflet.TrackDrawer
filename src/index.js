@@ -6,6 +6,7 @@ const LayerContainer = require('./LayerContainer');
 const { Node, node } = require('./Node');
 const { Edge, edge } = require('./Edge');
 const colors = require('./Colors');
+require('./Loader');
 
 /** @module L.TrackDrawer */
 L.TrackDrawer = {

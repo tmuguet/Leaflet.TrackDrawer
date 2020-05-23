@@ -67,10 +67,15 @@
     "uglify-js": "^3.7.2"
   },
   "dependencies": {
+    "@mapbox/corslite": "0.0.7",
+    "@mapbox/togeojson": "^0.16.0",
     "install": "^0.12.1",
     "leaflet": "^1.6.0",
     "leaflet-easybutton": "^2.4.0",
     "leaflet.awesome-markers": "^2.0.5",
     "npm": "^6.13.4"
+  },
+  "optionalDependencies": {
+    "leaflet-filelayer": "^1.2.0"
   }
 }

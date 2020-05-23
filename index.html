@@ -1,150 +1,168 @@
 <!DOCTYPE html>
 
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, user-scalable=no" />
-    <meta name="author" content="Thomas Muguet" />
 
-    <title>Leaflet.TrackDrawer</title>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <meta name="author" content="Thomas Muguet" />
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.css" />
-    <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css" />
+  <title>Leaflet.TrackDrawer</title>
 
-    <style>
-      .leaflet-bar .easy-button-button.active-active,
-      .leaflet-bar .easy-button-button.active-active:hover {
-        color: #ffffff;
-        background-color: #24b835;
-        border-bottom: 1px solid #999;
-      }
-    </style>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.css" />
+  <link rel="stylesheet" href="node_modules/leaflet-easybutton/src/easy-button.css" />
 
-    <script src="node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="node_modules/leaflet/dist/leaflet.js"></script>
-    <script src="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js"></script>
-    <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
-    <script src="dist/leaflet.trackdrawer.polyfill.js"></script>
-  </head>
+  <style>
+    .leaflet-bar .easy-button-button.active-active,
+    .leaflet-bar .easy-button-button.active-active:hover {
+      color: #ffffff;
+      background-color: #24b835;
+      border-bottom: 1px solid #999;
+    }
+  </style>
 
-  <body>
-    <div id="map" style="position: absolute; top:0px; left: 0px; bottom: 100px; right: 0px;"></div>
-    <div
-      id="console"
-      style="position: absolute; height: 100px; left: 0px; bottom: 0px; right: 0px; overflow: auto;"
-    ></div>
+  <script src="node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="node_modules/leaflet/dist/leaflet.js"></script>
+  <script src="node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js"></script>
+  <script src="node_modules/leaflet-easybutton/src/easy-button.js"></script>
+  <script src="node_modules/@mapbox/togeojson/togeojson.js"></script>
+  <script src="node_modules/leaflet-filelayer/src/leaflet.filelayer.js"></script>
+  <script src="dist/leaflet.trackdrawer.polyfill.js"></script>
+</head>
 
-    <script>
-      window.onload = function() {
-        var map = L.map('map', {
-          center: L.latLng(44.96777356135154, 6.06822967529297),
-          zoom: 13,
-        });
+<body>
+  <div id="map" style="position: absolute; top:0px; left: 0px; bottom: 100px; right: 0px;"></div>
+  <div id="console" style="position: absolute; height: 100px; left: 0px; bottom: 0px; right: 0px; overflow: auto;">
+  </div>
 
-        var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-        var osmAttrib = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
-        var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
-        map.addLayer(osm);
+  <script>
+    window.onload = function () {
+      var map = L.map('map', {
+        center: L.latLng(44.96777356135154, 6.06822967529297),
+        zoom: 13,
+      });
 
-        var importBtn = L.easyButton({
-          states: [
-            {
-              icon: 'fa-map-marker',
-              title: 'Clean and import some markers now',
-              onClick: function(btn, map) {
-                restoreState();
-              },
-            },
-          ],
-        });
-        L.easyBar([importBtn]).addTo(map);
+      var osmUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+      var osmAttrib = 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+      var osm = new L.TileLayer(osmUrl, { attribution: osmAttrib });
+      map.addLayer(osm);
 
-        var drawRoute = L.TrackDrawer.track({
-          debug: true,
-          routingCallback: function(previousMarker, marker, done) {
-            $('#console').prepend(
-              '[' +
-                new Date().toLocaleTimeString() +
-                '] Asked for route between ' +
-                previousMarker.getLatLng() +
-                ' and ' +
-                marker.getLatLng() +
-                '<br>'
-            );
-            setTimeout(function() {
-              done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
-            }, 500);
-          },
-        }).addTo(map);
-        var ctrl = L.TrackDrawer.toolBar(drawRoute).addTo(map);
-
-        drawRoute.on('TrackDrawer:done', function(e) {
-          var state = drawRoute.getState();
-          $('#console').prepend(
-            '[' + new Date().toLocaleTimeString() + '] Track has now ' + state.length + ' segments<br>'
-          );
-        });
-
-        var state = [
+      var createBtn = L.easyButton({
+        states: [
           {
-            version: 1,
-            start: [44.974635142416496, 6.064453125000001],
+            icon: 'fa-map-marker',
+            title: 'Clean and import some markers now',
+            onClick: function (btn, map) {
+              restoreState();
+            },
           },
-          [
-            {
-              end: [44.95301534523602, 6.098098754882813],
-              edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-            },
-          ],
-          [
-            {
-              end: [44.982406561242584, 6.120929718017578],
-              edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-            },
-            {
-              end: [44.98859865651695, 6.075782775878906],
-              edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-            },
-            {
-              end: [44.98119234648246, 6.040935516357423],
-              edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-            },
-          ],
-          [
-            {
-              end: [44.962976039238825, 6.023254394531251],
-              edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-            },
-          ],
-          [
-            {
-              end: [44.94924926661153, 6.041107177734376],
-              edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-            },
-            {
-              end: [44.943660436460185, 6.06548309326172],
-              edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-            },
-            {
-              end: [44.9439034403902, 6.1049652099609375],
-              edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-            },
-          ],
-        ];
+        ],
+      });
+      L.easyBar([createBtn]).addTo(map);
 
-        function restoreState() {
-          drawRoute.restoreState(state, function(latlng) {
-            var marker = L.TrackDrawer.node(latlng);
-            $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Restored ' + latlng + '<br>');
-            ctrl._bindMarkerEvents(marker);
-            return marker;
-          });
-        }
-        restoreState();
-      };
-    </script>
-  </body>
+      var drawRoute = L.TrackDrawer.track({
+        debug: true,
+        routingCallback: function (previousMarker, marker, done) {
+          $('#console').prepend(
+            '[' +
+            new Date().toLocaleTimeString() +
+            '] Asked for route between ' +
+            previousMarker.getLatLng() +
+            ' and ' +
+            marker.getLatLng() +
+            '<br>'
+          );
+          setTimeout(function () {
+            done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+          }, 500);
+        },
+      }).addTo(map);
+      var ctrl = L.TrackDrawer.toolBar(drawRoute, { position: 'topright' }).addTo(map);
+
+      var importBtn = L.easyButton({
+        states: [
+          {
+            icon: 'fa-cloud-upload',
+            title: 'Upload from URL',
+            onClick: function (btn, map) {
+              var url = prompt('URL?', 'https://thomasmuguet.info/2017-07-29-refuge-muzelle-lac-lauvitel/track.gpx');
+              if (url) drawRoute.loadUrl(encodeURI(url), true, 100);
+            },
+          },
+        ],
+      });
+      L.easyBar([importBtn]).addTo(map);
+
+      drawRoute.createFileLoaderControl(true);
+
+      drawRoute.on('TrackDrawer:done', function (e) {
+        var state = drawRoute.getState();
+        $('#console').prepend(
+          '[' + new Date().toLocaleTimeString() + '] Track has now ' + state.length + ' segments<br>'
+        );
+      });
+
+      var state = [
+        {
+          version: 1,
+          start: [44.974635142416496, 6.064453125000001],
+        },
+        [
+          {
+            end: [44.95301534523602, 6.098098754882813],
+            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          },
+        ],
+        [
+          {
+            end: [44.982406561242584, 6.120929718017578],
+            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          },
+          {
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          },
+          {
+            end: [44.98119234648246, 6.040935516357423],
+            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          },
+        ],
+        [
+          {
+            end: [44.962976039238825, 6.023254394531251],
+            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          },
+        ],
+        [
+          {
+            end: [44.94924926661153, 6.041107177734376],
+            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          },
+          {
+            end: [44.943660436460185, 6.06548309326172],
+            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          },
+          {
+            end: [44.9439034403902, 6.1049652099609375],
+            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          },
+        ],
+      ];
+
+      function restoreState() {
+        drawRoute.restoreState(state, function (latlng) {
+          var marker = L.TrackDrawer.node(latlng);
+          $('#console').prepend('[' + new Date().toLocaleTimeString() + '] Restored ' + latlng + '<br>');
+          ctrl._bindMarkerEvents(marker);
+          return marker;
+        });
+      }
+      restoreState();
+    };
+  </script>
+</body>
+
 </html>
