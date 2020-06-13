@@ -584,6 +584,12 @@ const Track = L.LayerGroup.extend({
           reject(err);
           return;
         }
+        
+        let features;
+        if(!Array.isArray(route)) { // we got geojson
+          features = route.features.pop()
+          route = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+        }
 
         if (previousEdge._computation === currentComputation) {
           // Route can give different precision than initial markers
@@ -592,6 +598,7 @@ const Track = L.LayerGroup.extend({
           node.setLatLng(L.latLng(route[route.length - 1]));
           previousEdge.setLatLngs(route);
           previousEdge.setStyle({ dashArray: null });
+          previousEdge.options.properties = features && features.properties;
         }
 
         resolve({ routes: [{ from: previousNode, to: node, previousEdge }] });
@@ -631,11 +638,18 @@ const Track = L.LayerGroup.extend({
           return;
         }
 
+        let features;
+        if(!Array.isArray(route1)) { // we got geojson
+          features = route1.features.pop()
+          route1 = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+        }
+
         if (edge1._computation === currentComputation1) {
           startMarker.setLatLng(L.latLng(route1[0]));
           node.setLatLng(L.latLng(route1[route1.length - 1]));
           edge1.setLatLngs(route1);
           edge1.setStyle({ dashArray: null });
+          edge1.options.properties = features && features.properties;
         }
         resolve({ from: startMarker, to: node, edge: edge1 });
       });
@@ -648,11 +662,18 @@ const Track = L.LayerGroup.extend({
           return;
         }
 
+        let features;
+        if(!Array.isArray(route2)) { // we got geojson
+          features = route2.features.pop()
+          route2 = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+        }
+
         if (edge2._computation === currentComputation2) {
           node.setLatLng(L.latLng(route2[0]));
           endMarker.setLatLng(L.latLng(route2[route2.length - 1]));
           edge2.setLatLngs(route2);
           edge2.setStyle({ dashArray: null });
+          edge2.options.properties = features && features.properties;
         }
         resolve({ from: node, to: endMarker, edge: edge2 });
       });
@@ -714,10 +735,17 @@ const Track = L.LayerGroup.extend({
               return;
             }
 
+            let features;
+            if(!Array.isArray(route)) { // we got geojson
+              features = route.features.pop()
+              route = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+            }
+
             if (previousEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[route.length - 1]));
               previousEdge.setLatLngs(route);
               previousEdge.setStyle({ dashArray: null });
+              previousEdge.options.properties = features && features.properties;
             }
 
             resolve({ from: previousNode, to: marker, edge: previousEdge });
@@ -738,10 +766,17 @@ const Track = L.LayerGroup.extend({
               return;
             }
 
+            let features;
+            if(!Array.isArray(route)) { // we got geojson
+              features = route.features.pop()
+              route = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+            }
+
             if (nextEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[0]));
               nextEdge.setLatLngs(route);
               nextEdge.setStyle({ dashArray: null });
+              nextEdge.options.properties = features && features.properties;
             }
 
             resolve({ from: marker, to: nextNode, edge: nextEdge });
@@ -796,8 +831,15 @@ const Track = L.LayerGroup.extend({
               return;
             }
 
+            let features;
+            if(!Array.isArray(route)) { // we got geojson
+              features = route.features.pop()
+              route = features.geometry.coordinates.map(c => [c[1], c[0], c[2]]);
+            }
+
             if (previousEdge._computation === currentComputation) {
               previousEdge.setLatLngs(route).setStyle({ dashArray: null });
+              previousEdge.options.properties = features && features.properties;
             }
 
             resolve({ from: previousNode, to: nextNode, edge: previousEdge });
