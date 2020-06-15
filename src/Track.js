@@ -335,6 +335,14 @@ const Track = L.LayerGroup.extend({
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:failed', { message: error.message });
   },
 
+  refreshEdges(routingCallback) {
+    this._nodesContainers.forEach((container) => {
+      const markers = container.getLayers();
+      if (markers.length > 0) 
+        markers.map(marker => this.onMoveNode(marker, routingCallback))
+    });
+  },
+
   clean() {
     this._fireStart();
     this._edgesContainers.clean();
