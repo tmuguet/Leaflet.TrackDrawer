@@ -7,6 +7,7 @@ const { Node, node } = require('./Node');
 const { Edge, edge } = require('./Edge');
 const colors = require('./Colors');
 require('./Loader');
+const latlngutils = require('./LatLngUtils');
 
 /** @module L.TrackDrawer */
 L.TrackDrawer = {
@@ -22,6 +23,7 @@ L.TrackDrawer = {
   Edge,
   edge,
   colors,
+  latlngutils,
 };
 
 module.exports = L.TrackDrawer;
