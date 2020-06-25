@@ -17,7 +17,7 @@ describe('Init', () => {
     const track = L.TrackDrawer.track().addTo(map);
     const state = track.getState();
     expect(state).to.be.an('array');
-    expect(state).to.be.deep.equal([{ version: 1, start: undefined }]);
+    expect(state).to.be.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
     expect(track.isUndoable()).to.be.false;
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.equal(0);

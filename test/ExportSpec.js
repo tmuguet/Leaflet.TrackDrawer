@@ -210,8 +210,28 @@ describe('Exporting track', () => {
             coordinates: [
               [6.098098754882813, 44.95301534523602],
               [6.120929718017578, 44.982406561242584],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 1,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.120929718017578, 44.982406561242584],
               [6.075782775878906, 44.98859865651695],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 1,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.075782775878906, 44.98859865651695],
               [6.040935516357423, 44.98119234648246],
             ],
@@ -237,8 +257,28 @@ describe('Exporting track', () => {
             coordinates: [
               [6.023254394531251, 44.962976039238825],
               [6.041107177734376, 44.94924926661153],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 3,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.041107177734376, 44.94924926661153],
               [6.06548309326172, 44.943660436460185],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 3,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.06548309326172, 44.943660436460185],
               [6.1049652099609375, 44.9439034403902],
             ],
@@ -312,7 +352,9 @@ describe('Exporting track', () => {
       features: [
         {
           type: 'Feature',
-          properties: { index: 0 },
+          properties: {
+            index: 0,
+          },
           geometry: {
             type: 'Point',
             coordinates: [6.064453125000001, 44.974635142416496],
@@ -320,7 +362,9 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 1 },
+          properties: {
+            index: 1,
+          },
           geometry: {
             type: 'Point',
             coordinates: [6.098098754882813, 44.95301534523602],
@@ -328,7 +372,9 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 2 },
+          properties: {
+            index: 2,
+          },
           geometry: {
             type: 'Point',
             coordinates: [6.040935516357423, 44.98119234648246],
@@ -336,7 +382,9 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 3 },
+          properties: {
+            index: 3,
+          },
           geometry: {
             type: 'Point',
             coordinates: [6.023254394531251, 44.962976039238825],
@@ -466,8 +514,28 @@ describe('Exporting track', () => {
             coordinates: [
               [6.098098754882813, 44.95301534523602],
               [6.120929718017578, 44.982406561242584],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 1,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.120929718017578, 44.982406561242584],
               [6.075782775878906, 44.98859865651695],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 1,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.075782775878906, 44.98859865651695],
               [6.040935516357423, 44.98119234648246],
             ],
@@ -493,8 +561,28 @@ describe('Exporting track', () => {
             coordinates: [
               [6.023254394531251, 44.962976039238825],
               [6.041107177734376, 44.94924926661153],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 3,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.041107177734376, 44.94924926661153],
               [6.06548309326172, 44.943660436460185],
+            ],
+          },
+        }, {
+          type: 'Feature',
+          properties: {
+            index: 3,
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
               [6.06548309326172, 44.943660436460185],
               [6.1049652099609375, 44.9439034403902],
             ],

@@ -30,7 +30,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.false;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(0);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
 
     await track.redo();
 
@@ -38,7 +38,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
   });
 
   it('undoing and adding two marker', async () => {
@@ -60,7 +60,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
 
     await track.undo();
 
@@ -68,7 +68,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.false;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(0);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
 
     await track.redo();
 
@@ -76,7 +76,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
 
     await track.redo();
 
@@ -128,7 +128,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
 
     await track.addNode(L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906)));
 
@@ -153,7 +153,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.false;
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.equal(0);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
   });
 
   it('redoing with nothing to redo should fail gracefully', async () => {
@@ -171,7 +171,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.false;
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.equal(0);
-    expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
   });
 
   it('adding more actions than undoDepth option should remove first items from stack', async () => {

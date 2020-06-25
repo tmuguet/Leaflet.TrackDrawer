@@ -34,11 +34,12 @@ describe('Markers', () => {
     expect(track._currentStateIndex).to.be.null;
 
     const expectedNewState = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          metadata: { node: {}, edge: {} },
         },
       ],
     ];
@@ -58,7 +59,7 @@ describe('Markers', () => {
     await track.addNode(marker1);
     expect(eventsTriggered).to.be.equal(1);
 
-    const expectedNewState = [{ version: 1, start: [44.974635142416496, 6.064453125000001] }];
+    const expectedNewState = [{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }];
 
     const newState = track.getState();
     expect(newState).to.deep.equal(expectedNewState);
@@ -75,11 +76,12 @@ describe('Markers', () => {
     });
 
     const expectedNewState = [
-      { version: 1, start: [44.974635, 6.06445313] },
+      { version: 2, start: [44.974635, 6.06445313], metadata: {} },
       [
         {
           end: [44.967774, 6.06823],
           edge: [44.974635, 6.06445313, 44.967774, 6.06823],
+          metadata: { node: {}, edge: {} },
         },
       ],
     ];
@@ -102,11 +104,12 @@ describe('Markers', () => {
     await track.addNode(marker2);
 
     const expectedNewState = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          metadata: { node: {}, edge: {} },
         },
       ],
     ];
@@ -141,11 +144,12 @@ describe('Markers', () => {
     await track.addNode(marker2);
 
     const expectedNewState = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          metadata: { node: {}, edge: {} },
         },
       ],
     ];
@@ -180,11 +184,12 @@ describe('Markers', () => {
     expect(track.isRedoable()).to.be.false;
 
     const expectedNewState = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+          metadata: { node: {}, edge: {} },
         },
       ],
     ];
