@@ -294,7 +294,7 @@ const Track = L.LayerGroup.extend({
           break;
         }
 
-        const properties = JSON.parse(JSON.stringify(nextNode.options.metadata));
+        const properties = JSON.parse(JSON.stringify(nextEdge.options.metadata));
         properties.index = idx;
 
         const feature = {

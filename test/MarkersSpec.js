@@ -17,8 +17,11 @@ describe('Markers', () => {
     const track = L.TrackDrawer.track({ undoable: false }).addTo(map);
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-    const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-    const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { type: 'stopover' });
+    const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { marker: 1 } });
+    const marker2 = L.TrackDrawer.node(
+      L.latLng(44.96777356135154, 6.06822967529297),
+      { type: 'stopover', metadata: { marker: 2 } },
+    );
 
     await track.addNode(marker1);
     expect(eventsTriggered).to.be.equal(1);
@@ -26,7 +29,7 @@ describe('Markers', () => {
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.null;
     await track.addNode(marker2, (previousMarker, currentMarker, done) => {
-      done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+      done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { edge: 1 });
     });
     expect(eventsTriggered).to.be.equal(2);
     expect(track.isUndoable()).to.be.false;
@@ -34,12 +37,12 @@ describe('Markers', () => {
     expect(track._currentStateIndex).to.be.null;
 
     const expectedNewState = [
-      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: { marker: 2 }, edge: { edge: 1 } },
         },
       ],
     ];
@@ -94,7 +97,7 @@ describe('Markers', () => {
     const track = L.TrackDrawer.track({
       undoable: false,
       routingCallback: (previousMarker, currentMarker, done) => {
-        done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+        done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { hello: 'world' });
       },
     }).addTo(map);
     const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
@@ -109,7 +112,7 @@ describe('Markers', () => {
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { hello: 'world' } },
         },
       ],
     ];
@@ -137,19 +140,19 @@ describe('Markers', () => {
         },
       },
     }).addTo(map);
-    const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-    const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+    const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { marker: 1 } });
+    const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { metadata: { marker: 2 } });
 
     await track.addNode(marker1);
     await track.addNode(marker2);
 
     const expectedNewState = [
-      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
       [
         {
           end: [44.96777356135154, 6.06822967529297],
           edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: { marker: 2 }, edge: {} },
         },
       ],
     ];

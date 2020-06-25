@@ -20,7 +20,7 @@ describe('Undo/Redo', () => {
       },
     }).addTo(map);
 
-    await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
+    await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { node: 1 } }));
 
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
@@ -38,7 +38,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.false;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { node: 1 } }]);
   });
 
   it('undoing and adding two marker', async () => {
@@ -48,8 +48,8 @@ describe('Undo/Redo', () => {
       },
     }).addTo(map);
 
-    await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-    await track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297)));
+    await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { node: 1 } }));
+    await track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { metadata: { node: 2 } }));
 
     const state = track.getState();
     let eventsTriggered = 0;
@@ -60,7 +60,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { node: 1 } }]);
 
     await track.undo();
 
@@ -76,7 +76,7 @@ describe('Undo/Redo', () => {
     expect(track.isUndoable()).to.be.true;
     expect(track.isRedoable()).to.be.true;
     expect(track._currentStateIndex).to.be.equal(1);
-    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} }]);
+    expect(track.getState()).to.deep.equal([{ version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { node: 1 } }]);
 
     await track.redo();
 

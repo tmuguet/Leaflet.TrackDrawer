@@ -28,9 +28,7 @@ describe('Importing track', () => {
       features: [
         {
           type: 'Feature',
-          properties: {
-            index: 0,
-          },
+          properties: { hello: 'world' },
           geometry: {
             type: 'LineString',
             coordinates: [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]],
@@ -45,7 +43,7 @@ describe('Importing track', () => {
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { hello: 'world' } },
         },
       ],
     ];
@@ -72,6 +70,7 @@ describe('Importing track', () => {
       type: 'FeatureCollection',
       features: [{
         type: 'Feature',
+        properties: { hello: 'world' },
         geometry: {
           type: 'LineString',
           coordinates: [
@@ -89,17 +88,17 @@ describe('Importing track', () => {
         {
           end: [44.909007, 6.054293],
           edge: [44.907764, 6.054379, 44.907771, 6.054381, 44.907795, 6.054222, 44.907795, 6.054222, 44.907871, 6.054269, 44.90801, 6.054326, 44.908486, 6.054444, 44.908534, 6.054434, 44.908611, 6.054409, 44.909007, 6.054293],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { hello: 'world' } },
         },
         {
           end: [44.909174, 6.053013],
           edge: [44.909007, 6.054293, 44.909074, 6.054233, 44.909141, 6.054148, 44.909227, 6.054016, 44.909227, 6.054016, 44.909243, 6.053941, 44.909248, 6.053843, 44.909237, 6.053715, 44.909197, 6.053606, 44.909153, 6.053458, 44.909116, 6.053316, 44.909112, 6.053229, 44.909127, 6.053147, 44.909174, 6.053013],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { hello: 'world' } },
         },
         {
           end: [44.909293, 6.052355],
           edge: [44.909174, 6.053013, 44.909189, 6.052983, 44.909227, 6.052908, 44.909242, 6.052859, 44.909261, 6.052782, 44.909278, 6.052669, 44.909288, 6.052545, 44.909293, 6.052355],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { hello: 'world' } },
         },
       ],
     ];
@@ -161,14 +160,14 @@ describe('Importing track', () => {
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { index: 0 } },
         },
       ],
       [
         {
           end: [44.98119234648246, 6.040935516357423],
           edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578, 44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906, 44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          metadata: { node: {}, edge: {} },
+          metadata: { node: {}, edge: { index: 1 } },
         },
       ],
     ];
@@ -180,7 +179,7 @@ describe('Importing track', () => {
     expect(state).to.deep.equal(expectedState);
   });
 
-  it('Importing a FeatureCollection with Points should ignore them', async () => {
+  it('Importing a FeatureCollection with only Points should ignore them', async () => {
     const track = L.TrackDrawer.track({
       routingCallback(previousMarker, marker, done) {
         throw new Error('Unexpected call');

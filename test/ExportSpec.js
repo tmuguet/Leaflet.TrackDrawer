@@ -105,45 +105,53 @@ describe('Exporting track', () => {
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
     const state = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { hello: 'world' } },
       [
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: { md1: 1 }, edge: { md2: 2 } },
         },
       ],
       [
         {
           end: [44.982406561242584, 6.120929718017578],
           edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          metadata: { node: { md3: 3 }, edge: { md4: 4 } },
         },
         {
           end: [44.98859865651695, 6.075782775878906],
           edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          metadata: { node: { md5: 5 }, edge: { md6: 6 } },
         },
         {
           end: [44.98119234648246, 6.040935516357423],
           edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          metadata: { node: { md7: 7 }, edge: { md7: 7 } },
         },
       ],
       [
         {
           end: [44.962976039238825, 6.023254394531251],
           edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          metadata: { node: { md8: 8 }, edge: { md9: 9 } },
         },
       ],
       [
         {
           end: [44.94924926661153, 6.041107177734376],
           edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          metadata: { node: { md10: 10 }, edge: { md11: 11 } },
         },
         {
           end: [44.943660436460185, 6.06548309326172],
           edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          metadata: { node: { md12: 12 }, edge: { md13: 13 } },
         },
         {
           end: [44.9439034403902, 6.1049652099609375],
           edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          metadata: { node: { md14: 14 }, edge: { md15: 15 } },
         },
       ],
     ];
@@ -152,7 +160,7 @@ describe('Exporting track', () => {
       features: [
         {
           type: 'Feature',
-          properties: { index: 0 },
+          properties: { index: 0, hello: 'world' },
           geometry: {
             type: 'Point',
             coordinates: [6.064453125000001, 44.974635142416496],
@@ -160,7 +168,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 1 },
+          properties: { index: 1, md1: 1 },
           geometry: {
             type: 'Point',
             coordinates: [6.098098754882813, 44.95301534523602],
@@ -168,7 +176,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 2 },
+          properties: { index: 2, md7: 7 },
           geometry: {
             type: 'Point',
             coordinates: [6.040935516357423, 44.98119234648246],
@@ -176,7 +184,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 3 },
+          properties: { index: 3, md8: 8 },
           geometry: {
             type: 'Point',
             coordinates: [6.023254394531251, 44.962976039238825],
@@ -184,7 +192,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 4 },
+          properties: { index: 4, md14: 14 },
           geometry: {
             type: 'Point',
             coordinates: [6.1049652099609375, 44.9439034403902],
@@ -192,9 +200,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 0,
-          },
+          properties: { index: 0, md2: 2 },
           geometry: {
             type: 'LineString',
             coordinates: [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]],
@@ -202,9 +208,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md4: 4 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -214,9 +218,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md6: 6 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -226,9 +228,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md7: 7 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -239,9 +239,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 2,
-          },
+          properties: { index: 2, md9: 9 },
           geometry: {
             type: 'LineString',
             coordinates: [[6.040935516357423, 44.98119234648246], [6.023254394531251, 44.962976039238825]],
@@ -249,9 +247,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md11: 11 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -261,9 +257,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md13: 13 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -273,9 +267,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md15: 15 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -287,7 +279,7 @@ describe('Exporting track', () => {
       ],
     };
 
-    await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+    await track.restoreState(state, (latlng, metadata) => L.TrackDrawer.node(latlng, { metadata }));
     expect(eventsTriggered).to.be.equal(1);
 
     const geojson = track.toGeoJSON(true);
@@ -305,45 +297,53 @@ describe('Exporting track', () => {
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
     const state = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { hello: 'world' } },
       [
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: { md1: 1 }, edge: { md2: 2 } },
         },
       ],
       [
         {
           end: [44.982406561242584, 6.120929718017578],
           edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          metadata: { node: { md3: 3 }, edge: { md4: 4 } },
         },
         {
           end: [44.98859865651695, 6.075782775878906],
           edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          metadata: { node: { md5: 5 }, edge: { md6: 6 } },
         },
         {
           end: [44.98119234648246, 6.040935516357423],
           edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          metadata: { node: { md7: 7 }, edge: { md7: 7 } },
         },
       ],
       [
         {
           end: [44.962976039238825, 6.023254394531251],
           edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          metadata: { node: { md8: 8 }, edge: { md9: 9 } },
         },
       ],
       [
         {
           end: [44.94924926661153, 6.041107177734376],
           edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          metadata: { node: { md10: 10 }, edge: { md11: 11 } },
         },
         {
           end: [44.943660436460185, 6.06548309326172],
           edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          metadata: { node: { md12: 12 }, edge: { md13: 13 } },
         },
         {
           end: [44.9439034403902, 6.1049652099609375],
           edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          metadata: { node: { md14: 14 }, edge: { md15: 15 } },
         },
       ],
     ];
@@ -352,9 +352,7 @@ describe('Exporting track', () => {
       features: [
         {
           type: 'Feature',
-          properties: {
-            index: 0,
-          },
+          properties: { index: 0, hello: 'world' },
           geometry: {
             type: 'Point',
             coordinates: [6.064453125000001, 44.974635142416496],
@@ -362,9 +360,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md1: 1 },
           geometry: {
             type: 'Point',
             coordinates: [6.098098754882813, 44.95301534523602],
@@ -372,9 +368,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 2,
-          },
+          properties: { index: 2, md7: 7 },
           geometry: {
             type: 'Point',
             coordinates: [6.040935516357423, 44.98119234648246],
@@ -382,9 +376,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md8: 8 },
           geometry: {
             type: 'Point',
             coordinates: [6.023254394531251, 44.962976039238825],
@@ -392,7 +384,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: { index: 4 },
+          properties: { index: 4, md14: 14 },
           geometry: {
             type: 'Point',
             coordinates: [6.1049652099609375, 44.9439034403902],
@@ -431,7 +423,7 @@ describe('Exporting track', () => {
       ],
     };
 
-    await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+    await track.restoreState(state);
     expect(eventsTriggered).to.be.equal(1);
 
     const geojson = track.toGeoJSON(true, true);
@@ -449,45 +441,53 @@ describe('Exporting track', () => {
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
     const state = [
-      { version: 1, start: [44.974635142416496, 6.064453125000001] },
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { hello: 'world' } },
       [
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: { md1: 1 }, edge: { md2: 2 } },
         },
       ],
       [
         {
           end: [44.982406561242584, 6.120929718017578],
           edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+          metadata: { node: { md3: 3 }, edge: { md4: 4 } },
         },
         {
           end: [44.98859865651695, 6.075782775878906],
           edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+          metadata: { node: { md5: 5 }, edge: { md6: 6 } },
         },
         {
           end: [44.98119234648246, 6.040935516357423],
           edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+          metadata: { node: { md7: 7 }, edge: { md7: 7 } },
         },
       ],
       [
         {
           end: [44.962976039238825, 6.023254394531251],
           edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+          metadata: { node: { md8: 8 }, edge: { md9: 9 } },
         },
       ],
       [
         {
           end: [44.94924926661153, 6.041107177734376],
           edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+          metadata: { node: { md10: 10 }, edge: { md11: 11 } },
         },
         {
           end: [44.943660436460185, 6.06548309326172],
           edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+          metadata: { node: { md12: 12 }, edge: { md13: 13 } },
         },
         {
           end: [44.9439034403902, 6.1049652099609375],
           edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+          metadata: { node: { md14: 14 }, edge: { md15: 15 } },
         },
       ],
     ];
@@ -496,9 +496,7 @@ describe('Exporting track', () => {
       features: [
         {
           type: 'Feature',
-          properties: {
-            index: 0,
-          },
+          properties: { index: 0, md2: 2 },
           geometry: {
             type: 'LineString',
             coordinates: [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]],
@@ -506,9 +504,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md4: 4 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -518,9 +514,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md6: 6 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -530,9 +524,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 1,
-          },
+          properties: { index: 1, md7: 7 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -543,9 +535,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 2,
-          },
+          properties: { index: 2, md9: 9 },
           geometry: {
             type: 'LineString',
             coordinates: [[6.040935516357423, 44.98119234648246], [6.023254394531251, 44.962976039238825]],
@@ -553,9 +543,7 @@ describe('Exporting track', () => {
         },
         {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md11: 11 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -565,9 +553,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md13: 13 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -577,9 +563,7 @@ describe('Exporting track', () => {
           },
         }, {
           type: 'Feature',
-          properties: {
-            index: 3,
-          },
+          properties: { index: 3, md15: 15 },
           geometry: {
             type: 'LineString',
             coordinates: [
@@ -591,7 +575,7 @@ describe('Exporting track', () => {
       ],
     };
 
-    await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+    await track.restoreState(state);
     expect(eventsTriggered).to.be.equal(1);
 
     const geojson = track.toGeoJSON(false);

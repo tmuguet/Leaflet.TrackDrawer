@@ -48,7 +48,7 @@ function featureGroupToPolylines(featureGroup) {
 }
 
 function featureGroupToLatLngs(featureGroup) {
-  return featureGroupToPolylines(featureGroup).map(layer => layer.getLatLngs());
+  return featureGroupToPolylines(featureGroup).map(layer => [layer.getLatLngs(), layer.feature.properties]);
 }
 
 module.exports = {
