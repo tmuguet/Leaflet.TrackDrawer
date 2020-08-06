@@ -12,7 +12,7 @@ var track = L.TrackDrawer.track({
   routingCallback: function(markerStart, markerEnd, done) {
     // Do stuff
     var latlngs = [markerStart.getLatLng(), markerEnd.getLatLng()];
-    done(null, latlngs);
+    done(null, latlngs, {my: 'metadata'});
   },
 }).addTo(map);
 
@@ -92,6 +92,10 @@ var track = L.TrackDrawer.track({
        * Type of the node, default value is `waypoint`
        */
       type?: NodeType;
+      /**
+       * Metadatas
+       */
+      metadata?: Object;
     }
 
     /**
@@ -120,6 +124,13 @@ var track = L.TrackDrawer.track({
 
     function node(latlng: LatLngExpression, options?: NodeOptions): Node;
 
+    interface EdgeOptions extends PolylineOptions {
+      /**
+       * Metadatas
+       */
+      metadata?: Object;
+    }
+
     /**
      * Path in the track
      */
@@ -130,7 +141,7 @@ var track = L.TrackDrawer.track({
        * @param latlngs Array of geographical point
        * @param options Options
        */
-      private constructor(latlngs: LatLngExpression[], options?: PolylineOptions);
+      private constructor(latlngs: LatLngExpression[], options?: EdgeOptions);
     }
 
     function edge(latlngs: LatLngExpression[], options?: PolylineOptions): Edge;
@@ -187,19 +198,19 @@ var track = L.TrackDrawer.track({
 
     /**
      * Function to implement to compute the route between two markers.
-     * Once computation is done, must call `done(null, <result>)` if successful, or `done(<error>)` if failure.
+     * Once computation is done, must call `done(null, <result>, <object>)` if successful, or `done(<error>)` if failure.
      *
      * Example:
      * ```javascript
 function(previousMarker, marker, done) {
-  done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+  done(null, [previousMarker.getLatLng(), marker.getLatLng()], {hello: 'world'});
 }
      * ```
      */
     type RoutingCallback = (
       previousMarker: Node,
       marker: Node,
-      done: (err: null | Routing.IError, result: LatLng[]) => void,
+      done: (err: null | Routing.IError, result: LatLng[], metadata?: Object) => void,
     ) => void;
     /**
      * Function that can be implemented to create a custom node.
@@ -209,7 +220,7 @@ function(previousMarker, marker, done) {
      * Example:
      * ```javascript
 function(latlng) {
-  var marker = L.TrackDrawer.node(latlng);
+  var marker = L.TrackDrawer.node(latlng, { metadata: { hello: 'world' } });
   ctrl._bindMarkerEvents(marker);
   return marker;
 }
@@ -279,8 +290,12 @@ function(latlng) {
       /**
        * Returns a GeoJSON representation of the track.
        * @param exportStopovers `true` to also export stop-over markers (default), `false` to ignore them
+       * @param exportAsFlat `true` to export as one unique Feature, `false` to export as-is (default)
        */
-      toGeoJSON(exportStopovers: boolean): geojson.FeatureCollection<geojson.GeometryObject, any>;
+      toGeoJSON(
+        exportStopovers: boolean,
+        exportAsFlat: boolean,
+      ): geojson.FeatureCollection<geojson.GeometryObject, any>;
 
       /** Gets the serializable state of the track. */
       getState(): State;
