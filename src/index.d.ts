@@ -300,6 +300,12 @@ function(latlng) {
       /** Gets the serializable state of the track. */
       getState(): State;
 
+      /**
+       * Refreshes all routes in the track
+       * @param routingCallback
+       */
+      refreshEdges(routingCallback?: RoutingCallback): Promise<Track>;
+
       /** Removes everything from the track. */
       clean(): this;
 

@@ -398,6 +398,28 @@ const Track = L.LayerGroup.extend({
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:failed', { message: error.message });
   },
 
+  async refreshEdges(routingCallback) {
+    const callback = routingCallback || this.options.routingCallback;
+
+    this._fireStart();
+    const oldValue = this._fireEvents;
+    this._fireEvents = false;
+
+    const promises = [];
+    this._nodesContainers.forEach((container) => {
+      const markers = container.getLayers();
+      markers.forEach((marker) => {
+        promises.push(this.onMoveNode(marker, callback));
+      });
+    });
+
+    await Promise.all(promises);
+
+    this._fireEvents = oldValue;
+    this._fireDone();
+    return this;
+  },
+
   clean() {
     this._fireStart();
     this._edgesContainers.clean();

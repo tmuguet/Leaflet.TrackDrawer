@@ -98,6 +98,19 @@
 
       drawRoute.createFileLoaderControl(true);
 
+      var refreshBtn = L.easyButton({
+        states: [
+          {
+            icon: 'fa-refresh',
+            title: 'Refresh',
+            onClick: function (btn, map) {
+              drawRoute.refreshEdges();
+            },
+          },
+        ],
+      });
+      L.easyBar([refreshBtn]).addTo(map);
+
       drawRoute.on('TrackDrawer:done', function (e) {
         var state = drawRoute.getState();
         $('#console').prepend(
