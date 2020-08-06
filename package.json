@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trackdrawer",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Enables drawing tracks using custom routing",
   "main": "dist/leaflet.trackdrawer.min.js",
   "types": "src/index.d.ts",
