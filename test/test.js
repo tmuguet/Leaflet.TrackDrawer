@@ -17,5 +17,5 @@ L.Map.include({
 
 $('body').append('<div id="map" style="width: 100%; height: 300px;"></div>');
 
-const assert = chai.assert;
-const expect = chai.expect;
+/* eslint-disable */
+const { assert, expect } = chai;

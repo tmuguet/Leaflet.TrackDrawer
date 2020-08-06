@@ -18,6 +18,8 @@ module.exports = function (config) {
       'node_modules/leaflet/dist/leaflet.js',
       'node_modules/leaflet-easybutton/src/easy-button.js',
       'node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js',
+      'node_modules/@mapbox/togeojson/togeojson.js',
+      'node_modules/leaflet-filelayer/src/leaflet.filelayer.js',
       'node_modules/@babel/polyfill/dist/polyfill.min.js',
       'dist/leaflet.trackdrawer.js',
       'test/*.js',

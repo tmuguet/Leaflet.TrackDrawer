@@ -1,4 +1,4 @@
-describe('Main', () => {
+describe('State', () => {
   let map;
 
   beforeEach(() => {
@@ -13,205 +13,8 @@ describe('Main', () => {
     await map.removeAsPromise();
   });
 
-  describe('Initialization', () => {
-    it('constructor should correctly initialize structures', () => {
-      const track = L.TrackDrawer.track().addTo(map);
-      const state = track.getState();
-      expect(state).to.be.an('array');
-      expect(state).to.be.deep.equal([{ version: 1, start: undefined }]);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(0);
-
-      const track2 = L.TrackDrawer.track({ undoable: false }).addTo(map);
-      expect(track2.isUndoable()).to.be.false;
-      expect(track2.isRedoable()).to.be.false;
-      expect(track2._currentStateIndex).to.be.null;
-    });
-
-    it('adding marker', async () => {
-      const track = L.TrackDrawer.track({ undoable: false }).addTo(map);
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { type: 'stopover' });
-
-      await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.null;
-      await track.addNode(marker2, (previousMarker, currentMarker, done) => {
-        done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-      });
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.null;
-
-      const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.96777356135154, 6.06822967529297],
-            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          },
-        ],
-      ];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-
-    it('adding twice same marker should have no effect', async () => {
-      const track = L.TrackDrawer.track({ undoable: false }).addTo(map);
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-
-      await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(1);
-      await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(1);
-
-      const expectedNewState = [{ version: 1, start: [44.974635142416496, 6.064453125000001] }];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-
-    it('adding marker with loss of precision in route', async () => {
-      const track = L.TrackDrawer.track({ undoable: false }).addTo(map);
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
-
-      await track.addNode(marker1);
-      await track.addNode(marker2, (previousMarker, currentMarker, done) => {
-        done(null, [L.latLng(44.974635, 6.06445313), L.latLng(44.967774, 6.06823)]);
-      });
-
-      const expectedNewState = [
-        { version: 1, start: [44.974635, 6.06445313] },
-        [
-          {
-            end: [44.967774, 6.06823],
-            edge: [44.974635, 6.06445313, 44.967774, 6.06823],
-          },
-        ],
-      ];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-
-    it('adding marker via routingCallback option', async () => {
-      const track = L.TrackDrawer.track({
-        undoable: false,
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
-
-      await track.addNode(marker1);
-      await track.addNode(marker2);
-
-      const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.96777356135154, 6.06822967529297],
-            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          },
-        ],
-      ];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-
-    it('adding marker via router option', async () => {
-      const hasRouting = L.Routing !== undefined;
-
-      if (!hasRouting) {
-        L.Routing = {
-          waypoint(latlng) {
-            return { latLng: latlng };
-          },
-        };
-      }
-      const track = L.TrackDrawer.track({
-        undoable: false,
-        router: {
-          route(waypoints, done) {
-            const res = [{ coordinates: [waypoints[0].latLng, waypoints[1].latLng] }];
-            done(null, res);
-          },
-        },
-      }).addTo(map);
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
-
-      await track.addNode(marker1);
-      await track.addNode(marker2);
-
-      const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.96777356135154, 6.06822967529297],
-            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          },
-        ],
-      ];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-
-      if (!hasRouting) {
-        delete L.Routing;
-      }
-    });
-
-    it('failure to add a marker should fail gracefully', async () => {
-      const track = L.TrackDrawer.track().addTo(map);
-      let eventsTriggered = 0;
-      let eventsFailureTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      track.on('TrackDrawer:failed', () => (eventsFailureTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { type: 'stopover' });
-
-      await track.addNode(marker1);
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-      await track.addNode(marker2, (previousMarker, currentMarker, done) => {
-        done(new Error('error'), null);
-      });
-      expect(eventsTriggered).to.be.equal(1);
-      expect(eventsFailureTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-
-      const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.96777356135154, 6.06822967529297],
-            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          },
-        ],
-      ];
-
-      const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-  });
-
-  describe('Restoring state', () => {
-    it('getting restored state should give back same state', async () => {
+  describe('Legacy state', () => {
+    it('Restoring version1 should work', async () => {
       const track = L.TrackDrawer.track({
         routingCallback(previousMarker, marker, done) {
           throw new Error('Unexpected call');
@@ -275,6 +78,82 @@ describe('Main', () => {
       expect(track._edgesContainers).to.have.lengthOf(4);
       expect(track._nodesContainers.get(-1)).to.equal(track._nodesContainers.get(3));
       expect(track._edgesContainers.get(-1)).to.equal(track._edgesContainers.get(3));
+    });
+  });
+
+  describe('Restoring state', () => {
+    it('getting restored state should give back same state', async () => {
+      const track = L.TrackDrawer.track({
+        routingCallback(previousMarker, marker, done) {
+          throw new Error('Unexpected call');
+        },
+      }).addTo(map);
+
+      let eventsTriggered = 0;
+      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+      const state = [
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { hello: 'world' } },
+        [
+          {
+            end: [44.95301534523602, 6.098098754882813],
+            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { md1: 1 }, edge: { md2: 2 } },
+          },
+        ],
+        [
+          {
+            end: [44.982406561242584, 6.120929718017578],
+            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { md3: 3 }, edge: { md4: 4 } },
+          },
+          {
+            end: [44.98859865651695, 6.075782775878906],
+            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { md5: 5 }, edge: { md6: 6 } },
+          },
+          {
+            end: [44.98119234648246, 6.040935516357423],
+            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { md7: 7 }, edge: { md7: 7 } },
+          },
+        ],
+        [
+          {
+            end: [44.962976039238825, 6.023254394531251],
+            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { md8: 8 }, edge: { md9: 9 } },
+          },
+        ],
+        [
+          {
+            end: [44.94924926661153, 6.041107177734376],
+            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { md10: 10 }, edge: { md11: 11 } },
+          },
+          {
+            end: [44.943660436460185, 6.06548309326172],
+            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { md12: 12 }, edge: { md13: 13 } },
+          },
+          {
+            end: [44.9439034403902, 6.1049652099609375],
+            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { md14: 14 }, edge: { md15: 15 } },
+          },
+        ],
+      ];
+
+      await track.restoreState(state);
+      expect(eventsTriggered).to.be.equal(1);
+      expect(track.isUndoable()).to.be.true;
+      expect(track.isRedoable()).to.be.false;
+      expect(track._currentStateIndex).to.be.equal(1);
+
+      expect(track._nodesContainers).to.have.lengthOf(4);
+      expect(track._edgesContainers).to.have.lengthOf(4);
+      expect(track._nodesContainers.get(-1)).to.equal(track._nodesContainers.get(3));
+      expect(track._edgesContainers.get(-1)).to.equal(track._edgesContainers.get(3));
 
       const newState = track.getState();
       expect(newState).to.deep.equal(state);
@@ -290,7 +169,7 @@ describe('Main', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-      await track.restoreState([{ version: 1, start: undefined }]);
+      await track.restoreState([{ version: 2, start: undefined, metadata: undefined }]);
       expect(eventsTriggered).to.be.equal(1);
       expect(track.isUndoable()).to.be.true;
       expect(track.isRedoable()).to.be.false;
@@ -300,7 +179,7 @@ describe('Main', () => {
       expect(track._edgesContainers).to.have.lengthOf(1);
 
       const newState = track.getState();
-      expect(newState).to.deep.equal([{ version: 1, start: undefined }]);
+      expect(newState).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
     });
   });
 
@@ -375,7 +254,7 @@ describe('Main', () => {
 
       const newState = track.getState();
       expect(newState).to.be.an('array');
-      expect(newState).to.deep.equal([{ version: 1, start: undefined }]);
+      expect(newState).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
     });
   });
 
@@ -388,90 +267,106 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -504,52 +399,60 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         if (markers.length === 0) marker.setType('stopover');
         markers.push(marker);
         return marker;
@@ -576,104 +479,120 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
         ],
         [
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
         ],
         [
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
         ],
         [
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
         ],
         [
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -701,105 +620,122 @@ describe('Main', () => {
     it('inserting a marker should alter state', async () => {
       const track = L.TrackDrawer.track({
         routingCallback(previousMarker, marker, done) {
-          done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+          done(null, [previousMarker.getLatLng(), marker.getLatLng()], { line: 'new' });
         },
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.96274246792451, 6.073146737835567],
             edge: [44.974635142416496, 6.064453125000001, 44.96274246792451, 6.073146737835567],
+            metadata: { node: { hello: 'world' }, edge: { line: 'new' } },
           },
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.96274246792451, 6.073146737835567, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 'new' } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -807,7 +743,7 @@ describe('Main', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-      const marker = L.TrackDrawer.node(L.latLng(44.96274246792451, 6.073146737835567));
+      const marker = L.TrackDrawer.node(L.latLng(44.96274246792451, 6.073146737835567), { metadata: { hello: 'world' } });
       const route = track
         .getStepsContainer()
         .get(0)
@@ -831,100 +767,117 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.96274246792451, 6.073146737835567],
             edge: [44.974635142416496, 6.064453125000001, 44.96274246792451, 6.073146737835567],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.96274246792451, 6.073146737835567, 44.95301534523602, 6.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -955,101 +908,117 @@ describe('Main', () => {
     it('moving markers should alter state', async () => {
       const track = L.TrackDrawer.track({
         routingCallback(previousMarker, marker, done) {
-          done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+          done(null, [previousMarker.getLatLng(), marker.getLatLng()], { line: 'new' });
         },
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 3 } },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 4 } },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 5 } },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 6 } },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 7 } },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 8 } },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [45.974635142416496, 5.064453125000001] },
+        { version: 2, start: [45.974635142416496, 5.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [45.95301534523602, 5.098098754882813],
             edge: [45.974635142416496, 5.064453125000001, 45.95301534523602, 5.098098754882813],
+            metadata: { node: { marker: 2 }, edge: { line: 'new' } },
           },
         ],
         [
           {
             end: [45.982406561242584, 5.120929718017578],
             edge: [45.95301534523602, 5.098098754882813, 45.982406561242584, 5.120929718017578],
+            metadata: { node: { marker: 3 }, edge: { line: 'new' } },
           },
           {
             end: [45.98859865651695, 5.075782775878906],
             edge: [45.982406561242584, 5.120929718017578, 45.98859865651695, 5.075782775878906],
+            metadata: { node: { marker: 4 }, edge: { line: 'new' } },
           },
           {
             end: [45.98119234648246, 5.040935516357423],
             edge: [45.98859865651695, 5.075782775878906, 45.98119234648246, 5.040935516357423],
+            metadata: { node: { marker: 5 }, edge: { line: 'new' } },
           },
         ],
         [
           {
             end: [45.962976039238825, 5.023254394531251],
             edge: [45.98119234648246, 5.040935516357423, 45.962976039238825, 5.023254394531251],
+            metadata: { node: { marker: 6 }, edge: { line: 'new' } },
           },
         ],
         [
           {
             end: [45.94924926661153, 5.041107177734376],
             edge: [45.962976039238825, 5.023254394531251, 45.94924926661153, 5.041107177734376],
+            metadata: { node: { marker: 7 }, edge: { line: 'new' } },
           },
           {
             end: [45.943660436460185, 5.06548309326172],
             edge: [45.94924926661153, 5.041107177734376, 45.943660436460185, 5.06548309326172],
+            metadata: { node: { marker: 8 }, edge: { line: 'new' } },
           },
           {
             end: [45.9439034403902, 5.1049652099609375],
             edge: [45.943660436460185, 5.06548309326172, 45.9439034403902, 5.1049652099609375],
+            metadata: { node: { marker: 9 }, edge: { line: 'new' } },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -1093,96 +1062,112 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const expectedNewState = [
-        { version: 1, start: [45.974635142416496, 5.064453125000001] },
+        { version: 2, start: [45.974635142416496, 5.064453125000001], metadata: {} },
         [
           {
             end: [45.95301534523602, 5.098098754882813],
             edge: [45.974635142416496, 5.064453125000001, 45.95301534523602, 5.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [45.982406561242584, 5.120929718017578],
             edge: [45.95301534523602, 5.098098754882813, 45.982406561242584, 5.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [45.98859865651695, 5.075782775878906],
             edge: [45.982406561242584, 5.120929718017578, 45.98859865651695, 5.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [45.98119234648246, 5.040935516357423],
             edge: [45.98859865651695, 5.075782775878906, 45.98119234648246, 5.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [45.962976039238825, 5.023254394531251],
             edge: [45.98119234648246, 5.040935516357423, 45.962976039238825, 5.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [45.94924926661153, 5.041107177734376],
             edge: [45.962976039238825, 5.023254394531251, 45.94924926661153, 5.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [45.943660436460185, 5.06548309326172],
             edge: [45.94924926661153, 5.041107177734376, 45.943660436460185, 5.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [45.9439034403902, 5.1049652099609375],
             edge: [45.943660436460185, 5.06548309326172, 45.9439034403902, 5.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -1216,52 +1201,60 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -1297,7 +1290,7 @@ describe('Main', () => {
 
       const newState = track.getState();
       expect(newState).to.be.an('array');
-      expect(newState).to.deep.equal([{ version: 1, start: undefined }]);
+      expect(newState).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
     });
 
     it('failure to delete marker should fail gracefully', async () => {
@@ -1308,52 +1301,60 @@ describe('Main', () => {
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.95301534523602, 6.098098754882813],
             edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.982406561242584, 6.120929718017578],
             edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98119234648246, 6.040935516357423],
             edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.962976039238825, 6.023254394531251],
             edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.94924926661153, 6.041107177734376],
             edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.943660436460185, 6.06548309326172],
             edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.9439034403902, 6.1049652099609375],
             edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
 
       const markers = [];
-      await track.restoreState(state, (latlng) => {
-        const marker = L.TrackDrawer.node(latlng);
+      await track.restoreState(state, (latlng, metadata) => {
+        const marker = L.TrackDrawer.node(latlng, { metadata });
         markers.push(marker);
         return marker;
       });
@@ -1392,7 +1393,7 @@ describe('Main', () => {
 
       const newState = track.getState();
       expect(newState).to.be.an('array');
-      expect(newState).to.deep.equal([{ version: 1, start: undefined }]);
+      expect(newState).to.deep.equal([{ version: 2, start: undefined, metadata: undefined }]);
     });
   });
 
@@ -1401,15 +1402,15 @@ describe('Main', () => {
       const track = L.TrackDrawer.track({
         routingCallback: (previousMarker, currentMarker, done) => {
           setTimeout(() => {
-            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { line: 'new' });
           }, Math.random() * 200);
         },
       }).addTo(map);
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
-      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { marker: 1 } });
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { metadata: { marker: 2 } });
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906), { metadata: { marker: 3 } });
 
       const promise1 = track.addNode(marker1);
       const promise2 = track.addNode(marker2);
@@ -1422,15 +1423,17 @@ describe('Main', () => {
       expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.96777356135154, 6.06822967529297],
             edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+            metadata: { node: { marker: 2 }, edge: { line: 'new' } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 3 }, edge: { line: 'new' } },
           },
         ],
       ];
@@ -1443,14 +1446,14 @@ describe('Main', () => {
       const track = L.TrackDrawer.track({
         routingCallback: (previousMarker, currentMarker, done) => {
           setTimeout(() => {
-            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { line: 'new' });
           }, Math.random() * 200);
         },
       }).addTo(map);
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { marker: 1 } });
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { metadata: { marker: 2 } });
 
       const promise1 = track.addNode(marker1);
       const promise2 = track.addNode(marker2);
@@ -1464,11 +1467,12 @@ describe('Main', () => {
       expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.974635142416496, 6.064453125000001, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 2 }, edge: { line: 'new' } },
           },
         ],
       ];
@@ -1481,15 +1485,15 @@ describe('Main', () => {
       const track = L.TrackDrawer.track({
         routingCallback: (previousMarker, currentMarker, done) => {
           setTimeout(() => {
-            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { line: 'new' });
           }, Math.random() * 200);
         },
       }).addTo(map);
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001));
-      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297));
-      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906));
+      const marker1 = L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001), { metadata: { marker: 1 } });
+      const marker2 = L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297), { metadata: { marker: 2 } });
+      const marker3 = L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906), { metadata: { marker: 3 } });
 
       const promise1 = track.addNode(marker1);
       const promise2 = track.addNode(marker2);
@@ -1503,11 +1507,12 @@ describe('Main', () => {
       expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.974635142416496, 6.064453125000001, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 3 }, edge: { line: 'new' } },
           },
         ],
       ];
@@ -1542,17 +1547,19 @@ describe('Main', () => {
       expect(track._currentStateIndex).to.be.equal(1);
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.96777356135154, 6.06822967529297],
             edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+            metadata: { node: {}, edge: {} },
           },
         ],
         [
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
@@ -1591,15 +1598,17 @@ describe('Main', () => {
       expect(track._currentStateIndex).to.be.equal(4);
 
       const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
         [
           {
             end: [44.96777356135154, 6.06822967529297],
             edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+            metadata: { node: {}, edge: {} },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+            metadata: { node: {}, edge: {} },
           },
         ],
       ];
@@ -1612,21 +1621,23 @@ describe('Main', () => {
       const track = L.TrackDrawer.track({
         routingCallback: (previousMarker, currentMarker, done) => {
           setTimeout(() => {
-            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
+            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()], { line: 'new' });
           }, Math.random() * 200);
         },
       }).addTo(map);
 
       const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
+        { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: { marker: 1 } },
         [
           {
             end: [44.96777356135154, 6.06822967529297],
             edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
+            metadata: { node: { marker: 2 }, edge: { line: 1 } },
           },
           {
             end: [44.98859865651695, 6.075782775878906],
             edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
+            metadata: { node: { marker: 3 }, edge: { line: 2 } },
           },
         ],
       ];
@@ -1634,8 +1645,8 @@ describe('Main', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-      const promise1 = track.addNode(L.TrackDrawer.node(L.latLng(44.977, 6.0667)));
-      const promise2 = track.addNode(L.TrackDrawer.node(L.latLng(44.978, 6.0668)));
+      const promise1 = track.addNode(L.TrackDrawer.node(L.latLng(44.977, 6.0667), { metadata: { marker: 'new' } }));
+      const promise2 = track.addNode(L.TrackDrawer.node(L.latLng(44.978, 6.0668), { metadata: { marker: 'new2' } }));
       const promise3 = track.restoreState(state);
 
       await Promise.all([promise1, promise2, promise3]);
@@ -1644,821 +1655,8 @@ describe('Main', () => {
       expect(track.isRedoable()).to.be.false;
       expect(track._currentStateIndex).to.be.equal(1);
 
-      const expectedNewState = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.96777356135154, 6.06822967529297],
-            edge: [44.974635142416496, 6.064453125000001, 44.96777356135154, 6.06822967529297],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.96777356135154, 6.06822967529297, 44.98859865651695, 6.075782775878906],
-          },
-        ],
-      ];
-
       const newState = track.getState();
-      expect(newState).to.deep.equal(expectedNewState);
-    });
-  });
-
-  describe('Bounds', () => {
-    it('getBounds() should contain all nodes and edges', async () => {
-      // TODO: really test edges
-      const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
-          throw new Error('Unexpected call');
-        },
-      }).addTo(map);
-
-      const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.95301534523602, 6.098098754882813],
-            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          },
-        ],
-        [
-          {
-            end: [44.982406561242584, 6.120929718017578],
-            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-          },
-          {
-            end: [44.98119234648246, 6.040935516357423],
-            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          },
-        ],
-        [
-          {
-            end: [44.962976039238825, 6.023254394531251],
-            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-          },
-        ],
-        [
-          {
-            end: [44.94924926661153, 6.041107177734376],
-            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-          },
-          {
-            end: [44.943660436460185, 6.06548309326172],
-            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-          },
-          {
-            end: [44.9439034403902, 6.1049652099609375],
-            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-          },
-        ],
-      ];
-
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
-
-      const bounds = track.getBounds();
-      state.forEach((group, idx) => {
-        if (idx === 0) {
-          const start = L.latLng(group.start);
-          expect(bounds.contains(start)).to.be.true;
-        } else {
-          group.forEach((step) => {
-            const end = L.latLng(step.end);
-            expect(bounds.contains(end)).to.be.true;
-          });
-        }
-      });
-    });
-
-    // TODO: test getBounds() with empty track
-    // TODO: test getBounds() with 1 marker
-  });
-
-  describe('Exporting track', () => {
-    it('getLatLngs() should return an array of LatLngs for each step', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
-          throw new Error('Unexpected call');
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.95301534523602, 6.098098754882813],
-            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          },
-        ],
-        [
-          {
-            end: [44.982406561242584, 6.120929718017578],
-            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-          },
-          {
-            end: [44.98119234648246, 6.040935516357423],
-            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          },
-        ],
-        [
-          {
-            end: [44.962976039238825, 6.023254394531251],
-            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-          },
-        ],
-        [
-          {
-            end: [44.94924926661153, 6.041107177734376],
-            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-          },
-          {
-            end: [44.943660436460185, 6.06548309326172],
-            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-          },
-          {
-            end: [44.9439034403902, 6.1049652099609375],
-            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-          },
-        ],
-      ];
-      const expectedLatLngs = [
-        [{ lat: 44.974635142416496, lng: 6.064453125000001 }, { lat: 44.95301534523602, lng: 6.098098754882813 }],
-        [
-          { lat: 44.95301534523602, lng: 6.098098754882813 },
-          { lat: 44.982406561242584, lng: 6.120929718017578 },
-          { lat: 44.982406561242584, lng: 6.120929718017578 },
-          { lat: 44.98859865651695, lng: 6.075782775878906 },
-          { lat: 44.98859865651695, lng: 6.075782775878906 },
-          { lat: 44.98119234648246, lng: 6.040935516357423 },
-        ],
-        [{ lat: 44.98119234648246, lng: 6.040935516357423 }, { lat: 44.962976039238825, lng: 6.023254394531251 }],
-        [
-          { lat: 44.962976039238825, lng: 6.023254394531251 },
-          { lat: 44.94924926661153, lng: 6.041107177734376 },
-          { lat: 44.94924926661153, lng: 6.041107177734376 },
-          { lat: 44.943660436460185, lng: 6.06548309326172 },
-          { lat: 44.943660436460185, lng: 6.06548309326172 },
-          { lat: 44.9439034403902, lng: 6.1049652099609375 },
-        ],
-      ];
-
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
-      expect(eventsTriggered).to.be.equal(1);
-
-      const latlngs = track.getLatLngs();
-      expect(latlngs).to.deep.equal(expectedLatLngs);
-    });
-
-    it('toGeoJSON() should return a structure with a Feature/LineString for each step', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
-          throw new Error('Unexpected call');
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.95301534523602, 6.098098754882813],
-            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          },
-        ],
-        [
-          {
-            end: [44.982406561242584, 6.120929718017578],
-            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-          },
-          {
-            end: [44.98119234648246, 6.040935516357423],
-            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          },
-        ],
-        [
-          {
-            end: [44.962976039238825, 6.023254394531251],
-            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-          },
-        ],
-        [
-          {
-            end: [44.94924926661153, 6.041107177734376],
-            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-          },
-          {
-            end: [44.943660436460185, 6.06548309326172],
-            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-          },
-          {
-            end: [44.9439034403902, 6.1049652099609375],
-            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-          },
-        ],
-      ];
-      const expectedGeoJson = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: { index: 0 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.064453125000001, 44.974635142416496],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 1 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.098098754882813, 44.95301534523602],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 2 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.040935516357423, 44.98119234648246],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 3 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.023254394531251, 44.962976039238825],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 4 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.1049652099609375, 44.9439034403902],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 0,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 1,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [6.098098754882813, 44.95301534523602],
-                [6.120929718017578, 44.982406561242584],
-                [6.120929718017578, 44.982406561242584],
-                [6.075782775878906, 44.98859865651695],
-                [6.075782775878906, 44.98859865651695],
-                [6.040935516357423, 44.98119234648246],
-              ],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 2,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [[6.040935516357423, 44.98119234648246], [6.023254394531251, 44.962976039238825]],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 3,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [6.023254394531251, 44.962976039238825],
-                [6.041107177734376, 44.94924926661153],
-                [6.041107177734376, 44.94924926661153],
-                [6.06548309326172, 44.943660436460185],
-                [6.06548309326172, 44.943660436460185],
-                [6.1049652099609375, 44.9439034403902],
-              ],
-            },
-          },
-        ],
-      };
-
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
-      expect(eventsTriggered).to.be.equal(1);
-
-      const geojson = track.toGeoJSON(true);
-      expect(geojson).to.deep.equal(expectedGeoJson);
-    });
-
-    it('toGeoJSON(exportAsFlat = true) should return a structure with a single Feature/LineString', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
-          throw new Error('Unexpected call');
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.95301534523602, 6.098098754882813],
-            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          },
-        ],
-        [
-          {
-            end: [44.982406561242584, 6.120929718017578],
-            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-          },
-          {
-            end: [44.98119234648246, 6.040935516357423],
-            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          },
-        ],
-        [
-          {
-            end: [44.962976039238825, 6.023254394531251],
-            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-          },
-        ],
-        [
-          {
-            end: [44.94924926661153, 6.041107177734376],
-            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-          },
-          {
-            end: [44.943660436460185, 6.06548309326172],
-            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-          },
-          {
-            end: [44.9439034403902, 6.1049652099609375],
-            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-          },
-        ],
-      ];
-      const expectedGeoJson = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: { index: 0 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.064453125000001, 44.974635142416496],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 1 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.098098754882813, 44.95301534523602],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 2 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.040935516357423, 44.98119234648246],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 3 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.023254394531251, 44.962976039238825],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: { index: 4 },
-            geometry: {
-              type: 'Point',
-              coordinates: [6.1049652099609375, 44.9439034403902],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 0,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [6.064453125000001, 44.974635142416496],
-                [6.098098754882813, 44.95301534523602],
-
-                [6.098098754882813, 44.95301534523602],
-                [6.120929718017578, 44.982406561242584],
-                [6.120929718017578, 44.982406561242584],
-                [6.075782775878906, 44.98859865651695],
-                [6.075782775878906, 44.98859865651695],
-                [6.040935516357423, 44.98119234648246],
-
-                [6.040935516357423, 44.98119234648246],
-                [6.023254394531251, 44.962976039238825],
-
-                [6.023254394531251, 44.962976039238825],
-                [6.041107177734376, 44.94924926661153],
-                [6.041107177734376, 44.94924926661153],
-                [6.06548309326172, 44.943660436460185],
-                [6.06548309326172, 44.943660436460185],
-                [6.1049652099609375, 44.9439034403902],
-              ],
-            },
-          },
-        ],
-      };
-
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
-      expect(eventsTriggered).to.be.equal(1);
-
-      const geojson = track.toGeoJSON(true, true);
-      expect(geojson).to.deep.equal(expectedGeoJson);
-    });
-
-    it('toGeoJSON(false) should not export points', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
-          throw new Error('Unexpected call');
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      const state = [
-        { version: 1, start: [44.974635142416496, 6.064453125000001] },
-        [
-          {
-            end: [44.95301534523602, 6.098098754882813],
-            edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          },
-        ],
-        [
-          {
-            end: [44.982406561242584, 6.120929718017578],
-            edge: [44.95301534523602, 6.098098754882813, 44.982406561242584, 6.120929718017578],
-          },
-          {
-            end: [44.98859865651695, 6.075782775878906],
-            edge: [44.982406561242584, 6.120929718017578, 44.98859865651695, 6.075782775878906],
-          },
-          {
-            end: [44.98119234648246, 6.040935516357423],
-            edge: [44.98859865651695, 6.075782775878906, 44.98119234648246, 6.040935516357423],
-          },
-        ],
-        [
-          {
-            end: [44.962976039238825, 6.023254394531251],
-            edge: [44.98119234648246, 6.040935516357423, 44.962976039238825, 6.023254394531251],
-          },
-        ],
-        [
-          {
-            end: [44.94924926661153, 6.041107177734376],
-            edge: [44.962976039238825, 6.023254394531251, 44.94924926661153, 6.041107177734376],
-          },
-          {
-            end: [44.943660436460185, 6.06548309326172],
-            edge: [44.94924926661153, 6.041107177734376, 44.943660436460185, 6.06548309326172],
-          },
-          {
-            end: [44.9439034403902, 6.1049652099609375],
-            edge: [44.943660436460185, 6.06548309326172, 44.9439034403902, 6.1049652099609375],
-          },
-        ],
-      ];
-      const expectedGeoJson = {
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {
-              index: 0,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 1,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [6.098098754882813, 44.95301534523602],
-                [6.120929718017578, 44.982406561242584],
-                [6.120929718017578, 44.982406561242584],
-                [6.075782775878906, 44.98859865651695],
-                [6.075782775878906, 44.98859865651695],
-                [6.040935516357423, 44.98119234648246],
-              ],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 2,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [[6.040935516357423, 44.98119234648246], [6.023254394531251, 44.962976039238825]],
-            },
-          },
-          {
-            type: 'Feature',
-            properties: {
-              index: 3,
-            },
-            geometry: {
-              type: 'LineString',
-              coordinates: [
-                [6.023254394531251, 44.962976039238825],
-                [6.041107177734376, 44.94924926661153],
-                [6.041107177734376, 44.94924926661153],
-                [6.06548309326172, 44.943660436460185],
-                [6.06548309326172, 44.943660436460185],
-                [6.1049652099609375, 44.9439034403902],
-              ],
-            },
-          },
-        ],
-      };
-
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
-      expect(eventsTriggered).to.be.equal(1);
-
-      const geojson = track.toGeoJSON(false);
-      expect(geojson).to.deep.equal(expectedGeoJson);
-    });
-  });
-
-  describe('Undoing/Redoing', () => {
-    it('undoing and redoing adding first marker', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      await track.undo();
-
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.true;
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
-
-      await track.redo();
-
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(1);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
-    });
-
-    it('undoing and adding two marker', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297)));
-
-      const state = track.getState();
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      await track.undo();
-
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.true;
-      expect(track._currentStateIndex).to.be.equal(1);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
-
-      await track.undo();
-
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.true;
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
-
-      await track.redo();
-
-      expect(eventsTriggered).to.be.equal(3);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.true;
-      expect(track._currentStateIndex).to.be.equal(1);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
-
-      await track.redo();
-
-      expect(eventsTriggered).to.be.equal(4);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(2);
-      expect(track.getState()).to.deep.equal(state);
-    });
-
-    it('undoing while computation is going on should do nothing', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          setTimeout(() => {
-            done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-          }, 1000);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      const promise1 = track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297)));
-      const promise2 = track.undo();
-      await Promise.all([promise1, promise2]);
-
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(2);
-    });
-
-    it('undoing and adding new marker should remove redo stack', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.96777356135154, 6.06822967529297)));
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      await track.undo();
-
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.true;
-      expect(track._currentStateIndex).to.be.equal(1);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: [44.974635142416496, 6.064453125000001] }]);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.98859865651695, 6.075782775878906)));
-
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track.isUndoable()).to.be.true;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(2);
-    });
-
-    it('undoing with nothing to undo should fail gracefully', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      await track.undo();
-
-      expect(eventsTriggered).to.be.equal(0);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
-    });
-
-    it('redoing with nothing to redo should fail gracefully', async () => {
-      const track = L.TrackDrawer.track({
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-      await track.redo();
-
-      expect(eventsTriggered).to.be.equal(0);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.getState()).to.deep.equal([{ version: 1, start: undefined }]);
-    });
-
-    it('adding more actions than undoDepth option should remove first items from stack', async () => {
-      const track = L.TrackDrawer.track({
-        undoDepth: 2,
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.97463, 6.064453)));
-      expect(track._currentStateIndex).to.be.equal(1);
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.97464, 6.064454)));
-      expect(track._currentStateIndex).to.be.equal(2);
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.97465, 6.064455)));
-      expect(track._currentStateIndex).to.be.equal(2);
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.97466, 6.064456)));
-      expect(track._currentStateIndex).to.be.equal(2);
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      await track.undo();
-      expect(eventsTriggered).to.be.equal(1);
-      expect(track._currentStateIndex).to.be.equal(1);
-      expect(track.isUndoable()).to.be.true;
-
-      await track.undo();
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.isUndoable()).to.be.false;
-
-      await track.undo();
-      expect(eventsTriggered).to.be.equal(2);
-      expect(track._currentStateIndex).to.be.equal(0);
-      expect(track.isUndoable()).to.be.false;
-    });
-
-    it('undoing and redoing when undoable option is false should fail gracefully', async () => {
-      const track = L.TrackDrawer.track({
-        undoable: false,
-        routingCallback: (previousMarker, currentMarker, done) => {
-          done(null, [previousMarker.getLatLng(), currentMarker.getLatLng()]);
-        },
-      }).addTo(map);
-
-      await track.addNode(L.TrackDrawer.node(L.latLng(44.974635142416496, 6.064453125000001)));
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.null;
-
-      let eventsTriggered = 0;
-      track.on('TrackDrawer:done', () => (eventsTriggered += 1));
-
-      await track.undo();
-      expect(eventsTriggered).to.be.equal(0);
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.null;
-
-      await track.redo();
-      expect(track.isUndoable()).to.be.false;
-      expect(track.isRedoable()).to.be.false;
-      expect(track._currentStateIndex).to.be.null;
+      expect(newState).to.deep.equal(state);
     });
   });
 });

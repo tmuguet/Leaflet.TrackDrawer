@@ -41,6 +41,7 @@ Main entry point.
 * [onDragStartNode](_leaflet_.trackdrawer.track.md#ondragstartnode)
 * [onMoveNode](_leaflet_.trackdrawer.track.md#onmovenode)
 * [promoteNodeToStopover](_leaflet_.trackdrawer.track.md#promotenodetostopover)
+* [refreshEdges](_leaflet_.trackdrawer.track.md#refreshedges)
 * [removeNode](_leaflet_.trackdrawer.track.md#removenode)
 * [restoreState](_leaflet_.trackdrawer.track.md#restorestate)
 * [setOptions](_leaflet_.trackdrawer.track.md#setoptions)
@@ -300,6 +301,23 @@ Promotes a waypoint node to a stop-over (e.g. creates a new segment)
 **Returns:** `this`
 
 ___
+<a id="refreshedges"></a>
+
+###  refreshEdges
+
+▸ **refreshEdges**(routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*): `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+
+Refreshes all routes in the track
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |   |
+
+**Returns:** `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+
+___
 <a id="removenode"></a>
 
 ###  removeNode
@@ -359,7 +377,7 @@ ___
 
 ###  toGeoJSON
 
-▸ **toGeoJSON**(exportStopovers: *`boolean`*): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
+▸ **toGeoJSON**(exportStopovers: *`boolean`*, exportAsFlat: *`boolean`*): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 
 Returns a GeoJSON representation of the track.
 
@@ -368,6 +386,7 @@ Returns a GeoJSON representation of the track.
 | Name | Type | Description |
 | ------ | ------ | ------ |
 | exportStopovers | `boolean` |  \`true\` to also export stop-over markers (default), \`false\` to ignore them |
+| exportAsFlat | `boolean` |  \`true\` to export as one unique Feature, \`false\` to export as-is (default) |
 
 **Returns:** `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
 

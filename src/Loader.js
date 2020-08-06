@@ -2,35 +2,7 @@
 const L = require('leaflet');
 const corslite = require('@mapbox/corslite');
 const { Track } = require('./Track');
-
-function split(polyline, distance = 100) {
-  if (distance <= 0) throw new Error('`distance` must be positive');
-
-  const latlngs = polyline.getLatLngs();
-  if (latlngs.length === 0) return [[]];
-
-  let result = [];
-  if (Array.isArray(latlngs[0])) {
-    for (let j = 0; j < latlngs.length; j += 1) {
-      result = result.concat(split(latlngs[j], distance));
-    }
-
-    return result;
-  }
-
-  let tmp = latlngs.splice(0, 1);
-  while (latlngs.length > 0) {
-    const [latlng] = latlngs.splice(0, 1);
-    tmp.push(latlng);
-    if (L.latLng(latlng).distanceTo(L.latLng(tmp[0])) > 100) {
-      result.push(L.polyline(tmp));
-      tmp = [latlng];
-    }
-  }
-  result.push(L.polyline(tmp));
-
-  return result;
-}
+const latlngutils = require('./LatLngUtils');
 
 if (L.FileLayer !== undefined) {
   Track.include({
@@ -63,34 +35,34 @@ if (L.FileLayer !== undefined) {
       this._fireEvents = false;
       this.clean();
 
-      const layers = layer.getLayers();
+      const latlngs = insertWaypoints
+        ? latlngutils.featureGroupToLatLngs(layer).map(l => [latlngutils.splitLatLngs(l[0]), l[1]])
+        : latlngutils.featureGroupToLatLngs(layer).map(l => [[l[0]], l[1]]);
+
       let lastMarker;
       const hasToolbar = this._toolbar !== undefined;
       /* eslint-disable no-await-in-loop */
-      for (let i = 0; i < layers.length; i += 1) {
-        if (layers[i] instanceof L.Polyline) {
-          const polylines = insertWaypoints ? split(layers[i], insertWaypoints) : [layers[i]];
-          const latlngs = polylines.map((l) => l.getLatLngs());
-
-          for (let j = 0; j < latlngs.length; j += 1) {
-            if (lastMarker === undefined) {
-              lastMarker = L.TrackDrawer.node(latlngs[j][0]);
-              await this.addNode(lastMarker, undefined, true);
-              if (hasToolbar) this._bindMarkerEvents(lastMarker);
-            }
-
-            lastMarker = L.TrackDrawer.node(latlngs[j][latlngs[j].length - 1], {
-              type: j === latlngs.length - 1 ? 'stopover' : 'waypoint',
-            });
-            await this.addNode(
-              lastMarker,
-              (n1, n2, cb) => {
-                cb(null, latlngs[j]);
-              },
-              true,
-            );
+      for (let i = 0; i < latlngs.length; i += 1) {
+        const properties = latlngs[i][1];
+        for (let j = 0; j < latlngs[i][0].length; j += 1) {
+          const l = latlngs[i][0][j];
+          if (lastMarker === undefined) {
+            lastMarker = L.TrackDrawer.node(l[0]);
+            await this.addNode(lastMarker, undefined, true);
             if (hasToolbar) this._bindMarkerEvents(lastMarker);
           }
+
+          lastMarker = L.TrackDrawer.node(l[l.length - 1], {
+            type: j === latlngs[i][0].length - 1 ? 'stopover' : 'waypoint',
+          });
+          await this.addNode(
+            lastMarker,
+            (_n1, _n2, cb) => {
+              cb(null, l, properties);
+            },
+            true,
+          );
+          if (hasToolbar) this._bindMarkerEvents(lastMarker);
         }
       }
       /* eslint-enable no-await-in-loop */

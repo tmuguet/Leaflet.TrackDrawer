@@ -1,53 +1,63 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Leaflet.TrackDrawer Spec Runner</title>
-    <link rel="stylesheet" type="text/css" href="../node_modules/mocha/mocha.css" />
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-    <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="../node_modules/leaflet-easybutton/src/easy-button.css" />
-    <link rel="stylesheet" href="../node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.css" />
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>Leaflet.TrackDrawer Spec Runner</title>
+  <link rel="stylesheet" type="text/css" href="../node_modules/mocha/mocha.css" />
 
-  <body>
-    <div id="mocha"></div>
-    <script src="../node_modules/mocha/mocha.js"></script>
-    <script src="../node_modules/chai/chai.js"></script>
-    <script src="../node_modules/sinon/pkg/sinon.js"></script>
-    <script src="../node_modules/happen/happen.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="../node_modules/leaflet-easybutton/src/easy-button.css" />
+  <link rel="stylesheet" href="../node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.css" />
+</head>
 
-    <!-- source files -->
-    <script>
-      // Trick Leaflet into believing we have a touchscreen (for Chrome)
-      if (window.Touch) {
-        window.ontouchstart = function() {};
-      }
-    </script>
+<body>
+  <div id="mocha"></div>
+  <script src="../node_modules/mocha/mocha.js"></script>
+  <script src="../node_modules/chai/chai.js"></script>
+  <script src="../node_modules/sinon/pkg/sinon.js"></script>
+  <script src="../node_modules/happen/happen.js"></script>
 
-    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="../node_modules/leaflet/dist/leaflet.js"></script>
-    <script src="../node_modules/leaflet-easybutton/src/easy-button.js"></script>
-    <script src="../node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js"></script>
-    <script src="../node_modules/@babel/polyfill/dist/polyfill.min.js"></script>
-    <script src="../dist/leaflet.trackdrawer.js"></script>
+  <!-- source files -->
+  <script>
+    // Trick Leaflet into believing we have a touchscreen (for Chrome)
+    if (window.Touch) {
+      window.ontouchstart = function () { };
+    }
+  </script>
 
-    <script>
-      mocha.setup({
-        ui: 'bdd',
-        ignoreLeaks: true,
-      });
-    </script>
+  <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  <script src="../node_modules/leaflet/dist/leaflet.js"></script>
+  <script src="../node_modules/leaflet-easybutton/src/easy-button.js"></script>
+  <script src="../node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js"></script>
+  <script src="../node_modules/@mapbox/togeojson/togeojson.js"></script>
+  <script src="../node_modules/leaflet-filelayer/src/leaflet.filelayer.js"></script>
+  <script src="../node_modules/@babel/polyfill/dist/polyfill.min.js"></script>
+  <script src="../dist/leaflet.trackdrawer.js"></script>
 
-    <!-- spec files -->
+  <script>
+    mocha.setup({
+      ui: 'bdd',
+      ignoreLeaks: true,
+    });
+  </script>
 
-    <script src="test.js"></script>
-    <script src="MainSpec.js"></script>
-    <script src="ToolBarSpec.js"></script>
+  <!-- spec files -->
 
-    <script>
-      (window.mochaPhantomJS || window.mocha).run();
-    </script>
-  </body>
+  <script src="test.js"></script>
+  <script src="InitSpec.js"></script>
+  <script src="MarkersSpec.js"></script>
+  <script src="StateSpec.js"></script>
+  <script src="ExportSpec.js"></script>
+  <script src="ImportSpec.js"></script>
+  <script src="UndoRedoSpec.js"></script>
+  <script src="MiscSpec.js"></script>
+  <script src="ToolBarSpec.js"></script>
+
+  <script>
+    (window.mochaPhantomJS || window.mocha).run();
+  </script>
+</body>
+
 </html>

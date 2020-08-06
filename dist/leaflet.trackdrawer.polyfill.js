@@ -1,10 +1,4 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
-module.exports = _arrayWithHoles;
-},{}],2:[function(_dereq_,module,exports){
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
   try {
     var info = gen[key](arg);
@@ -42,7 +36,7 @@ function _asyncToGenerator(fn) {
 }
 
 module.exports = _asyncToGenerator;
-},{}],3:[function(_dereq_,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 function _interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
     "default": obj
@@ -50,60 +44,10 @@ function _interopRequireDefault(obj) {
 }
 
 module.exports = _interopRequireDefault;
-},{}],4:[function(_dereq_,module,exports){
-function _iterableToArrayLimit(arr, i) {
-  if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) {
-    return;
-  }
-
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-
-  try {
-    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
-      _arr.push(_s.value);
-
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-
-  return _arr;
-}
-
-module.exports = _iterableToArrayLimit;
-},{}],5:[function(_dereq_,module,exports){
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
-
-module.exports = _nonIterableRest;
-},{}],6:[function(_dereq_,module,exports){
-var arrayWithHoles = _dereq_("./arrayWithHoles");
-
-var iterableToArrayLimit = _dereq_("./iterableToArrayLimit");
-
-var nonIterableRest = _dereq_("./nonIterableRest");
-
-function _slicedToArray(arr, i) {
-  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();
-}
-
-module.exports = _slicedToArray;
-},{"./arrayWithHoles":1,"./iterableToArrayLimit":4,"./nonIterableRest":5}],7:[function(_dereq_,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 module.exports = _dereq_("regenerator-runtime");
 
-},{"regenerator-runtime":9}],8:[function(_dereq_,module,exports){
+},{"regenerator-runtime":5}],4:[function(_dereq_,module,exports){
 function corslite(url, callback, cors) {
     var sent = false;
 
@@ -198,7 +142,7 @@ function corslite(url, callback, cors) {
 
 if (typeof module !== 'undefined') module.exports = corslite;
 
-},{}],9:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 /**
  * Copyright (c) 2014-present, Facebook, Inc.
  *
@@ -926,7 +870,7 @@ try {
   Function("r", "regeneratorRuntime = r")(runtime);
 }
 
-},{}],10:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 "use strict";
 
 var colorMap = {
@@ -971,7 +915,7 @@ module.exports = {
   }
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],7:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -983,10 +927,13 @@ var Edge = L.Polyline.extend({
   _promoted: false,
   _demoted: true,
   _computation: 0,
-  options: {},
+  options: {
+    metadata: {}
+  },
   initialize: function initialize(latlngs, options) {
     L.Polyline.prototype.initialize.call(this, latlngs, options);
     L.setOptions(this, options);
+    this.options.metadata = JSON.parse(JSON.stringify(this.options.metadata));
   }
 });
 module.exports = {
@@ -997,7 +944,84 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],12:[function(_dereq_,module,exports){
+},{}],8:[function(_dereq_,module,exports){
+(function (global){
+"use strict";
+
+var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
+/**
+ * Splits an array of LatLng objects every X meters
+ * @param {L.LatLng[]} latlngs Polyline to split
+ * @param {int} distance Max. distance of each segment of the polyline (in meters)
+ * @returns L.LatLng[][]
+ */
+
+
+function splitLatLngs(latlngs) {
+  var distance = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+  if (distance <= 0) throw new Error('`distance` must be positive');
+  if (latlngs.length === 0) return [[]];
+  var result = [];
+
+  if (Array.isArray(latlngs[0])) {
+    for (var j = 0; j < latlngs.length; j += 1) {
+      result = result.concat(splitLatLngs(latlngs[j], distance));
+    }
+
+    return result;
+  }
+
+  var tmp = latlngs.splice(0, 1);
+
+  while (latlngs.length > 0) {
+    var latlng = L.latLng(latlngs.splice(0, 1)[0]);
+    tmp.push(latlng);
+
+    if (latlng.distanceTo(tmp[0]) > distance) {
+      result.push(tmp);
+      tmp = [latlng];
+    }
+  }
+
+  result.push(tmp);
+  return result;
+}
+/**
+ * Splits a L.Polyline object every X meters
+ * @param {L.Polyline} polyline Polyline to split
+ * @param {int} distance Max. distance of each segment of the polyline (in meters)
+ * @returns L.Polyline[]
+ */
+
+
+function splitPolyline(polyline) {
+  var distance = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+  return splitLatLngs(polyline.getLatLngs(), distance).map(function (a) {
+    return L.polyline(a);
+  });
+}
+
+function featureGroupToPolylines(featureGroup) {
+  return featureGroup.getLayers().filter(function (layer) {
+    return layer instanceof L.Polyline;
+  });
+}
+
+function featureGroupToLatLngs(featureGroup) {
+  return featureGroupToPolylines(featureGroup).map(function (layer) {
+    return [layer.getLatLngs(), layer.feature.properties];
+  });
+}
+
+module.exports = {
+  splitPolyline: splitPolyline,
+  splitLatLngs: splitLatLngs,
+  featureGroupToPolylines: featureGroupToPolylines,
+  featureGroupToLatLngs: featureGroupToLatLngs
+};
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],9:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1068,7 +1092,7 @@ module.exports = L.Evented.extend({
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1078,8 +1102,6 @@ var _regenerator = _interopRequireDefault(_dereq_("@babel/runtime/regenerator"))
 
 var _asyncToGenerator2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/asyncToGenerator"));
 
-var _slicedToArray2 = _interopRequireDefault(_dereq_("@babel/runtime/helpers/slicedToArray"));
-
 /* eslint-disable arrow-parens */
 var L = (typeof window !== "undefined" ? window['L'] : typeof global !== "undefined" ? global['L'] : null);
 
@@ -1088,39 +1110,7 @@ var corslite = _dereq_('@mapbox/corslite');
 var _require = _dereq_('./Track'),
     Track = _require.Track;
 
-function split(polyline) {
-  var distance = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
-  if (distance <= 0) throw new Error('`distance` must be positive');
-  var latlngs = polyline.getLatLngs();
-  if (latlngs.length === 0) return [[]];
-  var result = [];
-
-  if (Array.isArray(latlngs[0])) {
-    for (var j = 0; j < latlngs.length; j += 1) {
-      result = result.concat(split(latlngs[j], distance));
-    }
-
-    return result;
-  }
-
-  var tmp = latlngs.splice(0, 1);
-
-  while (latlngs.length > 0) {
-    var _latlngs$splice = latlngs.splice(0, 1),
-        _latlngs$splice2 = (0, _slicedToArray2["default"])(_latlngs$splice, 1),
-        latlng = _latlngs$splice2[0];
-
-    tmp.push(latlng);
-
-    if (L.latLng(latlng).distanceTo(L.latLng(tmp[0])) > 100) {
-      result.push(L.polyline(tmp));
-      tmp = [latlng];
-    }
-  }
-
-  result.push(L.polyline(tmp));
-  return result;
-}
+var latlngutils = _dereq_('./LatLngUtils');
 
 if (L.FileLayer !== undefined) {
   Track.include({
@@ -1150,17 +1140,19 @@ if (L.FileLayer !== undefined) {
     _dataLoadedHandler: function () {
       var _dataLoadedHandler2 = (0, _asyncToGenerator2["default"])(
       /*#__PURE__*/
-      _regenerator["default"].mark(function _callee2(layer) {
+      _regenerator["default"].mark(function _callee(layer) {
         var _this2 = this;
 
         var insertWaypoints,
             oldValue,
-            layers,
+            latlngs,
             lastMarker,
             hasToolbar,
+            _loop,
             i,
             _args3 = arguments;
-        return _regenerator["default"].wrap(function _callee2$(_context3) {
+
+        return _regenerator["default"].wrap(function _callee$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
@@ -1171,100 +1163,100 @@ if (L.FileLayer !== undefined) {
                 oldValue = this._fireEvents;
                 this._fireEvents = false;
                 this.clean();
-                layers = layer.getLayers();
+                latlngs = insertWaypoints ? latlngutils.featureGroupToLatLngs(layer).map(function (l) {
+                  return [latlngutils.splitLatLngs(l[0]), l[1]];
+                }) : latlngutils.featureGroupToLatLngs(layer).map(function (l) {
+                  return [[l[0]], l[1]];
+                });
                 hasToolbar = this._toolbar !== undefined;
                 /* eslint-disable no-await-in-loop */
 
-                i = 0;
-
-              case 8:
-                if (!(i < layers.length)) {
-                  _context3.next = 14;
-                  break;
-                }
-
-                if (!(layers[i] instanceof L.Polyline)) {
-                  _context3.next = 11;
-                  break;
-                }
-
-                return _context3.delegateYield(
+                _loop =
                 /*#__PURE__*/
-                _regenerator["default"].mark(function _callee() {
-                  var polylines, latlngs, _loop, j;
+                _regenerator["default"].mark(function _loop(i) {
+                  var properties, _loop2, j;
 
-                  return _regenerator["default"].wrap(function _callee$(_context2) {
+                  return _regenerator["default"].wrap(function _loop$(_context2) {
                     while (1) {
                       switch (_context2.prev = _context2.next) {
                         case 0:
-                          polylines = insertWaypoints ? split(layers[i], insertWaypoints) : [layers[i]];
-                          latlngs = polylines.map(function (l) {
-                            return l.getLatLngs();
-                          });
-                          _loop =
+                          properties = latlngs[i][1];
+                          _loop2 =
                           /*#__PURE__*/
-                          _regenerator["default"].mark(function _loop(j) {
-                            return _regenerator["default"].wrap(function _loop$(_context) {
+                          _regenerator["default"].mark(function _loop2(j) {
+                            var l;
+                            return _regenerator["default"].wrap(function _loop2$(_context) {
                               while (1) {
                                 switch (_context.prev = _context.next) {
                                   case 0:
+                                    l = latlngs[i][0][j];
+
                                     if (!(lastMarker === undefined)) {
-                                      _context.next = 5;
+                                      _context.next = 6;
                                       break;
                                     }
 
-                                    lastMarker = L.TrackDrawer.node(latlngs[j][0]);
-                                    _context.next = 4;
+                                    lastMarker = L.TrackDrawer.node(l[0]);
+                                    _context.next = 5;
                                     return _this2.addNode(lastMarker, undefined, true);
 
-                                  case 4:
+                                  case 5:
                                     if (hasToolbar) _this2._bindMarkerEvents(lastMarker);
 
-                                  case 5:
-                                    lastMarker = L.TrackDrawer.node(latlngs[j][latlngs[j].length - 1], {
-                                      type: j === latlngs.length - 1 ? 'stopover' : 'waypoint'
+                                  case 6:
+                                    lastMarker = L.TrackDrawer.node(l[l.length - 1], {
+                                      type: j === latlngs[i][0].length - 1 ? 'stopover' : 'waypoint'
                                     });
-                                    _context.next = 8;
-                                    return _this2.addNode(lastMarker, function (n1, n2, cb) {
-                                      cb(null, latlngs[j]);
+                                    _context.next = 9;
+                                    return _this2.addNode(lastMarker, function (_n1, _n2, cb) {
+                                      cb(null, l, properties);
                                     }, true);
 
-                                  case 8:
+                                  case 9:
                                     if (hasToolbar) _this2._bindMarkerEvents(lastMarker);
 
-                                  case 9:
+                                  case 10:
                                   case "end":
                                     return _context.stop();
                                 }
                               }
-                            }, _loop);
+                            }, _loop2);
                           });
                           j = 0;
 
-                        case 4:
-                          if (!(j < latlngs.length)) {
-                            _context2.next = 9;
+                        case 3:
+                          if (!(j < latlngs[i][0].length)) {
+                            _context2.next = 8;
                             break;
                           }
 
-                          return _context2.delegateYield(_loop(j), "t0", 6);
+                          return _context2.delegateYield(_loop2(j), "t0", 5);
 
-                        case 6:
+                        case 5:
                           j += 1;
-                          _context2.next = 4;
+                          _context2.next = 3;
                           break;
 
-                        case 9:
+                        case 8:
                         case "end":
                           return _context2.stop();
                       }
                     }
-                  }, _callee);
-                })(), "t0", 11);
+                  }, _loop);
+                });
+                i = 0;
+
+              case 9:
+                if (!(i < latlngs.length)) {
+                  _context3.next = 14;
+                  break;
+                }
+
+                return _context3.delegateYield(_loop(i), "t0", 11);
 
               case 11:
                 i += 1;
-                _context3.next = 8;
+                _context3.next = 9;
                 break;
 
               case 14:
@@ -1278,7 +1270,7 @@ if (L.FileLayer !== undefined) {
                 return _context3.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee, this);
       }));
 
       function _dataLoadedHandler(_x) {
@@ -1297,8 +1289,8 @@ if (L.FileLayer !== undefined) {
         function () {
           var _ref = (0, _asyncToGenerator2["default"])(
           /*#__PURE__*/
-          _regenerator["default"].mark(function _callee3(event) {
-            return _regenerator["default"].wrap(function _callee3$(_context4) {
+          _regenerator["default"].mark(function _callee2(event) {
+            return _regenerator["default"].wrap(function _callee2$(_context4) {
               while (1) {
                 switch (_context4.prev = _context4.next) {
                   case 0:
@@ -1315,7 +1307,7 @@ if (L.FileLayer !== undefined) {
                     return _context4.stop();
                 }
               }
-            }, _callee3);
+            }, _callee2);
           }));
 
           return function (_x2) {
@@ -1349,8 +1341,8 @@ if (L.FileLayer !== undefined) {
               function () {
                 var _ref2 = (0, _asyncToGenerator2["default"])(
                 /*#__PURE__*/
-                _regenerator["default"].mark(function _callee4(event) {
-                  return _regenerator["default"].wrap(function _callee4$(_context5) {
+                _regenerator["default"].mark(function _callee3(event) {
+                  return _regenerator["default"].wrap(function _callee3$(_context5) {
                     while (1) {
                       switch (_context5.prev = _context5.next) {
                         case 0:
@@ -1367,7 +1359,7 @@ if (L.FileLayer !== undefined) {
                           return _context5.stop();
                       }
                     }
-                  }, _callee4);
+                  }, _callee3);
                 }));
 
                 return function (_x3) {
@@ -1406,7 +1398,7 @@ if (L.FileLayer !== undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Track":17,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/helpers/slicedToArray":6,"@babel/runtime/regenerator":7,"@mapbox/corslite":8}],14:[function(_dereq_,module,exports){
+},{"./LatLngUtils":8,"./Track":14,"@babel/runtime/helpers/asyncToGenerator":1,"@babel/runtime/helpers/interopRequireDefault":2,"@babel/runtime/regenerator":3,"@mapbox/corslite":4}],11:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1422,12 +1414,14 @@ var Node = L.Marker.extend({
     // Or 'stopover',
     colorName: 'blue',
     opacity: 1,
-    draggable: true
+    draggable: true,
+    metadata: {}
   },
   initialize: function initialize(latlng, options) {
     L.Marker.prototype.initialize.call(this, latlng, options);
     L.setOptions(this, options);
     this.setType(this.options.type);
+    this.options.metadata = JSON.parse(JSON.stringify(this.options.metadata));
   },
   setType: function setType(type) {
     this.options.type = type;
@@ -1471,7 +1465,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -1945,7 +1939,7 @@ if (L.Control.EasyBar === undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],16:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2034,7 +2028,7 @@ if (L.Control.EasyBar === undefined) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],17:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -2173,7 +2167,7 @@ var Track = L.LayerGroup.extend({
     if (this.options.router !== undefined) {
       this.options.routingCallback = function (previousMarker, marker, done) {
         _this.options.router.route([L.Routing.waypoint(previousMarker.getLatLng()), L.Routing.waypoint(marker.getLatLng())], function (err, result) {
-          done(err, result ? result[0].coordinates : null);
+          done(err, result ? result[0].coordinates : null, {});
         });
       };
     }
@@ -2265,115 +2259,70 @@ var Track = L.LayerGroup.extend({
 
     return latlngs;
   },
-  toGeoJSON: function toGeoJSON() {
+  _stopoversToGeoJSON: function _stopoversToGeoJSON() {
     var _this3 = this;
 
-    var exportStopovers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-    var exportAsFlat = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    var geojson = {
-      type: 'FeatureCollection',
-      features: []
-    };
-
-    if (exportStopovers) {
-      var currentNode = this._getNode(this._firstNodeId);
-
-      var stopovers = [];
-
-      if (currentNode !== undefined) {
-        stopovers.push(currentNode);
-      }
-
-      this._nodesContainers.forEach(function () {
-        do {
-          var _this3$_getNext = _this3._getNext(currentNode),
-              nextEdge = _this3$_getNext.nextEdge,
-              nextNode = _this3$_getNext.nextNode;
-
-          if (currentNode === undefined || nextEdge === undefined) {
-            break;
-          }
-
-          currentNode = nextNode;
-        } while (currentNode.options.type !== 'stopover');
-
-        if (currentNode !== undefined) {
-          stopovers.push(currentNode);
-        }
-      });
-
-      var hasTrackStats = L.TrackStats !== undefined;
-      stopovers.forEach(function (node, idx) {
-        var e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
-        geojson.features.push({
-          type: 'Feature',
-          properties: {
-            index: idx
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]
-          }
-        });
-      });
-    }
-
-    var latlngs = this.getLatLngs();
-
-    if (exportAsFlat) {
-      var feature = {
-        type: 'Feature',
-        properties: {
-          index: 0
-        },
-        geometry: {
-          type: 'LineString',
-          coordinates: []
-        }
-      };
-      latlngs.forEach(function (l) {
-        l.forEach(function (e) {
-          feature.geometry.coordinates.push('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]);
-        });
-      });
-      geojson.features.push(feature);
-    } else {
-      latlngs.forEach(function (l, idx) {
-        var feature = {
-          type: 'Feature',
-          properties: {
-            index: idx
-          },
-          geometry: {
-            type: 'LineString',
-            coordinates: l.map(function (e) {
-              return 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat];
-            })
-          }
-        };
-        geojson.features.push(feature);
-      });
-    }
-
-    return geojson;
-  },
-  getState: function getState() {
-    var _this4 = this;
-
-    var state = [{
-      version: 1,
-      start: undefined
-    }];
+    var stopovers = [];
+    var features = [];
 
     var currentNode = this._getNode(this._firstNodeId);
 
     if (currentNode !== undefined) {
-      state[0].start = encodeLatLng(currentNode.getLatLng());
+      stopovers.push(currentNode);
     }
 
     this._nodesContainers.forEach(function () {
-      var group = [];
+      do {
+        var _this3$_getNext = _this3._getNext(currentNode),
+            nextEdge = _this3$_getNext.nextEdge,
+            nextNode = _this3$_getNext.nextNode;
 
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+
+      if (currentNode !== undefined) {
+        stopovers.push(currentNode);
+      }
+    });
+
+    var hasTrackStats = L.TrackStats !== undefined;
+    stopovers.forEach(function (node, idx) {
+      var e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
+      var properties = JSON.parse(JSON.stringify(node.options.metadata));
+      properties.index = idx;
+      features.push({
+        type: 'Feature',
+        properties: properties,
+        geometry: {
+          type: 'Point',
+          coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]
+        }
+      });
+    });
+    return features;
+  },
+  _edgesToFlatGeoJSON: function _edgesToFlatGeoJSON() {
+    var _this4 = this;
+
+    var hasTrackStats = L.TrackStats !== undefined;
+    var feature = {
+      type: 'Feature',
+      properties: {
+        index: 0
+      },
+      geometry: {
+        type: 'LineString',
+        coordinates: []
+      }
+    };
+
+    var currentNode = this._getNode(this._firstNodeId);
+
+    this._nodesContainers.forEach(function () {
       do {
         var _this4$_getNext = _this4._getNext(currentNode),
             nextEdge = _this4$_getNext.nextEdge,
@@ -2383,9 +2332,120 @@ var Track = L.LayerGroup.extend({
           break;
         }
 
+        nextEdge.getLatLngs().forEach(function (e) {
+          var e2 = hasTrackStats ? L.TrackStats.cache.getAll(e) : e;
+          feature.geometry.coordinates.push('z' in e2 && e2.z !== null ? [e2.lng, e2.lat, e2.z] : [e2.lng, e2.lat]);
+        });
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+    });
+
+    return feature;
+  },
+  _edgesToGeoJSON: function _edgesToGeoJSON() {
+    var _this5 = this;
+
+    var hasTrackStats = L.TrackStats !== undefined;
+    var features = [];
+
+    var currentNode = this._getNode(this._firstNodeId);
+
+    this._nodesContainers.forEach(function (_c, idx) {
+      var _loop = function _loop() {
+        var _this5$_getNext = _this5._getNext(currentNode),
+            nextEdge = _this5$_getNext.nextEdge,
+            nextNode = _this5$_getNext.nextNode;
+
+        if (currentNode === undefined || nextEdge === undefined) {
+          return "break";
+        }
+
+        var properties = JSON.parse(JSON.stringify(nextEdge.options.metadata));
+        properties.index = idx;
+        var feature = {
+          type: 'Feature',
+          properties: properties,
+          geometry: {
+            type: 'LineString',
+            coordinates: []
+          }
+        };
+        nextEdge.getLatLngs().forEach(function (e) {
+          var e2 = hasTrackStats ? L.TrackStats.cache.getAll(e) : e;
+          feature.geometry.coordinates.push('z' in e2 && e2.z !== null ? [e2.lng, e2.lat, e2.z] : [e2.lng, e2.lat]);
+        });
+        features.push(feature);
+        currentNode = nextNode;
+      };
+
+      do {
+        var _ret = _loop();
+
+        if (_ret === "break") break;
+      } while (currentNode.options.type !== 'stopover');
+    });
+
+    return features;
+  },
+  toGeoJSON: function toGeoJSON() {
+    var exportStopovers = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+    var exportAsFlat = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    var geojson = {
+      type: 'FeatureCollection',
+      features: []
+    };
+
+    if (exportStopovers) {
+      this._stopoversToGeoJSON().forEach(function (f) {
+        return geojson.features.push(f);
+      });
+    }
+
+    if (exportAsFlat) {
+      geojson.features.push(this._edgesToFlatGeoJSON());
+    } else {
+      this._edgesToGeoJSON().forEach(function (f) {
+        return geojson.features.push(f);
+      });
+    }
+
+    return geojson;
+  },
+  getState: function getState() {
+    var _this6 = this;
+
+    var state = [{
+      version: 2,
+      start: undefined,
+      metadata: undefined
+    }];
+
+    var currentNode = this._getNode(this._firstNodeId);
+
+    if (currentNode !== undefined) {
+      state[0].start = encodeLatLng(currentNode.getLatLng());
+      state[0].metadata = JSON.parse(JSON.stringify(currentNode.options.metadata));
+    }
+
+    this._nodesContainers.forEach(function () {
+      var group = [];
+
+      do {
+        var _this6$_getNext = _this6._getNext(currentNode),
+            nextEdge = _this6$_getNext.nextEdge,
+            nextNode = _this6$_getNext.nextNode;
+
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
         group.push({
           end: encodeLatLng(nextNode.getLatLng()),
-          edge: encodeLatLngs(nextEdge.getLatLngs())
+          edge: encodeLatLngs(nextEdge.getLatLngs()),
+          metadata: {
+            node: JSON.parse(JSON.stringify(nextNode.options.metadata)),
+            edge: JSON.parse(JSON.stringify(nextEdge.options.metadata))
+          }
         });
         currentNode = nextNode;
       } while (currentNode.options.type !== 'stopover');
@@ -2413,6 +2473,56 @@ var Track = L.LayerGroup.extend({
       message: error.message
     });
   },
+  refreshEdges: function () {
+    var _refreshEdges = (0, _asyncToGenerator2["default"])(
+    /*#__PURE__*/
+    _regenerator["default"].mark(function _callee(routingCallback) {
+      var _this7 = this;
+
+      var callback, oldValue, promises;
+      return _regenerator["default"].wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              callback = routingCallback || this.options.routingCallback;
+
+              this._fireStart();
+
+              oldValue = this._fireEvents;
+              this._fireEvents = false;
+              promises = [];
+
+              this._nodesContainers.forEach(function (container) {
+                var markers = container.getLayers();
+                markers.forEach(function (marker) {
+                  promises.push(_this7.onMoveNode(marker, callback));
+                });
+              });
+
+              _context.next = 8;
+              return Promise.all(promises);
+
+            case 8:
+              this._fireEvents = oldValue;
+
+              this._fireDone();
+
+              return _context.abrupt("return", this);
+
+            case 11:
+            case "end":
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    function refreshEdges(_x) {
+      return _refreshEdges.apply(this, arguments);
+    }
+
+    return refreshEdges;
+  }(),
   clean: function clean() {
     this._fireStart();
 
@@ -2429,18 +2539,21 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   _createNode: function _createNode(latlng) {
-    return L.TrackDrawer.node(latlng);
+    var metadata = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    return L.TrackDrawer.node(latlng, {
+      metadata: metadata
+    });
   },
   restoreState: function () {
     var _restoreState = (0, _asyncToGenerator2["default"])(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee(state, nodeCallback) {
-      var _this5 = this;
+    _regenerator["default"].mark(function _callee2(state, nodeCallback) {
+      var _this8 = this;
 
-      var callback, oldValue, stopovers, routes, promises;
-      return _regenerator["default"].wrap(function _callee$(_context) {
+      var callback, oldValue, stopovers, routes, promises, version;
+      return _regenerator["default"].wrap(function _callee2$(_context2) {
         while (1) {
-          switch (_context.prev = _context.next) {
+          switch (_context2.prev = _context2.next) {
             case 0:
               callback = nodeCallback || this._createNode;
 
@@ -2454,9 +2567,12 @@ var Track = L.LayerGroup.extend({
               promises = [];
               state.forEach(function (group, i) {
                 if (i === 0) {
+                  // eslint-disable-next-line prefer-destructuring
+                  version = group.version;
+
                   if (group.start) {
-                    var marker = callback.call(null, decodeLatLng(group.start));
-                    promises.push(_this5.addNode(marker, function () {
+                    var marker = callback.call(null, decodeLatLng(group.start), version >= 2 ? group.metadata : {});
+                    promises.push(_this8.addNode(marker, function () {
                       throw new Error('Should not be called');
                     }, true));
                   }
@@ -2465,29 +2581,29 @@ var Track = L.LayerGroup.extend({
                 }
 
                 group.forEach(function (segment, j) {
-                  var marker = callback.call(null, decodeLatLng(segment.end));
+                  var marker = callback.call(null, decodeLatLng(segment.end), version >= 2 ? segment.metadata.node : {});
 
                   if (j === group.length - 1 && i < state.length - 1) {
                     stopovers.push(marker);
                   }
 
-                  promises.push(_this5.addNode(marker, function (from, to, done) {
+                  promises.push(_this8.addNode(marker, function (from, to, done) {
                     var edge = decodeLatLngs(segment.edge);
                     routes.push({
                       from: from,
                       to: to,
                       edge: edge
                     });
-                    done(null, edge);
+                    done(null, edge, version >= 2 ? segment.metadata.edge : {});
                   }, true));
                 });
               });
-              _context.next = 11;
+              _context2.next = 11;
               return Promise.all(promises);
 
             case 11:
               stopovers.forEach(function (m) {
-                return _this5.promoteNodeToStopover(m);
+                return _this8.promoteNodeToStopover(m);
               });
               this._fireEvents = oldValue;
 
@@ -2495,17 +2611,17 @@ var Track = L.LayerGroup.extend({
                 routes: routes
               });
 
-              return _context.abrupt("return", this);
+              return _context2.abrupt("return", this);
 
             case 15:
             case "end":
-              return _context.stop();
+              return _context2.stop();
           }
         }
-      }, _callee, this);
+      }, _callee2, this);
     }));
 
-    function restoreState(_x, _x2) {
+    function restoreState(_x2, _x3) {
       return _restoreState.apply(this, arguments);
     }
 
@@ -2531,62 +2647,17 @@ var Track = L.LayerGroup.extend({
   undo: function () {
     var _undo = (0, _asyncToGenerator2["default"])(
     /*#__PURE__*/
-    _regenerator["default"].mark(function _callee2(nodeCallback) {
-      return _regenerator["default"].wrap(function _callee2$(_context2) {
-        while (1) {
-          switch (_context2.prev = _context2.next) {
-            case 0:
-              if (!(this.isUndoable() && this._computing === 0)) {
-                _context2.next = 7;
-                break;
-              }
-
-              this._currentStateIndex -= 1;
-              this._undoing = true;
-              _context2.next = 5;
-              return this.restoreState(this._states[this._currentStateIndex], nodeCallback);
-
-            case 5:
-              this._undoing = false;
-              return _context2.abrupt("return", true);
-
-            case 7:
-              return _context2.abrupt("return", false);
-
-            case 8:
-            case "end":
-              return _context2.stop();
-          }
-        }
-      }, _callee2, this);
-    }));
-
-    function undo(_x3) {
-      return _undo.apply(this, arguments);
-    }
-
-    return undo;
-  }(),
-  isUndoable: function isUndoable() {
-    return this.options.undoable && this._currentStateIndex > 0;
-  },
-  isRedoable: function isRedoable() {
-    return this.options.undoable && this._currentStateIndex < this._states.length - 1;
-  },
-  redo: function () {
-    var _redo = (0, _asyncToGenerator2["default"])(
-    /*#__PURE__*/
     _regenerator["default"].mark(function _callee3(nodeCallback) {
       return _regenerator["default"].wrap(function _callee3$(_context3) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
-              if (!(this.isRedoable() && this._computing === 0)) {
+              if (!(this.isUndoable() && this._computing === 0)) {
                 _context3.next = 7;
                 break;
               }
 
-              this._currentStateIndex += 1;
+              this._currentStateIndex -= 1;
               this._undoing = true;
               _context3.next = 5;
               return this.restoreState(this._states[this._currentStateIndex], nodeCallback);
@@ -2606,7 +2677,52 @@ var Track = L.LayerGroup.extend({
       }, _callee3, this);
     }));
 
-    function redo(_x4) {
+    function undo(_x4) {
+      return _undo.apply(this, arguments);
+    }
+
+    return undo;
+  }(),
+  isUndoable: function isUndoable() {
+    return this.options.undoable && this._currentStateIndex > 0;
+  },
+  isRedoable: function isRedoable() {
+    return this.options.undoable && this._currentStateIndex < this._states.length - 1;
+  },
+  redo: function () {
+    var _redo = (0, _asyncToGenerator2["default"])(
+    /*#__PURE__*/
+    _regenerator["default"].mark(function _callee4(nodeCallback) {
+      return _regenerator["default"].wrap(function _callee4$(_context4) {
+        while (1) {
+          switch (_context4.prev = _context4.next) {
+            case 0:
+              if (!(this.isRedoable() && this._computing === 0)) {
+                _context4.next = 7;
+                break;
+              }
+
+              this._currentStateIndex += 1;
+              this._undoing = true;
+              _context4.next = 5;
+              return this.restoreState(this._states[this._currentStateIndex], nodeCallback);
+
+            case 5:
+              this._undoing = false;
+              return _context4.abrupt("return", true);
+
+            case 7:
+              return _context4.abrupt("return", false);
+
+            case 8:
+            case "end":
+              return _context4.stop();
+          }
+        }
+      }, _callee4, this);
+    }));
+
+    function redo(_x5) {
       return _redo.apply(this, arguments);
     }
 
@@ -2620,13 +2736,16 @@ var Track = L.LayerGroup.extend({
     }
   },
   _createEdge: function _createEdge(previousNode, node) {
-    var _this6 = this;
+    var _this9 = this;
+
+    var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
     var edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
 
     var edge = new Edge([previousNode.getLatLng(), node.getLatLng()], {
       color: Colors.nameToRgb(previousNode.options.colorName),
-      dashArray: '4'
+      dashArray: '4',
+      metadata: metadata
     }).addTo(edgesContainer);
     var id = edgesContainer.getLayerId(edge);
     previousNode._routeIdNext = id;
@@ -2639,7 +2758,7 @@ var Track = L.LayerGroup.extend({
       edge.on('tooltipopen', function () {
         var startNodeId = edge._startMarkerId;
         var endNodeId = edge._endMarkerId;
-        edge.setTooltipContent("id: ".concat(_this6._getEdgeId(edge), " (on #").concat(_this6._getEdgeContainerIndex(edge), ")<br>") + "previous node: ".concat(startNodeId) + " (on #".concat(_this6._getNodeContainerIndex(_this6._getNode(startNodeId)), ")<br>") + "next node: ".concat(endNodeId) + " (on #".concat(_this6._getNodeContainerIndex(_this6._getNode(endNodeId)), ")"));
+        edge.setTooltipContent("id: ".concat(_this9._getEdgeId(edge), " (on #").concat(_this9._getEdgeContainerIndex(edge), ")<br>") + "previous node: ".concat(startNodeId) + " (on #".concat(_this9._getNodeContainerIndex(_this9._getNode(startNodeId)), ")<br>") + "next node: ".concat(endNodeId) + " (on #".concat(_this9._getNodeContainerIndex(_this9._getNode(endNodeId)), ")"));
       });
       edge.bindTooltip('<>');
     }
@@ -2647,19 +2766,19 @@ var Track = L.LayerGroup.extend({
     return edge;
   },
   _prepareNode: function _prepareNode(node, nodesContainer) {
-    var _this7 = this;
+    var _this10 = this;
 
     if (this.options.debug) {
       node.on('tooltipopen', function () {
-        var _this7$_getPrevious = _this7._getPrevious(node),
-            previousEdge = _this7$_getPrevious.previousEdge,
-            previousNode = _this7$_getPrevious.previousNode;
+        var _this10$_getPrevious = _this10._getPrevious(node),
+            previousEdge = _this10$_getPrevious.previousEdge,
+            previousNode = _this10$_getPrevious.previousNode;
 
-        var _this7$_getNext = _this7._getNext(node),
-            nextEdge = _this7$_getNext.nextEdge,
-            nextNode = _this7$_getNext.nextNode;
+        var _this10$_getNext = _this10._getNext(node),
+            nextEdge = _this10$_getNext.nextEdge,
+            nextNode = _this10$_getNext.nextNode;
 
-        node.setTooltipContent("id: ".concat(_this7._getNodeId(node), " (on #").concat(_this7._getNodeContainerIndex(node), ")<br>") + "previous edge: ".concat(_this7._getEdgeId(previousEdge)) + " (on #".concat(_this7._getEdgeContainerIndex(previousEdge), ") to ").concat(_this7._getNodeId(previousNode), "<br>") + "next edge: ".concat(_this7._getEdgeId(nextEdge)) + " (on #".concat(_this7._getEdgeContainerIndex(nextEdge), ") to ").concat(_this7._getNodeId(nextNode)));
+        node.setTooltipContent("id: ".concat(_this10._getNodeId(node), " (on #").concat(_this10._getNodeContainerIndex(node), ")<br>") + "previous edge: ".concat(_this10._getEdgeId(previousEdge)) + " (on #".concat(_this10._getEdgeContainerIndex(previousEdge), ") to ").concat(_this10._getNodeId(previousNode), "<br>") + "next edge: ".concat(_this10._getEdgeId(nextEdge)) + " (on #".concat(_this10._getEdgeContainerIndex(nextEdge), ") to ").concat(_this10._getNodeId(nextNode)));
       });
       node.bindTooltip('<>');
     }
@@ -2677,13 +2796,13 @@ var Track = L.LayerGroup.extend({
 
     if (node.options.draggable) {
       node.on('dragstart', function (e) {
-        return _this7._onDragStartNode(e.target);
+        return _this10._onDragStartNode(e.target);
       });
       node.on('drag', function (e) {
-        return _this7._onDragNode(e.target);
+        return _this10._onDragNode(e.target);
       });
       node.on('moveend', function (e) {
-        return _this7.onMoveNode(e.target);
+        return _this10.onMoveNode(e.target);
       });
     }
 
@@ -2691,7 +2810,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   addNode: function addNode(node, routingCallback) {
-    var _this8 = this;
+    var _this11 = this;
 
     var skipChecks = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     var callback = routingCallback || this.options.routingCallback;
@@ -2738,7 +2857,7 @@ var Track = L.LayerGroup.extend({
       return new Promise(function (resolve) {
         resolve();
       }).then(function () {
-        _this8._fireDone({});
+        _this11._fireDone({});
       });
     }
 
@@ -2750,6 +2869,8 @@ var Track = L.LayerGroup.extend({
     var currentComputation = previousEdge._computation;
     return new Promise(function (resolve, reject) {
       callback.call(null, previousNode, node, function (err, route) {
+        var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
         if (err !== null) {
           reject(err);
           return;
@@ -2761,6 +2882,7 @@ var Track = L.LayerGroup.extend({
           previousNode.setLatLng(L.latLng(route[0]));
           node.setLatLng(L.latLng(route[route.length - 1]));
           previousEdge.setLatLngs(route);
+          previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
           previousEdge.setStyle({
             dashArray: null
           });
@@ -2775,15 +2897,15 @@ var Track = L.LayerGroup.extend({
         });
       });
     }).then(function (routes) {
-      _this8._fireDone({
+      _this11._fireDone({
         routes: routes
       });
     })["catch"](function (e) {
-      _this8._fireFailed(e);
+      _this11._fireFailed(e);
     });
   },
   insertNode: function insertNode(node, route, routingCallback) {
-    var _this9 = this;
+    var _this12 = this;
 
     var callback = routingCallback || this.options.routingCallback;
 
@@ -2807,6 +2929,8 @@ var Track = L.LayerGroup.extend({
     var currentComputation2 = edge2._computation;
     var promise1 = new Promise(function (resolve, reject) {
       callback.call(null, startMarker, node, function (err, route1) {
+        var metadata1 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
         if (err !== null) {
           reject(err);
           return;
@@ -2816,6 +2940,7 @@ var Track = L.LayerGroup.extend({
           startMarker.setLatLng(L.latLng(route1[0]));
           node.setLatLng(L.latLng(route1[route1.length - 1]));
           edge1.setLatLngs(route1);
+          edge1.options.metadata = JSON.parse(JSON.stringify(metadata1));
           edge1.setStyle({
             dashArray: null
           });
@@ -2830,6 +2955,8 @@ var Track = L.LayerGroup.extend({
     });
     var promise2 = new Promise(function (resolve, reject) {
       callback.call(null, node, endMarker, function (err, route2) {
+        var metadata2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
         if (err !== null) {
           reject(err);
           return;
@@ -2839,6 +2966,7 @@ var Track = L.LayerGroup.extend({
           node.setLatLng(L.latLng(route2[0]));
           endMarker.setLatLng(L.latLng(route2[route2.length - 1]));
           edge2.setLatLngs(route2);
+          edge2.options.metadata = JSON.parse(JSON.stringify(metadata2));
           edge2.setStyle({
             dashArray: null
           });
@@ -2852,11 +2980,11 @@ var Track = L.LayerGroup.extend({
       });
     });
     return Promise.all([promise1, promise2]).then(function (routes) {
-      _this9._fireDone({
+      _this12._fireDone({
         routes: routes
       });
     })["catch"](function (e) {
-      _this9._fireFailed(e);
+      _this12._fireFailed(e);
     });
   },
   _onDragStartNode: function _onDragStartNode(marker) {
@@ -2900,7 +3028,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   onMoveNode: function onMoveNode(marker, routingCallback) {
-    var _this10 = this;
+    var _this13 = this;
 
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
@@ -2924,6 +3052,8 @@ var Track = L.LayerGroup.extend({
       var currentComputation = previousEdge._computation;
       promises.push(new Promise(function (resolve, reject) {
         callback.call(null, previousNode, marker, function (err, route) {
+          var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
           if (err !== null) {
             reject(err);
             return;
@@ -2932,6 +3062,7 @@ var Track = L.LayerGroup.extend({
           if (previousEdge._computation === currentComputation) {
             marker.setLatLng(L.latLng(route[route.length - 1]));
             previousEdge.setLatLngs(route);
+            previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
             previousEdge.setStyle({
               dashArray: null
             });
@@ -2951,6 +3082,8 @@ var Track = L.LayerGroup.extend({
       var _currentComputation = nextEdge._computation;
       promises.push(new Promise(function (resolve, reject) {
         callback.call(null, marker, nextNode, function (err, route) {
+          var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
           if (err !== null) {
             reject(err);
             return;
@@ -2959,6 +3092,7 @@ var Track = L.LayerGroup.extend({
           if (nextEdge._computation === _currentComputation) {
             marker.setLatLng(L.latLng(route[0]));
             nextEdge.setLatLngs(route);
+            nextEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
             nextEdge.setStyle({
               dashArray: null
             });
@@ -2974,15 +3108,15 @@ var Track = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then(function (routes) {
-      _this10._fireDone({
+      _this13._fireDone({
         routes: routes
       });
     })["catch"](function (e) {
-      _this10._fireFailed(e);
+      _this13._fireFailed(e);
     });
   },
   removeNode: function removeNode(node, routingCallback) {
-    var _this11 = this;
+    var _this14 = this;
 
     var callback = routingCallback || this.options.routingCallback;
     var promises = [];
@@ -3017,6 +3151,8 @@ var Track = L.LayerGroup.extend({
       var currentComputation = previousEdge._computation;
       promises.push(new Promise(function (resolve, reject) {
         callback.call(null, previousNode, nextNode, function (err, route) {
+          var metadata = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
           if (err !== null) {
             reject(err);
             return;
@@ -3026,6 +3162,7 @@ var Track = L.LayerGroup.extend({
             previousEdge.setLatLngs(route).setStyle({
               dashArray: null
             });
+            previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
           }
 
           resolve({
@@ -3055,15 +3192,15 @@ var Track = L.LayerGroup.extend({
     }
 
     return Promise.all(promises).then(function (routes) {
-      _this11._fireDone({
+      _this14._fireDone({
         routes: routes
       });
     })["catch"](function (e) {
-      _this11._fireFailed(e);
+      _this14._fireFailed(e);
     });
   },
   promoteNodeToStopover: function promoteNodeToStopover(node) {
-    var _this12 = this;
+    var _this15 = this;
 
     if (node._promoted) {
       return this;
@@ -3109,10 +3246,10 @@ var Track = L.LayerGroup.extend({
 
     this._currentColorIndex += 1;
     nodes.forEach(function (e) {
-      e.removeFrom(_this12._getNodeContainer(e)).addTo(newNodesContainer);
+      e.removeFrom(_this15._getNodeContainer(e)).addTo(newNodesContainer);
     });
     edges.forEach(function (e) {
-      e.removeFrom(_this12._getEdgeContainer(e)).addTo(newEdgesContainer);
+      e.removeFrom(_this15._getEdgeContainer(e)).addTo(newEdgesContainer);
     });
     newNodesContainer.setStyle({
       colorName: Colors.nameOf(this._currentColorIndex)
@@ -3129,7 +3266,7 @@ var Track = L.LayerGroup.extend({
     return this;
   },
   demoteNodeToWaypoint: function demoteNodeToWaypoint(node) {
-    var _this13 = this;
+    var _this16 = this;
 
     if (node._demoted) {
       return this;
@@ -3172,10 +3309,10 @@ var Track = L.LayerGroup.extend({
     this._edgesContainers.splice(index, 1);
 
     nodes.forEach(function (e) {
-      e.removeFrom(_this13._getNodeContainer(e)).addTo(previousNodesContainer);
+      e.removeFrom(_this16._getNodeContainer(e)).addTo(previousNodesContainer);
     });
     edges.forEach(function (e) {
-      e.removeFrom(_this13._getEdgeContainer(e)).addTo(previousEdgesContainer);
+      e.removeFrom(_this16._getEdgeContainer(e)).addTo(previousEdgesContainer);
     });
 
     var _this$_getPrevious6 = this._getPrevious(nodes[0]),
@@ -3208,7 +3345,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":10,"./Edge":11,"./LayerContainer":12,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/interopRequireDefault":3,"@babel/runtime/regenerator":7}],18:[function(_dereq_,module,exports){
+},{"./Colors":6,"./Edge":7,"./LayerContainer":9,"@babel/runtime/helpers/asyncToGenerator":1,"@babel/runtime/helpers/interopRequireDefault":2,"@babel/runtime/regenerator":3}],15:[function(_dereq_,module,exports){
 (function (global){
 "use strict";
 
@@ -3239,6 +3376,8 @@ var _require5 = _dereq_('./Edge'),
 var colors = _dereq_('./Colors');
 
 _dereq_('./Loader');
+
+var latlngutils = _dereq_('./LatLngUtils');
 /** @module L.TrackDrawer */
 
 
@@ -3254,9 +3393,10 @@ L.TrackDrawer = {
   node: node,
   Edge: Edge,
   edge: edge,
-  colors: colors
+  colors: colors,
+  latlngutils: latlngutils
 };
 module.exports = L.TrackDrawer;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Colors":10,"./Edge":11,"./LayerContainer":12,"./Loader":13,"./Node":14,"./ToolBar":15,"./TraceModeBar":16,"./Track":17}]},{},[18]);
+},{"./Colors":6,"./Edge":7,"./LatLngUtils":8,"./LayerContainer":9,"./Loader":10,"./Node":11,"./ToolBar":12,"./TraceModeBar":13,"./Track":14}]},{},[15]);

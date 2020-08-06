@@ -7,11 +7,12 @@ const Edge = L.Polyline.extend({
   _demoted: true,
   _computation: 0,
 
-  options: {},
+  options: { metadata: {} },
 
   initialize(latlngs, options) {
     L.Polyline.prototype.initialize.call(this, latlngs, options);
     L.setOptions(this, options);
+    this.options.metadata = JSON.parse(JSON.stringify(this.options.metadata));
   },
 });
 

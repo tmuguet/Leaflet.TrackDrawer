@@ -11,12 +11,14 @@ const Node = L.Marker.extend({
     colorName: 'blue',
     opacity: 1,
     draggable: true,
+    metadata: {},
   },
 
   initialize(latlng, options) {
     L.Marker.prototype.initialize.call(this, latlng, options);
     L.setOptions(this, options);
     this.setType(this.options.type);
+    this.options.metadata = JSON.parse(JSON.stringify(this.options.metadata));
   },
 
   setType(type) {

@@ -12,12 +12,22 @@
 
 ### Properties
 
+* [metadata](_leaflet_.trackdrawer.nodeoptions.md#metadata)
 * [type](_leaflet_.trackdrawer.nodeoptions.md#type)
 
 ---
 
 ## Properties
 
+<a id="metadata"></a>
+
+### `<Optional>` metadata
+
+**● metadata**: *`Object`*
+
+Metadatas
+
+___
 <a id="type"></a>
 
 ### `<Optional>` type

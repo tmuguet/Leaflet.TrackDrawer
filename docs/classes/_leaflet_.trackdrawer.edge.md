@@ -24,7 +24,7 @@ Path in the track
 
 ### `<Private>` constructor
 
-⊕ **new Edge**(latlngs: *`LatLngExpression`[]*, options?: *`PolylineOptions`*): [Edge](_leaflet_.trackdrawer.edge.md)
+⊕ **new Edge**(latlngs: *`LatLngExpression`[]*, options?: *[EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md)*): [Edge](_leaflet_.trackdrawer.edge.md)
 
 Creates a new path.
 
@@ -33,7 +33,7 @@ Creates a new path.
 | Name | Type | Description |
 | ------ | ------ | ------ |
 | latlngs | `LatLngExpression`[] |  Array of geographical point |
-| `Optional` options | `PolylineOptions` |  Options |
+| `Optional` options | [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md) |  Options |
 
 **Returns:** [Edge](_leaflet_.trackdrawer.edge.md)
 

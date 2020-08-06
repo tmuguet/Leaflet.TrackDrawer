@@ -124,7 +124,7 @@ const Track = L.LayerGroup.extend({
         this.options.router.route(
           [L.Routing.waypoint(previousMarker.getLatLng()), L.Routing.waypoint(marker.getLatLng())],
           (err, result) => {
-            done(err, result ? result[0].coordinates : null);
+            done(err, result ? result[0].coordinates : null, {});
           },
         );
       };
@@ -207,6 +207,119 @@ const Track = L.LayerGroup.extend({
     return latlngs;
   },
 
+  _stopoversToGeoJSON() {
+    const stopovers = [];
+    const features = [];
+
+    let currentNode = this._getNode(this._firstNodeId);
+
+    if (currentNode !== undefined) {
+      stopovers.push(currentNode);
+    }
+    this._nodesContainers.forEach(() => {
+      do {
+        const { nextEdge, nextNode } = this._getNext(currentNode);
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+
+      if (currentNode !== undefined) {
+        stopovers.push(currentNode);
+      }
+    });
+
+    const hasTrackStats = L.TrackStats !== undefined;
+    stopovers.forEach((node, idx) => {
+      const e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
+      const properties = JSON.parse(JSON.stringify(node.options.metadata));
+      properties.index = idx;
+
+      features.push({
+        type: 'Feature',
+        properties,
+        geometry: {
+          type: 'Point',
+          coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat],
+        },
+      });
+    });
+
+    return features;
+  },
+
+  _edgesToFlatGeoJSON() {
+    const hasTrackStats = L.TrackStats !== undefined;
+    const feature = {
+      type: 'Feature',
+      properties: { index: 0 },
+      geometry: {
+        type: 'LineString',
+        coordinates: [],
+      },
+    };
+
+    let currentNode = this._getNode(this._firstNodeId);
+    this._nodesContainers.forEach(() => {
+      do {
+        const { nextEdge, nextNode } = this._getNext(currentNode);
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        nextEdge.getLatLngs().forEach((e) => {
+          const e2 = hasTrackStats ? L.TrackStats.cache.getAll(e) : e;
+          feature.geometry.coordinates.push('z' in e2 && e2.z !== null ? [e2.lng, e2.lat, e2.z] : [e2.lng, e2.lat]);
+        });
+
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+    });
+
+    return feature;
+  },
+
+  _edgesToGeoJSON() {
+    const hasTrackStats = L.TrackStats !== undefined;
+    const features = [];
+
+    let currentNode = this._getNode(this._firstNodeId);
+    this._nodesContainers.forEach((_c, idx) => {
+      do {
+        const { nextEdge, nextNode } = this._getNext(currentNode);
+        if (currentNode === undefined || nextEdge === undefined) {
+          break;
+        }
+
+        const properties = JSON.parse(JSON.stringify(nextEdge.options.metadata));
+        properties.index = idx;
+
+        const feature = {
+          type: 'Feature',
+          properties,
+          geometry: {
+            type: 'LineString',
+            coordinates: [],
+          },
+        };
+
+        nextEdge.getLatLngs().forEach((e) => {
+          const e2 = hasTrackStats ? L.TrackStats.cache.getAll(e) : e;
+          feature.geometry.coordinates.push('z' in e2 && e2.z !== null ? [e2.lng, e2.lat, e2.z] : [e2.lng, e2.lat]);
+        });
+
+        features.push(feature);
+
+        currentNode = nextNode;
+      } while (currentNode.options.type !== 'stopover');
+    });
+
+    return features;
+  },
+
   toGeoJSON(exportStopovers = true, exportAsFlat = false) {
     const geojson = {
       type: 'FeatureCollection',
@@ -214,69 +327,13 @@ const Track = L.LayerGroup.extend({
     };
 
     if (exportStopovers) {
-      let currentNode = this._getNode(this._firstNodeId);
-      const stopovers = [];
-      if (currentNode !== undefined) {
-        stopovers.push(currentNode);
-      }
-      this._nodesContainers.forEach(() => {
-        do {
-          const { nextEdge, nextNode } = this._getNext(currentNode);
-          if (currentNode === undefined || nextEdge === undefined) {
-            break;
-          }
-
-          currentNode = nextNode;
-        } while (currentNode.options.type !== 'stopover');
-
-        if (currentNode !== undefined) {
-          stopovers.push(currentNode);
-        }
-      });
-
-      const hasTrackStats = L.TrackStats !== undefined;
-      stopovers.forEach((node, idx) => {
-        const e = hasTrackStats ? L.TrackStats.cache.getAll(node.getLatLng()) : node.getLatLng();
-        geojson.features.push({
-          type: 'Feature',
-          properties: { index: idx },
-          geometry: {
-            type: 'Point',
-            coordinates: 'z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat],
-          },
-        });
-      });
+      this._stopoversToGeoJSON().forEach(f => geojson.features.push(f));
     }
 
-    const latlngs = this.getLatLngs();
-
     if (exportAsFlat) {
-      const feature = {
-        type: 'Feature',
-        properties: { index: 0 },
-        geometry: {
-          type: 'LineString',
-          coordinates: [],
-        },
-      };
-      latlngs.forEach((l) => {
-        l.forEach((e) => {
-          feature.geometry.coordinates.push('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat]);
-        });
-      });
-      geojson.features.push(feature);
+      geojson.features.push(this._edgesToFlatGeoJSON());
     } else {
-      latlngs.forEach((l, idx) => {
-        const feature = {
-          type: 'Feature',
-          properties: { index: idx },
-          geometry: {
-            type: 'LineString',
-            coordinates: l.map(e => ('z' in e && e.z !== null ? [e.lng, e.lat, e.z] : [e.lng, e.lat])),
-          },
-        };
-        geojson.features.push(feature);
-      });
+      this._edgesToGeoJSON().forEach(f => geojson.features.push(f));
     }
 
     return geojson;
@@ -285,14 +342,16 @@ const Track = L.LayerGroup.extend({
   getState() {
     const state = [
       {
-        version: 1,
+        version: 2,
         start: undefined,
+        metadata: undefined,
       },
     ];
     let currentNode = this._getNode(this._firstNodeId);
 
     if (currentNode !== undefined) {
       state[0].start = encodeLatLng(currentNode.getLatLng());
+      state[0].metadata = JSON.parse(JSON.stringify(currentNode.options.metadata));
     }
 
     this._nodesContainers.forEach(() => {
@@ -307,6 +366,10 @@ const Track = L.LayerGroup.extend({
         group.push({
           end: encodeLatLng(nextNode.getLatLng()),
           edge: encodeLatLngs(nextEdge.getLatLngs()),
+          metadata: {
+            node: JSON.parse(JSON.stringify(nextNode.options.metadata)),
+            edge: JSON.parse(JSON.stringify(nextEdge.options.metadata)),
+          },
         });
 
         currentNode = nextNode;
@@ -335,6 +398,28 @@ const Track = L.LayerGroup.extend({
     if (this._fireEvents && this._computing === 0) this.fire('TrackDrawer:failed', { message: error.message });
   },
 
+  async refreshEdges(routingCallback) {
+    const callback = routingCallback || this.options.routingCallback;
+
+    this._fireStart();
+    const oldValue = this._fireEvents;
+    this._fireEvents = false;
+
+    const promises = [];
+    this._nodesContainers.forEach((container) => {
+      const markers = container.getLayers();
+      markers.forEach((marker) => {
+        promises.push(this.onMoveNode(marker, callback));
+      });
+    });
+
+    await Promise.all(promises);
+
+    this._fireEvents = oldValue;
+    this._fireDone();
+    return this;
+  },
+
   clean() {
     this._fireStart();
     this._edgesContainers.clean();
@@ -348,8 +433,8 @@ const Track = L.LayerGroup.extend({
     return this;
   },
 
-  _createNode(latlng) {
-    return L.TrackDrawer.node(latlng);
+  _createNode(latlng, metadata = {}) {
+    return L.TrackDrawer.node(latlng, { metadata });
   },
 
   async restoreState(state, nodeCallback) {
@@ -364,10 +449,14 @@ const Track = L.LayerGroup.extend({
     const routes = [];
     const promises = [];
 
+    let version;
+
     state.forEach((group, i) => {
       if (i === 0) {
+        // eslint-disable-next-line prefer-destructuring
+        version = group.version;
         if (group.start) {
-          const marker = callback.call(null, decodeLatLng(group.start));
+          const marker = callback.call(null, decodeLatLng(group.start), version >= 2 ? group.metadata : {});
           promises.push(
             this.addNode(
               marker,
@@ -382,7 +471,7 @@ const Track = L.LayerGroup.extend({
       }
 
       group.forEach((segment, j) => {
-        const marker = callback.call(null, decodeLatLng(segment.end));
+        const marker = callback.call(null, decodeLatLng(segment.end), version >= 2 ? segment.metadata.node : {});
         if (j === group.length - 1 && i < state.length - 1) {
           stopovers.push(marker);
         }
@@ -393,7 +482,7 @@ const Track = L.LayerGroup.extend({
             (from, to, done) => {
               const edge = decodeLatLngs(segment.edge);
               routes.push({ from, to, edge });
-              done(null, edge);
+              done(null, edge, version >= 2 ? segment.metadata.edge : {});
             },
             true,
           ),
@@ -463,11 +552,12 @@ const Track = L.LayerGroup.extend({
     }
   },
 
-  _createEdge(previousNode, node) {
+  _createEdge(previousNode, node, metadata = {}) {
     const edgesContainer = this._edgesContainers.get(this._getNodeContainerIndex(previousNode));
     const edge = new Edge([previousNode.getLatLng(), node.getLatLng()], {
       color: Colors.nameToRgb(previousNode.options.colorName),
       dashArray: '4',
+      metadata,
     }).addTo(edgesContainer);
     const id = edgesContainer.getLayerId(edge);
 
@@ -579,7 +669,7 @@ const Track = L.LayerGroup.extend({
     const currentComputation = previousEdge._computation;
 
     return new Promise((resolve, reject) => {
-      callback.call(null, previousNode, node, (err, route) => {
+      callback.call(null, previousNode, node, (err, route, metadata = {}) => {
         if (err !== null) {
           reject(err);
           return;
@@ -591,6 +681,7 @@ const Track = L.LayerGroup.extend({
           previousNode.setLatLng(L.latLng(route[0]));
           node.setLatLng(L.latLng(route[route.length - 1]));
           previousEdge.setLatLngs(route);
+          previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
           previousEdge.setStyle({ dashArray: null });
         }
 
@@ -625,7 +716,7 @@ const Track = L.LayerGroup.extend({
     const currentComputation2 = edge2._computation;
 
     const promise1 = new Promise((resolve, reject) => {
-      callback.call(null, startMarker, node, (err, route1) => {
+      callback.call(null, startMarker, node, (err, route1, metadata1 = {}) => {
         if (err !== null) {
           reject(err);
           return;
@@ -635,6 +726,7 @@ const Track = L.LayerGroup.extend({
           startMarker.setLatLng(L.latLng(route1[0]));
           node.setLatLng(L.latLng(route1[route1.length - 1]));
           edge1.setLatLngs(route1);
+          edge1.options.metadata = JSON.parse(JSON.stringify(metadata1));
           edge1.setStyle({ dashArray: null });
         }
         resolve({ from: startMarker, to: node, edge: edge1 });
@@ -642,7 +734,7 @@ const Track = L.LayerGroup.extend({
     });
 
     const promise2 = new Promise((resolve, reject) => {
-      callback.call(null, node, endMarker, (err, route2) => {
+      callback.call(null, node, endMarker, (err, route2, metadata2 = {}) => {
         if (err !== null) {
           reject(err);
           return;
@@ -652,6 +744,7 @@ const Track = L.LayerGroup.extend({
           node.setLatLng(L.latLng(route2[0]));
           endMarker.setLatLng(L.latLng(route2[route2.length - 1]));
           edge2.setLatLngs(route2);
+          edge2.options.metadata = JSON.parse(JSON.stringify(metadata2));
           edge2.setStyle({ dashArray: null });
         }
         resolve({ from: node, to: endMarker, edge: edge2 });
@@ -708,7 +801,7 @@ const Track = L.LayerGroup.extend({
 
       promises.push(
         new Promise((resolve, reject) => {
-          callback.call(null, previousNode, marker, (err, route) => {
+          callback.call(null, previousNode, marker, (err, route, metadata = {}) => {
             if (err !== null) {
               reject(err);
               return;
@@ -717,6 +810,7 @@ const Track = L.LayerGroup.extend({
             if (previousEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[route.length - 1]));
               previousEdge.setLatLngs(route);
+              previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
               previousEdge.setStyle({ dashArray: null });
             }
 
@@ -732,7 +826,7 @@ const Track = L.LayerGroup.extend({
 
       promises.push(
         new Promise((resolve, reject) => {
-          callback.call(null, marker, nextNode, (err, route) => {
+          callback.call(null, marker, nextNode, (err, route, metadata = {}) => {
             if (err !== null) {
               reject(err);
               return;
@@ -741,6 +835,7 @@ const Track = L.LayerGroup.extend({
             if (nextEdge._computation === currentComputation) {
               marker.setLatLng(L.latLng(route[0]));
               nextEdge.setLatLngs(route);
+              nextEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
               nextEdge.setStyle({ dashArray: null });
             }
 
@@ -790,7 +885,7 @@ const Track = L.LayerGroup.extend({
 
       promises.push(
         new Promise((resolve, reject) => {
-          callback.call(null, previousNode, nextNode, (err, route) => {
+          callback.call(null, previousNode, nextNode, (err, route, metadata = {}) => {
             if (err !== null) {
               reject(err);
               return;
@@ -798,6 +893,7 @@ const Track = L.LayerGroup.extend({
 
             if (previousEdge._computation === currentComputation) {
               previousEdge.setLatLngs(route).setStyle({ dashArray: null });
+              previousEdge.options.metadata = JSON.parse(JSON.stringify(metadata));
             }
 
             resolve({ from: previousNode, to: nextNode, edge: previousEdge });

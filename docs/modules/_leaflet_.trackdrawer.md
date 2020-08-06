@@ -11,7 +11,7 @@ var track = L.TrackDrawer.track({
 routingCallback: function(markerStart, markerEnd, done) {
 // Do stuff
 var latlngs = [markerStart.getLatLng(), markerEnd.getLatLng()];
-done(null, latlngs);
+done(null, latlngs, {my: 'metadata'});
 },
 }).addTo(map);
 
@@ -42,6 +42,7 @@ router: L.Routing.osrmv1(),
 
 ### Interfaces
 
+* [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md)
 * [EdgesList](../interfaces/_leaflet_.trackdrawer.edgeslist.md)
 * [NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md)
 * [NodesList](../interfaces/_leaflet_.trackdrawer.nodeslist.md)
@@ -95,7 +96,7 @@ Example:
 
 ```javascript
 function(latlng) {
-var marker = L.TrackDrawer.node(latlng);
+var marker = L.TrackDrawer.node(latlng, { metadata: { hello: 'world' } });
 ctrl._bindMarkerEvents(marker);
 return marker;
 }
@@ -119,13 +120,13 @@ ___
 
 **Ƭ RoutingCallback**: *`function`*
 
-Function to implement to compute the route between two markers. Once computation is done, must call `done(null, <result>)` if successful, or `done(<error>)` if failure.
+Function to implement to compute the route between two markers. Once computation is done, must call `done(null, <result>, <object>)` if successful, or `done(<error>)` if failure.
 
 Example:
 
 ```javascript
 function(previousMarker, marker, done) {
-done(null, [previousMarker.getLatLng(), marker.getLatLng()]);
+done(null, [previousMarker.getLatLng(), marker.getLatLng()], {hello: 'world'});
 }
 ```
 
