@@ -46,23 +46,25 @@ if (L.FileLayer !== undefined) {
         const properties = latlngs[i][1];
         for (let j = 0; j < latlngs[i][0].length; j += 1) {
           const l = latlngs[i][0][j];
-          if (lastMarker === undefined) {
-            lastMarker = L.TrackDrawer.node(l[0]);
-            await this.addNode(lastMarker, undefined, true);
+          if (l.length > 0) {
+            if (lastMarker === undefined) {
+              lastMarker = L.TrackDrawer.node(l[0]);
+              await this.addNode(lastMarker, undefined, true);
+              if (hasToolbar) this._bindMarkerEvents(lastMarker);
+            }
+
+            lastMarker = L.TrackDrawer.node(l[l.length - 1], {
+              type: j === latlngs[i][0].length - 1 ? 'stopover' : 'waypoint',
+            });
+            await this.addNode(
+              lastMarker,
+              (_n1, _n2, cb) => {
+                cb(null, l, properties);
+              },
+              true,
+            );
             if (hasToolbar) this._bindMarkerEvents(lastMarker);
           }
-
-          lastMarker = L.TrackDrawer.node(l[l.length - 1], {
-            type: j === latlngs[i][0].length - 1 ? 'stopover' : 'waypoint',
-          });
-          await this.addNode(
-            lastMarker,
-            (_n1, _n2, cb) => {
-              cb(null, l, properties);
-            },
-            true,
-          );
-          if (hasToolbar) this._bindMarkerEvents(lastMarker);
         }
       }
       /* eslint-enable no-await-in-loop */

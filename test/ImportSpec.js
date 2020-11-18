@@ -219,4 +219,37 @@ describe('Importing track', () => {
     const state = track.getState();
     expect(state).to.deep.equal(expectedState);
   });
+
+  it('Importing a FeatureCollection with empty coordinates should ignore them', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback(previousMarker, marker, done) {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    const geojson = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: { hello: 'world' },
+          geometry: {
+            type: 'LineString',
+            coordinates: [],
+          },
+        },
+      ],
+    };
+
+    const expectedState = [{ version: 2, start: undefined, metadata: undefined }];
+
+    await track._dataLoadedHandler(L.geoJSON(geojson), false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
 });
