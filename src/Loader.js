@@ -73,6 +73,22 @@ if (L.FileLayer !== undefined) {
       this._fireDone();
     },
 
+    loadData(data, name, ext, insertWaypoints = false) {
+      return new Promise((resolve, reject) => {
+        this._fileLoader.on('data:loaded', async (event) => {
+          await this._dataLoadedHandler(event.layer, insertWaypoints);
+          this._fileLoader.off();
+          resolve();
+        });
+        this._fileLoader.on('data:error', (error) => {
+          this._fileLoader.off();
+          reject(error.error);
+        });
+
+        this._fileLoader.loadData(data, name, ext);
+      });
+    },
+
     loadFile(file, insertWaypoints = false) {
       return new Promise((resolve, reject) => {
         this._fileLoader.on('data:loaded', async (event) => {

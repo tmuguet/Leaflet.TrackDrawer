@@ -252,4 +252,106 @@ describe('Importing track', () => {
     const state = track.getState();
     expect(state).to.deep.equal(expectedState);
   });
+
+  it('Importing GeoJSON data should give a track', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback(previousMarker, marker, done) {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    const geojson = `{
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": { "hello": "world" },
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [[6.064453125000001, 44.974635142416496], [6.098098754882813, 44.95301534523602]]
+          }
+        }
+      ]
+    }`;
+
+    const expectedState = [
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
+      [
+        {
+          end: [44.95301534523602, 6.098098754882813],
+          edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: {}, edge: { hello: 'world' } },
+        },
+      ],
+    ];
+
+    await track.loadData(geojson, 'track', 'geojson', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
+
+  it('Importing KML data should give a track', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback(previousMarker, marker, done) {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    const kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Hike</name><Placemark><ExtendedData><Data name="hello"><value>world</value></Data></ExtendedData><LineString><coordinates>6.064453125000001,44.974635142416496 6.098098754882813,44.95301534523602</coordinates></LineString></Placemark></Document></kml>';
+
+    const expectedState = [
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
+      [
+        {
+          end: [44.95301534523602, 6.098098754882813],
+          edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: {}, edge: { hello: 'world' } },
+        },
+      ],
+    ];
+
+    await track.loadData(kml, 'track', 'kml', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
+
+  it('Importing GPX data should give a track', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback(previousMarker, marker, done) {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    const gpx = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="map2gpx"><metadata/><trk><name>Track</name><desc>hello world</desc><trkseg><trkpt lat="44.974635142416496" lon="6.064453125000001"></trkpt><trkpt lat="44.95301534523602" lon="6.098098754882813"></trkpt></trkseg></trk></gpx>';
+
+    const expectedState = [
+      { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
+      [
+        {
+          end: [44.95301534523602, 6.098098754882813],
+          edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
+          metadata: { node: {}, edge: { name: 'Track', desc: 'hello world' } },
+        },
+      ],
+    ];
+
+    await track.loadData(gpx, 'track', 'gpx', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
 });
