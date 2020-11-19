@@ -16,7 +16,7 @@
     "test": "karma start karma.conf.js",
     "doc": "typedoc --out docs/ --ignoreCompilerErrors --includeDeclarations --excludeExternals --name \"Leaflet.TrackDrawer\" --theme markdown --mdHideSources --readme none --mode file src/index.d.ts",
     "validate": "npm run bundle && npm run eslint && npm run test",
-    "version": "npm run validate && npm run doc"
+    "version": "npm run validate && npm run doc && git add docs dist"
   },
   "repository": "github:tmuguet/Leaflet.TrackDrawer",
   "author": {
