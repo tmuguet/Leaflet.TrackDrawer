@@ -37,6 +37,9 @@ Main entry point.
 * [getStepsContainer](_leaflet_.trackdrawer.track.md#getstepscontainer)
 * [hasNodes](_leaflet_.trackdrawer.track.md#hasnodes)
 * [insertNode](_leaflet_.trackdrawer.track.md#insertnode)
+* [loadData](_leaflet_.trackdrawer.track.md#loaddata)
+* [loadFile](_leaflet_.trackdrawer.track.md#loadfile)
+* [loadUrl](_leaflet_.trackdrawer.track.md#loadurl)
 * [onDragNode](_leaflet_.trackdrawer.track.md#ondragnode)
 * [onDragStartNode](_leaflet_.trackdrawer.track.md#ondragstartnode)
 * [onMoveNode](_leaflet_.trackdrawer.track.md#onmovenode)
@@ -234,6 +237,63 @@ Inserts a node within an edge.
 | `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |  Callback to determine paths between previous/next nodes and this one |
 
 **Returns:** `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+
+___
+<a id="loaddata"></a>
+
+###  loadData
+
+▸ **loadData**(data: *`string`*, name: *`string`*, ext: *`string`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+
+Creates a track from a string
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| data | `string` |  Raw data (JSON, GPX, KML) |
+| name | `string` |  Name of the track |
+| ext | `string` |  Extension of the data (json, gpx, kml) |
+| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+
+**Returns:** `Promise`<`void`>
+
+___
+<a id="loadfile"></a>
+
+###  loadFile
+
+▸ **loadFile**(file: *`Blob`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+
+Creates a track from a file or blob object
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| file | `Blob` |  File to import (JSON, GPX, KML) |
+| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+
+**Returns:** `Promise`<`void`>
+
+___
+<a id="loadurl"></a>
+
+###  loadUrl
+
+▸ **loadUrl**(url: *`string`*, useProxy?: *`boolean`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+
+Creates a track from a URL
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| url | `string` |  URL to import |
+| `Optional` useProxy | `boolean` |  If \`true\`, use proxy to bypass CORS restrictions (see \`fetch.php\`) (defaults to \`false\`) |
+| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+
+**Returns:** `Promise`<`void`>
 
 ___
 <a id="ondragnode"></a>

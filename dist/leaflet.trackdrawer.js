@@ -412,31 +412,36 @@ if (L.FileLayer !== undefined) {
                                   case 0:
                                     l = latlngs[i][0][j];
 
+                                    if (!(l.length > 0)) {
+                                      _context.next = 11;
+                                      break;
+                                    }
+
                                     if (!(lastMarker === undefined)) {
-                                      _context.next = 6;
+                                      _context.next = 7;
                                       break;
                                     }
 
                                     lastMarker = L.TrackDrawer.node(l[0]);
-                                    _context.next = 5;
+                                    _context.next = 6;
                                     return _this2.addNode(lastMarker, undefined, true);
 
-                                  case 5:
+                                  case 6:
                                     if (hasToolbar) _this2._bindMarkerEvents(lastMarker);
 
-                                  case 6:
+                                  case 7:
                                     lastMarker = L.TrackDrawer.node(l[l.length - 1], {
                                       type: j === latlngs[i][0].length - 1 ? 'stopover' : 'waypoint'
                                     });
-                                    _context.next = 9;
+                                    _context.next = 10;
                                     return _this2.addNode(lastMarker, function (_n1, _n2, cb) {
                                       cb(null, l, properties);
                                     }, true);
 
-                                  case 9:
+                                  case 10:
                                     if (hasToolbar) _this2._bindMarkerEvents(lastMarker);
 
-                                  case 10:
+                                  case 11:
                                   case "end":
                                     return _context.stop();
                                 }
@@ -500,10 +505,10 @@ if (L.FileLayer !== undefined) {
 
       return _dataLoadedHandler;
     }(),
-    loadFile: function loadFile(file) {
+    loadData: function loadData(data, name, ext) {
       var _this3 = this;
 
-      var insertWaypoints = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var insertWaypoints = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       return new Promise(function (resolve, reject) {
         _this3._fileLoader.on('data:loaded',
         /*#__PURE__*/
@@ -542,11 +547,56 @@ if (L.FileLayer !== undefined) {
           reject(error.error);
         });
 
-        _this3._fileLoader.load(file);
+        _this3._fileLoader.loadData(data, name, ext);
+      });
+    },
+    loadFile: function loadFile(file) {
+      var _this4 = this;
+
+      var insertWaypoints = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      return new Promise(function (resolve, reject) {
+        _this4._fileLoader.on('data:loaded',
+        /*#__PURE__*/
+        function () {
+          var _ref2 = _asyncToGenerator(
+          /*#__PURE__*/
+          regeneratorRuntime.mark(function _callee3(event) {
+            return regeneratorRuntime.wrap(function _callee3$(_context5) {
+              while (1) {
+                switch (_context5.prev = _context5.next) {
+                  case 0:
+                    _context5.next = 2;
+                    return _this4._dataLoadedHandler(event.layer, insertWaypoints);
+
+                  case 2:
+                    _this4._fileLoader.off();
+
+                    resolve();
+
+                  case 4:
+                  case "end":
+                    return _context5.stop();
+                }
+              }
+            }, _callee3);
+          }));
+
+          return function (_x3) {
+            return _ref2.apply(this, arguments);
+          };
+        }());
+
+        _this4._fileLoader.on('data:error', function (error) {
+          _this4._fileLoader.off();
+
+          reject(error.error);
+        });
+
+        _this4._fileLoader.load(file);
       });
     },
     loadUrl: function loadUrl(url) {
-      var _this4 = this;
+      var _this5 = this;
 
       var useProxy = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var insertWaypoints = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
@@ -557,44 +607,44 @@ if (L.FileLayer !== undefined) {
         corslite(proxiedUrl, function (err, resp) {
           if (!err) {
             try {
-              _this4._fileLoader.on('data:loaded',
+              _this5._fileLoader.on('data:loaded',
               /*#__PURE__*/
               function () {
-                var _ref2 = _asyncToGenerator(
+                var _ref3 = _asyncToGenerator(
                 /*#__PURE__*/
-                regeneratorRuntime.mark(function _callee3(event) {
-                  return regeneratorRuntime.wrap(function _callee3$(_context5) {
+                regeneratorRuntime.mark(function _callee4(event) {
+                  return regeneratorRuntime.wrap(function _callee4$(_context6) {
                     while (1) {
-                      switch (_context5.prev = _context5.next) {
+                      switch (_context6.prev = _context6.next) {
                         case 0:
-                          _context5.next = 2;
-                          return _this4._dataLoadedHandler(event.layer, insertWaypoints);
+                          _context6.next = 2;
+                          return _this5._dataLoadedHandler(event.layer, insertWaypoints);
 
                         case 2:
-                          _this4._fileLoader.off();
+                          _this5._fileLoader.off();
 
                           resolve();
 
                         case 4:
                         case "end":
-                          return _context5.stop();
+                          return _context6.stop();
                       }
                     }
-                  }, _callee3);
+                  }, _callee4);
                 }));
 
-                return function (_x3) {
-                  return _ref2.apply(this, arguments);
+                return function (_x4) {
+                  return _ref3.apply(this, arguments);
                 };
               }());
 
-              _this4._fileLoader.on('data:error', function (error) {
-                _this4._fileLoader.off();
+              _this5._fileLoader.on('data:error', function (error) {
+                _this5._fileLoader.off();
 
                 reject(error.error);
               });
 
-              _this4._fileLoader.loadData(resp.responseText, filename, ext);
+              _this5._fileLoader.loadData(resp.responseText, filename, ext);
             } catch (ex) {
               reject(ex);
             }
