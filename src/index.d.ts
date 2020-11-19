@@ -364,6 +364,30 @@ function(latlng) {
        * @param node Node to demote
        */
       demoteNodeToWaypoint(node: Node): this;
+
+      /**
+       * Creates a track from a string
+       * @param data Raw data (JSON, GPX, KML)
+       * @param name Name of the track
+       * @param ext Extension of the data (json, gpx, kml)
+       * @param insertWaypoints If `true`, insert waypoints on the track every 100m (defaults to `false`)
+       */
+      loadData(data: string, name: string, ext: string, insertWaypoints?: booleau): Promise<void>
+
+      /**
+       * Creates a track from a file or blob object
+       * @param file File to import (JSON, GPX, KML)
+       * @param insertWaypoints If `true`, insert waypoints on the track every 100m (defaults to `false`)
+       */
+      loadFile(file: Blob, insertWaypoints?: booleau): Promise<void>
+
+      /**
+       * Creates a track from a URL
+       * @param url URL to import
+       * @param useProxy If `true`, use proxy to bypass CORS restrictions (see `fetch.php`) (defaults to `false`)
+       * @param insertWaypoints If `true`, insert waypoints on the track every 100m (defaults to `false`)
+       */
+      loadUrl(url: string, useProxy?: boolean, insertWaypoints?: booleau): Promise<void>
     }
 
     function track(options?: TrackOptions): Track;
