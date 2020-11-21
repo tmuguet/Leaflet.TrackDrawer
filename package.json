@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@mapbox/corslite": "0.0.7",
-    "@mapbox/togeojson": "^0.16.0",
+    "@tmcw/togeojson": "^4.2.0",
     "install": "^0.12.1",
     "leaflet": "^1.6.0",
     "leaflet-easybutton": "^2.4.0",
