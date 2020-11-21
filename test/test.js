@@ -1,14 +1,14 @@
 L.Map.include({
   loadAsPromise() {
     const _this = this;
-    return $.Deferred(function () {
+    return $.Deferred(function load() {
       _this.on('load', () => this.resolve());
     });
   },
 
   removeAsPromise() {
     const _this = this;
-    return $.Deferred(function () {
+    return $.Deferred(function remove() {
       _this.on('unload', () => this.resolve());
       _this.remove();
     });

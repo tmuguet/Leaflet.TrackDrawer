@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 describe('State', () => {
   let map;
 
@@ -16,7 +17,7 @@ describe('State', () => {
   describe('Legacy state', () => {
     it('Restoring version1 should work', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -84,7 +85,7 @@ describe('State', () => {
   describe('Restoring state', () => {
     it('getting restored state should give back same state', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -161,7 +162,7 @@ describe('State', () => {
 
     it('restoring empty state restore nothing', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -186,7 +187,7 @@ describe('State', () => {
   describe('Cleaning state', () => {
     it('cleaning state should give back initial state', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -261,7 +262,7 @@ describe('State', () => {
   describe('Modifying state', () => {
     it('demote to waypoints should flatten state', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -374,7 +375,7 @@ describe('State', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-      markers.forEach((m, i) => {
+      markers.forEach((m) => {
         track.demoteNodeToWaypoint(m);
       });
       expect(eventsTriggered).to.be.equal(3);
@@ -393,7 +394,7 @@ describe('State', () => {
 
     it('demote first node should not do anything', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -473,7 +474,7 @@ describe('State', () => {
 
     it('promoting to stopovers should expand state', async () => {
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -743,7 +744,10 @@ describe('State', () => {
       let eventsTriggered = 0;
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-      const marker = L.TrackDrawer.node(L.latLng(44.96274246792451, 6.073146737835567), { metadata: { hello: 'world' } });
+      const marker = L.TrackDrawer.node(
+        L.latLng(44.96274246792451, 6.073146737835567),
+        { metadata: { hello: 'world' } },
+      );
       const route = track
         .getStepsContainer()
         .get(0)
@@ -887,7 +891,7 @@ describe('State', () => {
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
       track.on('TrackDrawer:failed', () => (eventsFailureTriggered += 1));
 
-      const routingCallback = function (previousMarker, marker, done) {
+      const routingCallback = function routingCallback(previousMarker, marker, done) {
         done(new Error('error'), null);
       };
 
@@ -1029,6 +1033,7 @@ describe('State', () => {
       for (let i = 0; i < markers.length; i += 1) {
         const latlng = markers[i].getLatLng();
         markers[i].setLatLng(L.latLng(latlng.lat + 1, latlng.lng - 1));
+        // eslint-disable-next-line no-await-in-loop
         await track.onMoveNode(markers[i]);
       }
       expect(eventsTriggered).to.be.equal(9);
@@ -1177,13 +1182,14 @@ describe('State', () => {
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
       track.on('TrackDrawer:failed', () => (eventsFailureTriggered += 1));
 
-      const routingCallback = function (previousMarker, marker, done) {
+      const routingCallback = function routingCallback(previousMarker, marker, done) {
         done(new Error('error'), null);
       };
 
       for (let i = 0; i < markers.length; i += 1) {
         const latlng = markers[i].getLatLng();
         markers[i].setLatLng(L.latLng(latlng.lat + 1, latlng.lng - 1));
+        // eslint-disable-next-line no-await-in-loop
         await track.onMoveNode(markers[i], routingCallback);
       }
       expect(eventsTriggered).to.be.equal(0);
@@ -1278,6 +1284,7 @@ describe('State', () => {
       expect(track._currentStateIndex).to.be.equal(5);
 
       for (let i = 0; i < markers.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
         await track.removeNode(markers[i]);
         expect(eventsTriggered).to.be.equal(5 + i);
         expect(track._currentStateIndex).to.be.equal(6 + i);
@@ -1364,7 +1371,7 @@ describe('State', () => {
       track.on('TrackDrawer:done', () => (eventsTriggered += 1));
       track.on('TrackDrawer:failed', () => (eventsFailureTriggered += 1));
 
-      const routingCallback = function (previousMarker, marker, done) {
+      const routingCallback = function routingCallback(previousMarker, marker, done) {
         done(new Error('error'), null);
       };
 
@@ -1381,6 +1388,7 @@ describe('State', () => {
       expect(eventsFailureTriggered).to.be.equal(2);
 
       for (let i = 0; i < markers.length; i += 1) {
+        // eslint-disable-next-line no-await-in-loop
         await track.removeNode(markers[i], routingCallback);
       }
       expect(eventsTriggered).to.be.equal(7);

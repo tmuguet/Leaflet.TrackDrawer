@@ -12,7 +12,7 @@
     "bundle:polyfill": "npm run browserify:polyfill && npm run uglify:polyfill",
     "bundle:noruntime": "npm run browserify:noruntime && npm run uglify:noruntime",
     "bundle": "npm run bundle:polyfill && npm run bundle:noruntime",
-    "eslint": "eslint src/*.js",
+    "eslint": "eslint src/*.js test/*.js",
     "test": "karma start karma.conf.js",
     "doc": "typedoc --out docs/ --ignoreCompilerErrors --includeDeclarations --excludeExternals --name \"Leaflet.TrackDrawer\" --theme markdown --mdHideSources --readme none --mode file src/index.d.ts",
     "validate": "npm run bundle && npm run eslint && npm run test",

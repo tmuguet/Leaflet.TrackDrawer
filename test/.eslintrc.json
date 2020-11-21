@@ -15,6 +15,7 @@
   "globals": {
     "L": "readonly",
     "expect": "readonly",
-    "sinon": "readonly"
+    "sinon": "readonly",
+    "happen": "readonly"
   }
 }
