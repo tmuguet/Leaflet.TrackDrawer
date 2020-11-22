@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [TraceModeBarOptions](../interfaces/_leaflet_.trackdrawer.tracemodebaroptions.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / TraceModeBarOptions
 
 # Interface: TraceModeBarOptions
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ TraceModeBarOptions**
+  ↳ **TraceModeBarOptions**
 
 ## Index
 
@@ -14,17 +16,10 @@
 
 * [mode](_leaflet_.trackdrawer.tracemodebaroptions.md#mode)
 
----
-
 ## Properties
 
-<a id="mode"></a>
+### mode
 
-###  mode
-
-**● mode**: *`String`*
+•  **mode**: String
 
 Id of the default mode
-
-___
-

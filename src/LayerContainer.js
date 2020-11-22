@@ -18,7 +18,7 @@ module.exports = L.Evented.extend({
   /* eslint-disable prefer-rest-params */
   splice() {
     const ret = this._elements.splice(...arguments);
-    ret.forEach(x => x.removeFrom(this._parent).removeEventParent(this));
+    ret.forEach((x) => x.removeFrom(this._parent).removeEventParent(this));
 
     if (arguments.length > 2) {
       const args = Array.prototype.slice.call(arguments, 2);
@@ -42,14 +42,14 @@ module.exports = L.Evented.extend({
   },
 
   getLayer(id) {
-    const parentLayer = this._elements.find(x => x.getLayer(id) !== undefined);
+    const parentLayer = this._elements.find((x) => x.getLayer(id) !== undefined);
     return parentLayer !== undefined ? parentLayer.getLayer(id) : undefined;
   },
   getLayerId(layer) {
-    const parentLayer = this._elements.find(x => x.hasLayer(layer));
+    const parentLayer = this._elements.find((x) => x.hasLayer(layer));
     return parentLayer !== undefined ? parentLayer.getLayerId(layer) : undefined;
   },
   getLayerIndex(layer) {
-    return this._elements.findIndex(x => x.hasLayer(layer));
+    return this._elements.findIndex((x) => x.hasLayer(layer));
   },
 });

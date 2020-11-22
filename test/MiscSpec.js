@@ -66,7 +66,7 @@ describe('Misc', () => {
         ],
       ];
 
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+      await track.restoreState(state, (latlng) => L.TrackDrawer.node(latlng));
 
       const bounds = track.getBounds();
       state.forEach((group, idx) => {

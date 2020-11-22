@@ -88,7 +88,7 @@ describe('Exporting track', () => {
       ],
     ];
 
-    await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+    await track.restoreState(state, (latlng) => L.TrackDrawer.node(latlng));
     expect(eventsTriggered).to.be.equal(1);
 
     const latlngs = track.getLatLngs();

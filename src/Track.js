@@ -274,7 +274,6 @@ const Track = L.LayerGroup.extend({
           feature.geometry.coordinates.push('z' in e2 && e2.z !== null ? [e2.lng, e2.lat, e2.z] : [e2.lng, e2.lat]);
         });
 
-
         currentNode = nextNode;
       } while (currentNode.options.type !== 'stopover');
     });
@@ -327,13 +326,13 @@ const Track = L.LayerGroup.extend({
     };
 
     if (exportStopovers) {
-      this._stopoversToGeoJSON().forEach(f => geojson.features.push(f));
+      this._stopoversToGeoJSON().forEach((f) => geojson.features.push(f));
     }
 
     if (exportAsFlat) {
       geojson.features.push(this._edgesToFlatGeoJSON());
     } else {
-      this._edgesToGeoJSON().forEach(f => geojson.features.push(f));
+      this._edgesToGeoJSON().forEach((f) => geojson.features.push(f));
     }
 
     return geojson;
@@ -492,7 +491,7 @@ const Track = L.LayerGroup.extend({
 
     await Promise.all(promises);
 
-    stopovers.forEach(m => this.promoteNodeToStopover(m));
+    stopovers.forEach((m) => this.promoteNodeToStopover(m));
 
     this._fireEvents = oldValue;
     this._fireDone({ routes });
@@ -611,9 +610,9 @@ const Track = L.LayerGroup.extend({
     }
 
     if (node.options.draggable) {
-      node.on('dragstart', e => this._onDragStartNode(e.target));
-      node.on('drag', e => this._onDragNode(e.target));
-      node.on('moveend', e => this.onMoveNode(e.target));
+      node.on('dragstart', (e) => this._onDragStartNode(e.target));
+      node.on('drag', (e) => this._onDragNode(e.target));
+      node.on('moveend', (e) => this.onMoveNode(e.target));
     }
 
     node.addTo(nodesContainer);

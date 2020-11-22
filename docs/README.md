@@ -1,11 +1,11 @@
+**[Leaflet.TrackDrawer](README.md)**
 
-#  Leaflet.TrackDrawer
+> Globals
+
+# Leaflet.TrackDrawer
 
 ## Index
 
 ### Modules
 
 * ["leaflet"](modules/_leaflet_.md)
-
----
-

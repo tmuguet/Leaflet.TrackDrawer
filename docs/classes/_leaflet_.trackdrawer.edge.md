@@ -1,4 +1,6 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [Edge](../classes/_leaflet_.trackdrawer.edge.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / Edge
 
 # Class: Edge
 
@@ -6,9 +8,9 @@ Path in the track
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ Edge**
+  ↳ **Edge**
 
 ## Index
 
@@ -16,26 +18,19 @@ Path in the track
 
 * [constructor](_leaflet_.trackdrawer.edge.md#constructor)
 
----
-
 ## Constructors
 
-<a id="constructor"></a>
+### constructor
 
-### `<Private>` constructor
-
-⊕ **new Edge**(latlngs: *`LatLngExpression`[]*, options?: *[EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md)*): [Edge](_leaflet_.trackdrawer.edge.md)
+\+ `Private`**new Edge**(`latlngs`: LatLngExpression[], `options?`: [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md)): [Edge](_leaflet_.trackdrawer.edge.md)
 
 Creates a new path.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| latlngs | `LatLngExpression`[] |  Array of geographical point |
-| `Optional` options | [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md) |  Options |
+Name | Type | Description |
+------ | ------ | ------ |
+`latlngs` | LatLngExpression[] | Array of geographical point |
+`options?` | [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md) | Options  |
 
 **Returns:** [Edge](_leaflet_.trackdrawer.edge.md)
-
-___
-

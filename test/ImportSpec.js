@@ -173,6 +173,7 @@ describe('Importing track', () => {
         },
       ],
     ];
+    /* eslint-enable max-len */
 
     await track._dataLoadedHandler(L.geoJSON(geojson), false);
     expect(eventsTriggered).to.be.equal(1);
@@ -340,7 +341,7 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-    /* eslint-disable max-len */
+    /* eslint-disable-next-line max-len */
     const kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Hike</name><Placemark><ExtendedData><Data name="hello"><value>world</value></Data></ExtendedData><LineString><coordinates>6.064453125000001,44.974635142416496 6.098098754882813,44.95301534523602</coordinates></LineString></Placemark></Document></kml>';
 
     const expectedState = [
@@ -372,7 +373,7 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-    /* eslint-disable max-len */
+    /* eslint-disable-next-line max-len */
     const kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Hike</name><Placemark><ExtendedData><Data name="hello"><value>world</value></Data></ExtendedData><LineString><coordinates/></LineString></Placemark></Document></kml>';
 
     const expectedState = [{ version: 2, start: undefined, metadata: undefined }];
@@ -394,7 +395,7 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-    /* eslint-disable max-len */
+    /* eslint-disable-next-line max-len */
     const gpx = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="map2gpx"><metadata/><trk><name>Track</name><desc>hello world</desc><trkseg><trkpt lat="44.974635142416496" lon="6.064453125000001"></trkpt><trkpt lat="44.95301534523602" lon="6.098098754882813"></trkpt></trkseg></trk></gpx>';
 
     const expectedState = [
@@ -426,7 +427,7 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
-    /* eslint-disable max-len */
+    /* eslint-disable-next-line max-len */
     const gpx = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="map2gpx"><metadata/><trk><name>Track</name><desc>hello world</desc><trkseg/></trk></gpx>';
 
     const expectedState = [{ version: 2, start: undefined, metadata: undefined }];

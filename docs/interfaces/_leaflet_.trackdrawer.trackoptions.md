@@ -1,14 +1,17 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / TrackOptions
 
 # Interface: TrackOptions
 
 Available options.
 
-Either `routingCallback` or `router` must be provided. If `routing` is provided, `routingCallback` will be ignored.
+Either `routingCallback` or `router` must be provided.
+If `routing` is provided, `routingCallback` will be ignored.
 
 ## Hierarchy
 
-**TrackOptions**
+* **TrackOptions**
 
 ## Index
 
@@ -20,51 +23,40 @@ Either `routingCallback` or `router` must be provided. If `routing` is provided,
 * [undoDepth](_leaflet_.trackdrawer.trackoptions.md#undodepth)
 * [undoable](_leaflet_.trackdrawer.trackoptions.md#undoable)
 
----
-
 ## Properties
 
-<a id="debug"></a>
+### debug
 
-### `<Optional>` debug
-
-**● debug**: *`boolean`*
+• `Optional` **debug**: boolean
 
 ___
-<a id="router"></a>
 
-### `<Optional>` router
+### router
 
-**● router**: *`Routing.IRouter`*
+• `Optional` **router**: Routing.IRouter
 
 Back-end from [Leaflet Routing Machine](http://www.liedman.net/leaflet-routing-machine/) used to get the route between two markers.
 
 ___
-<a id="routingcallback"></a>
 
-### `<Optional>` routingCallback
+### routingCallback
 
-**● routingCallback**: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*
+• `Optional` **routingCallback**: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)
 
 Callback used to get the route between two markers. This option is not necessary if `router` is specified.
 
 ___
-<a id="undodepth"></a>
 
-### `<Optional>` undoDepth
+### undoDepth
 
-**● undoDepth**: *`number`*
+• `Optional` **undoDepth**: number
 
 Number of states to keep in memory if `undoable` is `true`. Default is `30`
 
 ___
-<a id="undoable"></a>
 
-### `<Optional>` undoable
+### undoable
 
-**● undoable**: *`boolean`*
+• `Optional` **undoable**: boolean
 
 If `true`, all actions are undoable via `undo` and `redo` methods. Default is `true`
-
-___
-

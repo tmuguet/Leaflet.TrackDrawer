@@ -1,12 +1,11 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / "leaflet"
 
 # Module: "leaflet"
 
 ## Index
 
-### Modules
+### Namespaces
 
 * [TrackDrawer](_leaflet_.trackdrawer.md)
-
----
-

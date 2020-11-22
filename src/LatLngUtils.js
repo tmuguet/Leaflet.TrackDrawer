@@ -40,15 +40,15 @@ function splitLatLngs(latlngs, distance = 100) {
  * @returns L.Polyline[]
  */
 function splitPolyline(polyline, distance = 100) {
-  return splitLatLngs(polyline.getLatLngs(), distance).map(a => L.polyline(a));
+  return splitLatLngs(polyline.getLatLngs(), distance).map((a) => L.polyline(a));
 }
 
 function featureGroupToPolylines(featureGroup) {
-  return featureGroup.getLayers().filter(layer => layer instanceof L.Polyline);
+  return featureGroup.getLayers().filter((layer) => layer instanceof L.Polyline);
 }
 
 function featureGroupToLatLngs(featureGroup) {
-  return featureGroupToPolylines(featureGroup).map(layer => [layer.getLatLngs(), layer.feature.properties]);
+  return featureGroupToPolylines(featureGroup).map((layer) => [layer.getLatLngs(), layer.feature.properties]);
 }
 
 module.exports = {

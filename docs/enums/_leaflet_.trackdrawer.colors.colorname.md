@@ -1,4 +1,6 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [colors](../modules/_leaflet_.trackdrawer.colors.md) > [ColorName](../enums/_leaflet_.trackdrawer.colors.colorname.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / [colors](../modules/_leaflet_.trackdrawer.colors.md) / ColorName
 
 # Enumeration: ColorName
 
@@ -21,92 +23,74 @@ List of supported colors for tracks and markers
 * [purple](_leaflet_.trackdrawer.colors.colorname.md#purple)
 * [red](_leaflet_.trackdrawer.colors.colorname.md#red)
 
----
-
 ## Enumeration members
 
-<a id="beige"></a>
+### beige
 
-###  beige
-
-**beige**: 
-
-___
-<a id="blue"></a>
-
-###  blue
-
-**blue**: 
-
-___
-<a id="darkblue"></a>
-
-###  darkblue
-
-**darkblue**: 
-
-___
-<a id="darkpurple"></a>
-
-###  darkpurple
-
-**darkpurple**: 
-
-___
-<a id="green"></a>
-
-###  green
-
-**green**: 
-
-___
-<a id="lightblue"></a>
-
-###  lightblue
-
-**lightblue**: 
-
-___
-<a id="lightgreen"></a>
-
-###  lightgreen
-
-**lightgreen**: 
-
-___
-<a id="lightred"></a>
-
-###  lightred
-
-**lightred**: 
-
-___
-<a id="orange"></a>
-
-###  orange
-
-**orange**: 
-
-___
-<a id="pink"></a>
-
-###  pink
-
-**pink**: 
-
-___
-<a id="purple"></a>
-
-###  purple
-
-**purple**: 
-
-___
-<a id="red"></a>
-
-###  red
-
-**red**: 
+•  **beige**: 
 
 ___
 
+### blue
+
+•  **blue**: 
+
+___
+
+### darkblue
+
+•  **darkblue**: 
+
+___
+
+### darkpurple
+
+•  **darkpurple**: 
+
+___
+
+### green
+
+•  **green**: 
+
+___
+
+### lightblue
+
+•  **lightblue**: 
+
+___
+
+### lightgreen
+
+•  **lightgreen**: 
+
+___
+
+### lightred
+
+•  **lightred**: 
+
+___
+
+### orange
+
+•  **orange**: 
+
+___
+
+### pink
+
+•  **pink**: 
+
+___
+
+### purple
+
+•  **purple**: 
+
+___
+
+### red
+
+•  **red**:
