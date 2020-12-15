@@ -18,10 +18,10 @@ module.exports = function (config) {
       'node_modules/leaflet/dist/leaflet.js',
       'node_modules/leaflet-easybutton/src/easy-button.js',
       'node_modules/leaflet.awesome-markers/dist/leaflet.awesome-markers.min.js',
-      'node_modules/@mapbox/togeojson/togeojson.js',
+      'node_modules/@tmcw/togeojson/dist/togeojson.umd.js',
+      'node_modules/@mapbox/corslite/corslite.js',
       'node_modules/leaflet-filelayer/src/leaflet.filelayer.js',
-      'node_modules/@babel/polyfill/dist/polyfill.min.js',
-      'dist/leaflet.trackdrawer.js',
+      'dist/leaflet.trackdrawer.umd.js',
       'test/*.js',
       'test/**/*Spec.js',
     ],
@@ -29,7 +29,7 @@ module.exports = function (config) {
     reporters: ['progress', 'coverage'],
 
     preprocessors: {
-      'dist/leaflet.trackdrawer.js': ['coverage'],
+      'dist/leaflet.trackdrawer.umd.js': ['coverage'],
     },
 
     coverageReporter: {

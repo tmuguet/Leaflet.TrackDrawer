@@ -1,11 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md)
+**[Leaflet.TrackDrawer](../README.md)**
 
-# Module: TrackDrawer
+> [Globals](../README.md) / ["leaflet"](_leaflet_.md) / TrackDrawer
+
+# Namespace: TrackDrawer
 
 TrackDrawer
 
 Usage sample:
-
 ```javascript
 var track = L.TrackDrawer.track({
 routingCallback: function(markerStart, markerEnd, done) {
@@ -23,7 +24,7 @@ router: L.Routing.osrmv1(),
 
 ## Index
 
-### Modules
+### Namespaces
 
 * [colors](_leaflet_.trackdrawer.colors.md)
 
@@ -63,37 +64,31 @@ router: L.Routing.osrmv1(),
 
 ### Functions
 
-* [edge](_leaflet_.trackdrawer.md#edge-1)
-* [node](_leaflet_.trackdrawer.md#node-1)
-* [toolBar](_leaflet_.trackdrawer.md#toolbar-1)
-* [traceModeBar](_leaflet_.trackdrawer.md#tracemodebar-1)
-* [track](_leaflet_.trackdrawer.md#track-1)
-
----
+* [edge](_leaflet_.trackdrawer.md#edge)
+* [node](_leaflet_.trackdrawer.md#node)
+* [toolBar](_leaflet_.trackdrawer.md#toolbar)
+* [traceModeBar](_leaflet_.trackdrawer.md#tracemodebar)
+* [track](_leaflet_.trackdrawer.md#track)
 
 ## Type aliases
 
-<a id="layerid"></a>
+### LayerId
 
-###  LayerId
-
-**Ƭ LayerId**: *`Number`*
+Ƭ  **LayerId**: Number
 
 Leaflet's internal layer ID
 
 ___
-<a id="nodecreationcallback"></a>
 
-###  NodeCreationCallback
+### NodeCreationCallback
 
-**Ƭ NodeCreationCallback**: *`function`*
+Ƭ  **NodeCreationCallback**: (latlng: LatLngExpression) => [Node](../classes/_leaflet_.trackdrawer.node.md)
 
 Function that can be implemented to create a custom node.
 
 Color of the node will be (re)set by this plugin.
 
 Example:
-
 ```javascript
 function(latlng) {
 var marker = L.TrackDrawer.node(latlng, { metadata: { hello: 'world' } });
@@ -102,145 +97,107 @@ return marker;
 }
 ```
 
-#### Type declaration
-▸(latlng: *`LatLngExpression`*): [Node](../classes/_leaflet_.trackdrawer.node.md)
-
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| latlng | `LatLngExpression` |
-
-**Returns:** [Node](../classes/_leaflet_.trackdrawer.node.md)
-
 ___
-<a id="routingcallback"></a>
 
-###  RoutingCallback
+### RoutingCallback
 
-**Ƭ RoutingCallback**: *`function`*
+Ƭ  **RoutingCallback**: (previousMarker: [Node](../classes/_leaflet_.trackdrawer.node.md), marker: [Node](../classes/_leaflet_.trackdrawer.node.md), done: (err: null \| Routing.IError, result: LatLng[], metadata?: Object) => void) => void
 
-Function to implement to compute the route between two markers. Once computation is done, must call `done(null, <result>, <object>)` if successful, or `done(<error>)` if failure.
+Function to implement to compute the route between two markers.
+Once computation is done, must call `done(null, <result>, <object>)` if successful, or `done(<error>)` if failure.
 
 Example:
-
 ```javascript
 function(previousMarker, marker, done) {
 done(null, [previousMarker.getLatLng(), marker.getLatLng()], {hello: 'world'});
 }
 ```
 
-#### Type declaration
-▸(previousMarker: *[Node](../classes/_leaflet_.trackdrawer.node.md)*, marker: *[Node](../classes/_leaflet_.trackdrawer.node.md)*, done: *`function`*): `void`
+___
 
-**Parameters:**
+### State
 
-| Name | Type |
-| ------ | ------ |
-| previousMarker | [Node](../classes/_leaflet_.trackdrawer.node.md) |
-| marker | [Node](../classes/_leaflet_.trackdrawer.node.md) |
-| done | `function` |
-
-**Returns:** `void`
+Ƭ  **State**: object
 
 ___
-<a id="state"></a>
 
-###  State
+### TrackLayer
 
-**Ƭ State**: *`object`*
-
-___
-<a id="tracklayer"></a>
-
-###  TrackLayer
-
-**Ƭ TrackLayer**: *[Node](../classes/_leaflet_.trackdrawer.node.md) \| [Edge](../classes/_leaflet_.trackdrawer.edge.md)*
+Ƭ  **TrackLayer**: [Node](../classes/_leaflet_.trackdrawer.node.md) \| [Edge](../classes/_leaflet_.trackdrawer.edge.md)
 
 Layers handled by this plugin
 
-___
-
 ## Functions
 
-<a id="edge-1"></a>
+### edge
 
-###  edge
+▸ **edge**(`latlngs`: LatLngExpression[], `options?`: PolylineOptions): [Edge](../classes/_leaflet_.trackdrawer.edge.md)
 
-▸ **edge**(latlngs: *`LatLngExpression`[]*, options?: *`PolylineOptions`*): [Edge](../classes/_leaflet_.trackdrawer.edge.md)
+#### Parameters:
 
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| latlngs | `LatLngExpression`[] |
-| `Optional` options | `PolylineOptions` |
+Name | Type |
+------ | ------ |
+`latlngs` | LatLngExpression[] |
+`options?` | PolylineOptions |
 
 **Returns:** [Edge](../classes/_leaflet_.trackdrawer.edge.md)
 
 ___
-<a id="node-1"></a>
 
-###  node
+### node
 
-▸ **node**(latlng: *`LatLngExpression`*, options?: *[NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md)*): [Node](../classes/_leaflet_.trackdrawer.node.md)
+▸ **node**(`latlng`: LatLngExpression, `options?`: [NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md)): [Node](../classes/_leaflet_.trackdrawer.node.md)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| latlng | `LatLngExpression` |
-| `Optional` options | [NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md) |
+Name | Type |
+------ | ------ |
+`latlng` | LatLngExpression |
+`options?` | [NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md) |
 
 **Returns:** [Node](../classes/_leaflet_.trackdrawer.node.md)
 
 ___
-<a id="toolbar-1"></a>
 
-###  toolBar
+### toolBar
 
-▸ **toolBar**(track: *[Track](../classes/_leaflet_.trackdrawer.track.md)*, options?: *[ToolBarOptions](../interfaces/_leaflet_.trackdrawer.toolbaroptions.md)*): [ToolBar](../classes/_leaflet_.trackdrawer.toolbar.md)
+▸ **toolBar**(`track`: [Track](../classes/_leaflet_.trackdrawer.track.md), `options?`: [ToolBarOptions](../interfaces/_leaflet_.trackdrawer.toolbaroptions.md)): [ToolBar](../classes/_leaflet_.trackdrawer.toolbar.md)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| track | [Track](../classes/_leaflet_.trackdrawer.track.md) |
-| `Optional` options | [ToolBarOptions](../interfaces/_leaflet_.trackdrawer.toolbaroptions.md) |
+Name | Type |
+------ | ------ |
+`track` | [Track](../classes/_leaflet_.trackdrawer.track.md) |
+`options?` | [ToolBarOptions](../interfaces/_leaflet_.trackdrawer.toolbaroptions.md) |
 
 **Returns:** [ToolBar](../classes/_leaflet_.trackdrawer.toolbar.md)
 
 ___
-<a id="tracemodebar-1"></a>
 
-###  traceModeBar
+### traceModeBar
 
-▸ **traceModeBar**(track: *[Track](../classes/_leaflet_.trackdrawer.track.md)*, modes: *[TraceMode](../interfaces/_leaflet_.trackdrawer.tracemode.md)[]*, options?: *[TraceModeBarOptions](../interfaces/_leaflet_.trackdrawer.tracemodebaroptions.md)*): [TraceModeBar](../classes/_leaflet_.trackdrawer.tracemodebar.md)
+▸ **traceModeBar**(`track`: [Track](../classes/_leaflet_.trackdrawer.track.md), `modes`: [TraceMode](../interfaces/_leaflet_.trackdrawer.tracemode.md)[], `options?`: [TraceModeBarOptions](../interfaces/_leaflet_.trackdrawer.tracemodebaroptions.md)): [TraceModeBar](../classes/_leaflet_.trackdrawer.tracemodebar.md)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| track | [Track](../classes/_leaflet_.trackdrawer.track.md) |
-| modes | [TraceMode](../interfaces/_leaflet_.trackdrawer.tracemode.md)[] |
-| `Optional` options | [TraceModeBarOptions](../interfaces/_leaflet_.trackdrawer.tracemodebaroptions.md) |
+Name | Type |
+------ | ------ |
+`track` | [Track](../classes/_leaflet_.trackdrawer.track.md) |
+`modes` | [TraceMode](../interfaces/_leaflet_.trackdrawer.tracemode.md)[] |
+`options?` | [TraceModeBarOptions](../interfaces/_leaflet_.trackdrawer.tracemodebaroptions.md) |
 
 **Returns:** [TraceModeBar](../classes/_leaflet_.trackdrawer.tracemodebar.md)
 
 ___
-<a id="track-1"></a>
 
-###  track
+### track
 
-▸ **track**(options?: *[TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)*): [Track](../classes/_leaflet_.trackdrawer.track.md)
+▸ **track**(`options?`: [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)): [Track](../classes/_leaflet_.trackdrawer.track.md)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| `Optional` options | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |
+Name | Type |
+------ | ------ |
+`options?` | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |
 
 **Returns:** [Track](../classes/_leaflet_.trackdrawer.track.md)
-
-___
-

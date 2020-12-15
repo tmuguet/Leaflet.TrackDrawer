@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [EdgeOptions](../interfaces/_leaflet_.trackdrawer.edgeoptions.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / EdgeOptions
 
 # Interface: EdgeOptions
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ EdgeOptions**
+  ↳ **EdgeOptions**
 
 ## Index
 
@@ -14,17 +16,10 @@
 
 * [metadata](_leaflet_.trackdrawer.edgeoptions.md#metadata)
 
----
-
 ## Properties
 
-<a id="metadata"></a>
+### metadata
 
-### `<Optional>` metadata
-
-**● metadata**: *`Object`*
+• `Optional` **metadata**: Object
 
 Metadatas
-
-___
-

@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 describe('Exporting track', () => {
   let map;
 
@@ -15,7 +16,7 @@ describe('Exporting track', () => {
 
   it('getLatLngs() should return an array of LatLngs for each step', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -87,7 +88,7 @@ describe('Exporting track', () => {
       ],
     ];
 
-    await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+    await track.restoreState(state, (latlng) => L.TrackDrawer.node(latlng));
     expect(eventsTriggered).to.be.equal(1);
 
     const latlngs = track.getLatLngs();
@@ -96,7 +97,7 @@ describe('Exporting track', () => {
 
   it('toGeoJSON() should return a structure with a Feature/LineString for each step', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -288,7 +289,7 @@ describe('Exporting track', () => {
 
   it('toGeoJSON(exportAsFlat = true) should return a structure with a single Feature/LineString', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -432,7 +433,7 @@ describe('Exporting track', () => {
 
   it('toGeoJSON(false) should not export points', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);

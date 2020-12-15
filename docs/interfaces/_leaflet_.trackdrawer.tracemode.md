@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [TraceMode](../interfaces/_leaflet_.trackdrawer.tracemode.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / TraceMode
 
 # Interface: TraceMode
 
 ## Hierarchy
 
-**TraceMode**
+* **TraceMode**
 
 ## Index
 
@@ -15,44 +17,34 @@
 * [name](_leaflet_.trackdrawer.tracemode.md#name)
 * [router](_leaflet_.trackdrawer.tracemode.md#router)
 
----
-
 ## Properties
 
-<a id="icon"></a>
+### icon
 
-###  icon
-
-**● icon**: *`String`*
+•  **icon**: String
 
 Icon supported by Leaflet AwesomeMarker (e.g. `fa-map-o`)
 
 ___
-<a id="id"></a>
 
-###  id
+### id
 
-**● id**: *`String`*
+•  **id**: String
 
 Unique identifier (used for `setMode` for instance)
 
 ___
-<a id="name"></a>
 
-###  name
+### name
 
-**● name**: *`String`*
+•  **name**: String
 
 Label of the button
 
 ___
-<a id="router"></a>
 
-###  router
+### router
 
-**● router**: *`Routing.IRouter`*
+•  **router**: Routing.IRouter
 
 Router to enable when this button is selected
-
-___
-

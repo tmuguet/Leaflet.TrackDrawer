@@ -17,7 +17,7 @@ describe('Misc', () => {
     it('getBounds() should contain all nodes and edges', async () => {
       // TODO: really test edges
       const track = L.TrackDrawer.track({
-        routingCallback(previousMarker, marker, done) {
+        routingCallback() {
           throw new Error('Unexpected call');
         },
       }).addTo(map);
@@ -66,7 +66,7 @@ describe('Misc', () => {
         ],
       ];
 
-      await track.restoreState(state, latlng => L.TrackDrawer.node(latlng));
+      await track.restoreState(state, (latlng) => L.TrackDrawer.node(latlng));
 
       const bounds = track.getBounds();
       state.forEach((group, idx) => {

@@ -1,12 +1,14 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [NodeOptions](../interfaces/_leaflet_.trackdrawer.nodeoptions.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / NodeOptions
 
 # Interface: NodeOptions
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ NodeOptions**
+  ↳ **NodeOptions**
 
 ## Index
 
@@ -15,26 +17,18 @@
 * [metadata](_leaflet_.trackdrawer.nodeoptions.md#metadata)
 * [type](_leaflet_.trackdrawer.nodeoptions.md#type)
 
----
-
 ## Properties
 
-<a id="metadata"></a>
+### metadata
 
-### `<Optional>` metadata
-
-**● metadata**: *`Object`*
+• `Optional` **metadata**: Object
 
 Metadatas
 
 ___
-<a id="type"></a>
 
-### `<Optional>` type
+### type
 
-**● type**: *[NodeType](../enums/_leaflet_.trackdrawer.nodetype.md)*
+• `Optional` **type**: [NodeType](../enums/_leaflet_.trackdrawer.nodetype.md)
 
 Type of the node, default value is `waypoint`
-
-___
-

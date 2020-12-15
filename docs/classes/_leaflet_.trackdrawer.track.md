@@ -1,20 +1,22 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [Track](../classes/_leaflet_.trackdrawer.track.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / Track
 
 # Class: Track
 
 Main entry point.
 
-*__emits__*: TrackDrawer:start Fired when an edit has started
+**`emits`** TrackDrawer:start Fired when an edit has started
 
-*__emits__*: TrackDrawer:done Fired when all pending edits are done
+**`emits`** TrackDrawer:done Fired when all pending edits are done
 
-*__emits__*: TrackDrawer:failed Fired if an error occured
+**`emits`** TrackDrawer:failed Fired if an error occured
 
 ## Hierarchy
 
- `any`
+* any
 
-**↳ Track**
+  ↳ **Track**
 
 ## Index
 
@@ -50,133 +52,117 @@ Main entry point.
 * [setOptions](_leaflet_.trackdrawer.track.md#setoptions)
 * [toGeoJSON](_leaflet_.trackdrawer.track.md#togeojson)
 
----
-
 ## Constructors
 
-<a id="constructor"></a>
+### constructor
 
-###  constructor
+\+ **new Track**(`options?`: [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)): [Track](_leaflet_.trackdrawer.track.md)
 
-⊕ **new Track**(options?: *[TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)*): [Track](_leaflet_.trackdrawer.track.md)
+#### Parameters:
 
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| `Optional` options | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |
+Name | Type |
+------ | ------ |
+`options?` | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |
 
 **Returns:** [Track](_leaflet_.trackdrawer.track.md)
 
-___
-
 ## Methods
 
-<a id="addlayer"></a>
+### addLayer
 
-###  addLayer
+▸ **addLayer**(`layer`: Layer): this
 
-▸ **addLayer**(layer: *`Layer`*): `this`
+#### Parameters:
 
-**Parameters:**
+Name | Type |
+------ | ------ |
+`layer` | Layer |
 
-| Name | Type |
-| ------ | ------ |
-| layer | `Layer` |
-
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="addnode"></a>
 
-###  addNode
+### addNode
 
-▸ **addNode**(node: *[Node](_leaflet_.trackdrawer.node.md)*, routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*, skipChecks?: *`boolean`*): `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **addNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback), `skipChecks?`: boolean): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 Adds a node at the end of the track.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| node | [Node](_leaflet_.trackdrawer.node.md) |  Node to add |
-| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |  Callback to determine path between previous node and this one |
-| `Optional` skipChecks | `boolean` |  If \`true\`, skips proximity checks (defaults to \`false\`). |
+Name | Type | Description |
+------ | ------ | ------ |
+`node` | [Node](_leaflet_.trackdrawer.node.md) | Node to add |
+`routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine path between previous node and this one |
+`skipChecks?` | boolean | If `true`, skips proximity checks (defaults to `false`).  |
 
-**Returns:** `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 ___
-<a id="clean"></a>
 
-###  clean
+### clean
 
-▸ **clean**(): `this`
+▸ **clean**(): this
 
 Removes everything from the track.
 
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="demotenodetowaypoint"></a>
 
-###  demoteNodeToWaypoint
+### demoteNodeToWaypoint
 
-▸ **demoteNodeToWaypoint**(node: *[Node](_leaflet_.trackdrawer.node.md)*): `this`
+▸ **demoteNodeToWaypoint**(`node`: [Node](_leaflet_.trackdrawer.node.md)): this
 
 Demotes a stop-over node to a simple waypoint (e.g. merges two segments)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| node | [Node](_leaflet_.trackdrawer.node.md) |  Node to demote |
+Name | Type | Description |
+------ | ------ | ------ |
+`node` | [Node](_leaflet_.trackdrawer.node.md) | Node to demote  |
 
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="getbounds"></a>
 
-###  getBounds
+### getBounds
 
-▸ **getBounds**(): `LatLngBounds`
+▸ **getBounds**(): LatLngBounds
 
 Returns the LatLngBounds of the track.
 
-**Returns:** `LatLngBounds`
+**Returns:** LatLngBounds
 
 ___
-<a id="getlatlngs"></a>
 
-###  getLatLngs
+### getLatLngs
 
-▸ **getLatLngs**(): `LatLng`[]
+▸ **getLatLngs**(): LatLng[]
 
 Returns an array of the points in the track.
 
-**Returns:** `LatLng`[]
+**Returns:** LatLng[]
 
 ___
-<a id="getnodes"></a>
 
-###  getNodes
+### getNodes
 
 ▸ **getNodes**(): [NodesList](../interfaces/_leaflet_.trackdrawer.nodeslist.md)[]
 
 **Returns:** [NodesList](../interfaces/_leaflet_.trackdrawer.nodeslist.md)[]
 
 ___
-<a id="getnodescontainer"></a>
 
-###  getNodesContainer
+### getNodesContainer
 
-▸ **getNodesContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Node](_leaflet_.trackdrawer.node.md)>
+▸ **getNodesContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Node](_leaflet_.trackdrawer.node.md)>
 
-**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Node](_leaflet_.trackdrawer.node.md)>
+**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Node](_leaflet_.trackdrawer.node.md)>
 
 ___
-<a id="getstate"></a>
 
-###  getState
+### getState
 
 ▸ **getState**(): [State](../modules/_leaflet_.trackdrawer.md#state)
 
@@ -185,270 +171,251 @@ Gets the serializable state of the track.
 **Returns:** [State](../modules/_leaflet_.trackdrawer.md#state)
 
 ___
-<a id="getsteps"></a>
 
-###  getSteps
+### getSteps
 
 ▸ **getSteps**(): [EdgesList](../interfaces/_leaflet_.trackdrawer.edgeslist.md)[]
 
 **Returns:** [EdgesList](../interfaces/_leaflet_.trackdrawer.edgeslist.md)[]
 
 ___
-<a id="getstepscontainer"></a>
 
-###  getStepsContainer
+### getStepsContainer
 
-▸ **getStepsContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Edge](_leaflet_.trackdrawer.edge.md)>
+▸ **getStepsContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Edge](_leaflet_.trackdrawer.edge.md)>
 
-**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Edge](_leaflet_.trackdrawer.edge.md)>
+**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Edge](_leaflet_.trackdrawer.edge.md)>
 
 ___
-<a id="hasnodes"></a>
 
-###  hasNodes
+### hasNodes
 
-▸ **hasNodes**(count?: *`number`*): `boolean`
+▸ **hasNodes**(`count?`: number): boolean
 
 Returns `true` if the track has at least `count` nodes.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| `Optional` count | `number` |
+Name | Type |
+------ | ------ |
+`count?` | number |
 
-**Returns:** `boolean`
+**Returns:** boolean
 
 ___
-<a id="insertnode"></a>
 
-###  insertNode
+### insertNode
 
-▸ **insertNode**(node: *[Node](_leaflet_.trackdrawer.node.md)*, route: *[Edge](_leaflet_.trackdrawer.edge.md)*, routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*): `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **insertNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `route`: [Edge](_leaflet_.trackdrawer.edge.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 Inserts a node within an edge.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| node | [Node](_leaflet_.trackdrawer.node.md) |  Node to insert |
-| route | [Edge](_leaflet_.trackdrawer.edge.md) |  Edge to split |
-| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |  Callback to determine paths between previous/next nodes and this one |
+Name | Type | Description |
+------ | ------ | ------ |
+`node` | [Node](_leaflet_.trackdrawer.node.md) | Node to insert |
+`route` | [Edge](_leaflet_.trackdrawer.edge.md) | Edge to split |
+`routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous/next nodes and this one  |
 
-**Returns:** `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 ___
-<a id="loaddata"></a>
 
-###  loadData
+### loadData
 
-▸ **loadData**(data: *`string`*, name: *`string`*, ext: *`string`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+▸ **loadData**(`data`: string, `name`: string, `ext`: string, `insertWaypoints?`: booleau): Promise\<void>
 
 Creates a track from a string
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| data | `string` |  Raw data (JSON, GPX, KML) |
-| name | `string` |  Name of the track |
-| ext | `string` |  Extension of the data (json, gpx, kml) |
-| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+Name | Type | Description |
+------ | ------ | ------ |
+`data` | string | Raw data (JSON, GPX, KML) |
+`name` | string | Name of the track |
+`ext` | string | Extension of the data (json, gpx, kml) |
+`insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** `Promise`<`void`>
+**Returns:** Promise\<void>
 
 ___
-<a id="loadfile"></a>
 
-###  loadFile
+### loadFile
 
-▸ **loadFile**(file: *`Blob`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+▸ **loadFile**(`file`: Blob, `insertWaypoints?`: booleau): Promise\<void>
 
 Creates a track from a file or blob object
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| file | `Blob` |  File to import (JSON, GPX, KML) |
-| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+Name | Type | Description |
+------ | ------ | ------ |
+`file` | Blob | File to import (JSON, GPX, KML) |
+`insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** `Promise`<`void`>
+**Returns:** Promise\<void>
 
 ___
-<a id="loadurl"></a>
 
-###  loadUrl
+### loadUrl
 
-▸ **loadUrl**(url: *`string`*, useProxy?: *`boolean`*, insertWaypoints?: *`booleau`*): `Promise`<`void`>
+▸ **loadUrl**(`url`: string, `useProxy?`: boolean, `insertWaypoints?`: booleau): Promise\<void>
 
 Creates a track from a URL
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| url | `string` |  URL to import |
-| `Optional` useProxy | `boolean` |  If \`true\`, use proxy to bypass CORS restrictions (see \`fetch.php\`) (defaults to \`false\`) |
-| `Optional` insertWaypoints | `booleau` |  If \`true\`, insert waypoints on the track every 100m (defaults to \`false\`) |
+Name | Type | Description |
+------ | ------ | ------ |
+`url` | string | URL to import |
+`useProxy?` | boolean | If `true`, use proxy to bypass CORS restrictions (see `fetch.php`) (defaults to `false`) |
+`insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** `Promise`<`void`>
-
-___
-<a id="ondragnode"></a>
-
-###  onDragNode
-
-▸ **onDragNode**(marker: *[Node](_leaflet_.trackdrawer.node.md)*): `void`
-
-**Parameters:**
-
-| Name | Type |
-| ------ | ------ |
-| marker | [Node](_leaflet_.trackdrawer.node.md) |
-
-**Returns:** `void`
+**Returns:** Promise\<void>
 
 ___
-<a id="ondragstartnode"></a>
 
-###  onDragStartNode
+### onDragNode
 
-▸ **onDragStartNode**(marker: *[Node](_leaflet_.trackdrawer.node.md)*): `void`
+▸ **onDragNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md)): void
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type |
-| ------ | ------ |
-| marker | [Node](_leaflet_.trackdrawer.node.md) |
+Name | Type |
+------ | ------ |
+`marker` | [Node](_leaflet_.trackdrawer.node.md) |
 
-**Returns:** `void`
+**Returns:** void
 
 ___
-<a id="onmovenode"></a>
 
-###  onMoveNode
+### onDragStartNode
 
-▸ **onMoveNode**(marker: *[Node](_leaflet_.trackdrawer.node.md)*, routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*): `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **onDragStartNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md)): void
+
+#### Parameters:
+
+Name | Type |
+------ | ------ |
+`marker` | [Node](_leaflet_.trackdrawer.node.md) |
+
+**Returns:** void
+
+___
+
+### onMoveNode
+
+▸ **onMoveNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 Handler to call when a node has been moved
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| marker | [Node](_leaflet_.trackdrawer.node.md) |  Node which moved |
-| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |  Callback to determine paths between previous/next nodes and this one |
+Name | Type | Description |
+------ | ------ | ------ |
+`marker` | [Node](_leaflet_.trackdrawer.node.md) | Node which moved |
+`routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous/next nodes and this one  |
 
-**Returns:** `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 ___
-<a id="promotenodetostopover"></a>
 
-###  promoteNodeToStopover
+### promoteNodeToStopover
 
-▸ **promoteNodeToStopover**(node: *[Node](_leaflet_.trackdrawer.node.md)*): `this`
+▸ **promoteNodeToStopover**(`node`: [Node](_leaflet_.trackdrawer.node.md)): this
 
 Promotes a waypoint node to a stop-over (e.g. creates a new segment)
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| node | [Node](_leaflet_.trackdrawer.node.md) |  Node to promote |
+Name | Type | Description |
+------ | ------ | ------ |
+`node` | [Node](_leaflet_.trackdrawer.node.md) | Node to promote  |
 
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="refreshedges"></a>
 
-###  refreshEdges
+### refreshEdges
 
-▸ **refreshEdges**(routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*): `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+▸ **refreshEdges**(`routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[Track](_leaflet_.trackdrawer.track.md)>
 
 Refreshes all routes in the track
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |   |
+Name | Type | Description |
+------ | ------ | ------ |
+`routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |   |
 
-**Returns:** `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+**Returns:** Promise\<[Track](_leaflet_.trackdrawer.track.md)>
 
 ___
-<a id="removenode"></a>
 
-###  removeNode
+### removeNode
 
-▸ **removeNode**(marker: *[Node](_leaflet_.trackdrawer.node.md)*, routingCallback?: *[RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)*): `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **removeNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 Removes a node.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| marker | [Node](_leaflet_.trackdrawer.node.md) |  Node to remove |
-| `Optional` routingCallback | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |  Callback to determine paths between previous and next nodes |
+Name | Type | Description |
+------ | ------ | ------ |
+`marker` | [Node](_leaflet_.trackdrawer.node.md) | Node to remove |
+`routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous and next nodes  |
 
-**Returns:** `Promise`<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
 
 ___
-<a id="restorestate"></a>
 
-###  restoreState
+### restoreState
 
-▸ **restoreState**(state: *[State](../modules/_leaflet_.trackdrawer.md#state)*, nodeCallback?: *[NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback)*): `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+▸ **restoreState**(`state`: [State](../modules/_leaflet_.trackdrawer.md#state), `nodeCallback?`: [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback)): Promise\<[Track](_leaflet_.trackdrawer.track.md)>
 
 Restores a state saved via `getState`.
 
-*__see__*: getState
+**`see`** getState
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| state | [State](../modules/_leaflet_.trackdrawer.md#state) |  \- |
-| `Optional` nodeCallback | [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback) |  \- |
+Name | Type |
+------ | ------ |
+`state` | [State](../modules/_leaflet_.trackdrawer.md#state) |
+`nodeCallback?` | [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback) |
 
-**Returns:** `Promise`<[Track](_leaflet_.trackdrawer.track.md)>
+**Returns:** Promise\<[Track](_leaflet_.trackdrawer.track.md)>
 
 ___
-<a id="setoptions"></a>
 
-###  setOptions
+### setOptions
 
-▸ **setOptions**(options: *[TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)*): `this`
+▸ **setOptions**(`options`: [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md)): this
 
 Apply options.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| options | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |   |
+Name | Type | Description |
+------ | ------ | ------ |
+`options` | [TrackOptions](../interfaces/_leaflet_.trackdrawer.trackoptions.md) |   |
 
-**Returns:** `this`
+**Returns:** this
 
 ___
-<a id="togeojson"></a>
 
-###  toGeoJSON
+### toGeoJSON
 
-▸ **toGeoJSON**(exportStopovers: *`boolean`*, exportAsFlat: *`boolean`*): `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
+▸ **toGeoJSON**(`exportStopovers`: boolean, `exportAsFlat`: boolean): geojson.FeatureCollection\<geojson.GeometryObject, any>
 
 Returns a GeoJSON representation of the track.
 
-**Parameters:**
+#### Parameters:
 
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| exportStopovers | `boolean` |  \`true\` to also export stop-over markers (default), \`false\` to ignore them |
-| exportAsFlat | `boolean` |  \`true\` to export as one unique Feature, \`false\` to export as-is (default) |
+Name | Type | Description |
+------ | ------ | ------ |
+`exportStopovers` | boolean | `true` to also export stop-over markers (default), `false` to ignore them |
+`exportAsFlat` | boolean | `true` to export as one unique Feature, `false` to export as-is (default)  |
 
-**Returns:** `geojson.FeatureCollection`<`geojson.GeometryObject`, `any`>
-
-___
-
+**Returns:** geojson.FeatureCollection\<geojson.GeometryObject, any>

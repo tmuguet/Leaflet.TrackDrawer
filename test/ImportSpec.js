@@ -1,3 +1,4 @@
+/* eslint-disable no-return-assign */
 describe('Importing track', () => {
   let map;
 
@@ -15,7 +16,7 @@ describe('Importing track', () => {
 
   it('Importing a FeatureCollection with a single Feature should give one line', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -57,7 +58,7 @@ describe('Importing track', () => {
 
   it('Importing a FeatureCollection with insertWaypoints=true should give several lines', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -113,7 +114,7 @@ describe('Importing track', () => {
 
   it('Importing a FeatureCollection with a multiple Features should give one line per feature', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -154,6 +155,7 @@ describe('Importing track', () => {
       ],
     };
 
+    /* eslint-disable max-len */
     const expectedState = [
       { version: 2, start: [44.974635142416496, 6.064453125000001], metadata: {} },
       [
@@ -171,6 +173,7 @@ describe('Importing track', () => {
         },
       ],
     ];
+    /* eslint-enable max-len */
 
     await track._dataLoadedHandler(L.geoJSON(geojson), false);
     expect(eventsTriggered).to.be.equal(1);
@@ -181,7 +184,7 @@ describe('Importing track', () => {
 
   it('Importing a FeatureCollection with only Points should ignore them', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -222,7 +225,7 @@ describe('Importing track', () => {
 
   it('Importing a FeatureCollection with empty coordinates should ignore them', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -255,7 +258,7 @@ describe('Importing track', () => {
 
   it('Importing GeoJSON data should give a track', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -295,9 +298,9 @@ describe('Importing track', () => {
     expect(state).to.deep.equal(expectedState);
   });
 
-  it('Importing KML data should give a track', async () => {
+  it('Importing GeoJSON data with empty coordinates should ignore them', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -305,6 +308,40 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
+    const geojson = `{
+      "type": "FeatureCollection",
+      "features": [
+        {
+          "type": "Feature",
+          "properties": { "hello": "world" },
+          "geometry": {
+            "type": "LineString",
+            "coordinates": []
+          }
+        }
+      ]
+    }`;
+
+    const expectedState = [{ version: 2, start: undefined, metadata: undefined }];
+
+    await track.loadData(geojson, 'track', 'geojson', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
+
+  it('Importing KML data should give a track', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback() {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    /* eslint-disable-next-line max-len */
     const kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Hike</name><Placemark><ExtendedData><Data name="hello"><value>world</value></Data></ExtendedData><LineString><coordinates>6.064453125000001,44.974635142416496 6.098098754882813,44.95301534523602</coordinates></LineString></Placemark></Document></kml>';
 
     const expectedState = [
@@ -325,9 +362,10 @@ describe('Importing track', () => {
     expect(state).to.deep.equal(expectedState);
   });
 
-  it('Importing GPX data should give a track', async () => {
+  // TODO: not supported by filelayer
+  it.skip('Importing KML data with empty coordinates should ignore them', async () => {
     const track = L.TrackDrawer.track({
-      routingCallback(previousMarker, marker, done) {
+      routingCallback() {
         throw new Error('Unexpected call');
       },
     }).addTo(map);
@@ -335,6 +373,29 @@ describe('Importing track', () => {
     let eventsTriggered = 0;
     track.on('TrackDrawer:done', () => (eventsTriggered += 1));
 
+    /* eslint-disable-next-line max-len */
+    const kml = '<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Hike</name><Placemark><ExtendedData><Data name="hello"><value>world</value></Data></ExtendedData><LineString><coordinates/></LineString></Placemark></Document></kml>';
+
+    const expectedState = [{ version: 2, start: undefined, metadata: undefined }];
+
+    await track.loadData(kml, 'track', 'kml', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
+
+  it('Importing GPX data should give a track', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback() {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    /* eslint-disable-next-line max-len */
     const gpx = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="map2gpx"><metadata/><trk><name>Track</name><desc>hello world</desc><trkseg><trkpt lat="44.974635142416496" lon="6.064453125000001"></trkpt><trkpt lat="44.95301534523602" lon="6.098098754882813"></trkpt></trkseg></trk></gpx>';
 
     const expectedState = [
@@ -343,10 +404,33 @@ describe('Importing track', () => {
         {
           end: [44.95301534523602, 6.098098754882813],
           edge: [44.974635142416496, 6.064453125000001, 44.95301534523602, 6.098098754882813],
-          metadata: { node: {}, edge: { name: 'Track', desc: 'hello world' } },
+          metadata: { node: {}, edge: { name: 'Track', desc: 'hello world', _gpxType: 'trk' } },
         },
       ],
     ];
+
+    await track.loadData(gpx, 'track', 'gpx', false);
+    expect(eventsTriggered).to.be.equal(1);
+
+    const state = track.getState();
+    expect(state).to.deep.equal(expectedState);
+  });
+
+  // TODO: not supported by filelayer
+  it.skip('Importing GPX data with empty coordinates should ignore them', async () => {
+    const track = L.TrackDrawer.track({
+      routingCallback() {
+        throw new Error('Unexpected call');
+      },
+    }).addTo(map);
+
+    let eventsTriggered = 0;
+    track.on('TrackDrawer:done', () => (eventsTriggered += 1));
+
+    /* eslint-disable-next-line max-len */
+    const gpx = '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" creator="map2gpx"><metadata/><trk><name>Track</name><desc>hello world</desc><trkseg/></trk></gpx>';
+
+    const expectedState = [{ version: 2, start: undefined, metadata: undefined }];
 
     await track.loadData(gpx, 'track', 'gpx', false);
     expect(eventsTriggered).to.be.equal(1);

@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [EdgesList](../interfaces/_leaflet_.trackdrawer.edgeslist.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / EdgesList
 
 # Interface: EdgesList
 
 ## Hierarchy
 
-**EdgesList**
+* **EdgesList**
 
 ## Index
 
@@ -13,22 +15,14 @@
 * [container](_leaflet_.trackdrawer.edgeslist.md#container)
 * [edges](_leaflet_.trackdrawer.edgeslist.md#edges)
 
----
-
 ## Properties
 
-<a id="container"></a>
+### container
 
-###  container
-
-**● container**: *`FeatureGroup`*
-
-___
-<a id="edges"></a>
-
-###  edges
-
-**● edges**: *[Edge](../classes/_leaflet_.trackdrawer.edge.md)[]*
+•  **container**: FeatureGroup
 
 ___
 
+### edges
+
+•  **edges**: [Edge](../classes/_leaflet_.trackdrawer.edge.md)[]

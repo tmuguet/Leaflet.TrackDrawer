@@ -1,10 +1,12 @@
-[Leaflet.TrackDrawer](../README.md) > ["leaflet"](../modules/_leaflet_.md) > [TrackDrawer](../modules/_leaflet_.trackdrawer.md) > [ToolBarMode](../interfaces/_leaflet_.trackdrawer.toolbarmode.md)
+**[Leaflet.TrackDrawer](../README.md)**
+
+> [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / ToolBarMode
 
 # Interface: ToolBarMode
 
 ## Hierarchy
 
-**ToolBarMode**
+* **ToolBarMode**
 
 ## Index
 
@@ -16,43 +18,32 @@
 * [insert](_leaflet_.trackdrawer.toolbarmode.md#insert)
 * [promote](_leaflet_.trackdrawer.toolbarmode.md#promote)
 
----
-
 ## Properties
 
-<a id="add"></a>
+### add
 
-###  add
-
-**● add**: *`any`*
-
-___
-<a id="delete"></a>
-
-###  delete
-
-**● delete**: *`any`*
-
-___
-<a id="demote"></a>
-
-###  demote
-
-**● demote**: *`any`*
-
-___
-<a id="insert"></a>
-
-###  insert
-
-**● insert**: *`any`*
-
-___
-<a id="promote"></a>
-
-###  promote
-
-**● promote**: *`any`*
+•  **add**: any
 
 ___
 
+### delete
+
+•  **delete**: any
+
+___
+
+### demote
+
+•  **demote**: any
+
+___
+
+### insert
+
+•  **insert**: any
+
+___
+
+### promote
+
+•  **promote**: any
