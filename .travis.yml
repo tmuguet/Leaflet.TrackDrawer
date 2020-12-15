@@ -1,7 +1,9 @@
 language: node_js
+os:
+  - linux
+dist: xenial
 node_js:
   - 12
-dist: xenial
 services:
   - xvfb
 
@@ -13,7 +15,6 @@ script:
 deploy:
   provider: npm
   email: '$NPM_EMAIL'
-  api_key: '$NPM_TOKEN'
-  skip_cleanup: true
+  api_token: '$NPM_TOKEN'
   on:
     tags: true

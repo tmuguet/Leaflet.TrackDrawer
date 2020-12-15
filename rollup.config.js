@@ -25,7 +25,7 @@ export default [
       commonjs(),
       babel({
         exclude: ['node_modules/**'],
-        babelHelpers: 'bundled',
+        babelHelpers: 'runtime',
       }),
       terser(),
     ],
@@ -45,7 +45,7 @@ export default [
       commonjs(),
       babel({
         exclude: ['node_modules/**'],
-        babelHelpers: 'bundled',
+        babelHelpers: 'runtime',
       }),
     ],
     external,
@@ -54,7 +54,7 @@ export default [
   // CommonJS (for Node) and ES module (for bundlers) build.
   {
     input,
-    external: ['ms'] + external,
+    external: ['ms', /@babel\/runtime/] + external,
     output: [
       {
         file: pkg.main, format: 'cjs', sourcemap, globals,
