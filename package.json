@@ -1,6 +1,6 @@
 {
   "name": "leaflet-trackdrawer",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Enables drawing tracks using custom routing",
   "main": "dist/leaflet.trackdrawer.cjs.js",
   "module": "dist/leaflet.trackdrawer.esm.js",

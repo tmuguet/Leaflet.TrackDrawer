@@ -2,7 +2,7 @@
 
 > [Globals](../README.md) / ["leaflet"](../modules/_leaflet_.md) / [TrackDrawer](../modules/_leaflet_.trackdrawer.md) / LayerContainer
 
-# Class: LayerContainer\<TrackLayer>
+# Class: LayerContainer<TrackLayer\>
 
 Wrapper around Array to manage the collections of Nodes or Edges
 

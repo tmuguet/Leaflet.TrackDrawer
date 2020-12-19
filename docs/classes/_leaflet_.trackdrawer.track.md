@@ -84,7 +84,7 @@ ___
 
 ### addNode
 
-▸ **addNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback), `skipChecks?`: boolean): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **addNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback), `skipChecks?`: boolean): Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 Adds a node at the end of the track.
 
@@ -96,7 +96,7 @@ Name | Type | Description |
 `routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine path between previous node and this one |
 `skipChecks?` | boolean | If `true`, skips proximity checks (defaults to `false`).  |
 
-**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 ___
 
@@ -156,9 +156,9 @@ ___
 
 ### getNodesContainer
 
-▸ **getNodesContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Node](_leaflet_.trackdrawer.node.md)>
+▸ **getNodesContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Node](_leaflet_.trackdrawer.node.md)\>
 
-**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Node](_leaflet_.trackdrawer.node.md)>
+**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Node](_leaflet_.trackdrawer.node.md)\>
 
 ___
 
@@ -182,9 +182,9 @@ ___
 
 ### getStepsContainer
 
-▸ **getStepsContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Edge](_leaflet_.trackdrawer.edge.md)>
+▸ **getStepsContainer**(): [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Edge](_leaflet_.trackdrawer.edge.md)\>
 
-**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)\<[Edge](_leaflet_.trackdrawer.edge.md)>
+**Returns:** [LayerContainer](_leaflet_.trackdrawer.layercontainer.md)<[Edge](_leaflet_.trackdrawer.edge.md)\>
 
 ___
 
@@ -206,7 +206,7 @@ ___
 
 ### insertNode
 
-▸ **insertNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `route`: [Edge](_leaflet_.trackdrawer.edge.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **insertNode**(`node`: [Node](_leaflet_.trackdrawer.node.md), `route`: [Edge](_leaflet_.trackdrawer.edge.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 Inserts a node within an edge.
 
@@ -218,13 +218,13 @@ Name | Type | Description |
 `route` | [Edge](_leaflet_.trackdrawer.edge.md) | Edge to split |
 `routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous/next nodes and this one  |
 
-**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 ___
 
 ### loadData
 
-▸ **loadData**(`data`: string, `name`: string, `ext`: string, `insertWaypoints?`: booleau): Promise\<void>
+▸ **loadData**(`data`: string, `name`: string, `ext`: string, `insertWaypoints?`: booleau): Promise<void\>
 
 Creates a track from a string
 
@@ -237,13 +237,13 @@ Name | Type | Description |
 `ext` | string | Extension of the data (json, gpx, kml) |
 `insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 
 ### loadFile
 
-▸ **loadFile**(`file`: Blob, `insertWaypoints?`: booleau): Promise\<void>
+▸ **loadFile**(`file`: Blob, `insertWaypoints?`: booleau): Promise<void\>
 
 Creates a track from a file or blob object
 
@@ -254,13 +254,13 @@ Name | Type | Description |
 `file` | Blob | File to import (JSON, GPX, KML) |
 `insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 
 ### loadUrl
 
-▸ **loadUrl**(`url`: string, `useProxy?`: boolean, `insertWaypoints?`: booleau): Promise\<void>
+▸ **loadUrl**(`url`: string, `useProxy?`: boolean, `insertWaypoints?`: booleau): Promise<void\>
 
 Creates a track from a URL
 
@@ -272,7 +272,7 @@ Name | Type | Description |
 `useProxy?` | boolean | If `true`, use proxy to bypass CORS restrictions (see `fetch.php`) (defaults to `false`) |
 `insertWaypoints?` | booleau | If `true`, insert waypoints on the track every 100m (defaults to `false`)  |
 
-**Returns:** Promise\<void>
+**Returns:** Promise<void\>
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 ### onMoveNode
 
-▸ **onMoveNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **onMoveNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 Handler to call when a node has been moved
 
@@ -317,7 +317,7 @@ Name | Type | Description |
 `marker` | [Node](_leaflet_.trackdrawer.node.md) | Node which moved |
 `routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous/next nodes and this one  |
 
-**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 ___
 
@@ -339,7 +339,7 @@ ___
 
 ### refreshEdges
 
-▸ **refreshEdges**(`routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[Track](_leaflet_.trackdrawer.track.md)>
+▸ **refreshEdges**(`routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise<[Track](_leaflet_.trackdrawer.track.md)\>
 
 Refreshes all routes in the track
 
@@ -349,13 +349,13 @@ Name | Type | Description |
 ------ | ------ | ------ |
 `routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) |   |
 
-**Returns:** Promise\<[Track](_leaflet_.trackdrawer.track.md)>
+**Returns:** Promise<[Track](_leaflet_.trackdrawer.track.md)\>
 
 ___
 
 ### removeNode
 
-▸ **removeNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+▸ **removeNode**(`marker`: [Node](_leaflet_.trackdrawer.node.md), `routingCallback?`: [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback)): Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 Removes a node.
 
@@ -366,13 +366,13 @@ Name | Type | Description |
 `marker` | [Node](_leaflet_.trackdrawer.node.md) | Node to remove |
 `routingCallback?` | [RoutingCallback](../modules/_leaflet_.trackdrawer.md#routingcallback) | Callback to determine paths between previous and next nodes  |
 
-**Returns:** Promise\<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]>
+**Returns:** Promise<[RouteInfo](../interfaces/_leaflet_.trackdrawer.routeinfo.md)[]\>
 
 ___
 
 ### restoreState
 
-▸ **restoreState**(`state`: [State](../modules/_leaflet_.trackdrawer.md#state), `nodeCallback?`: [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback)): Promise\<[Track](_leaflet_.trackdrawer.track.md)>
+▸ **restoreState**(`state`: [State](../modules/_leaflet_.trackdrawer.md#state), `nodeCallback?`: [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback)): Promise<[Track](_leaflet_.trackdrawer.track.md)\>
 
 Restores a state saved via `getState`.
 
@@ -385,7 +385,7 @@ Name | Type |
 `state` | [State](../modules/_leaflet_.trackdrawer.md#state) |
 `nodeCallback?` | [NodeCreationCallback](../modules/_leaflet_.trackdrawer.md#nodecreationcallback) |
 
-**Returns:** Promise\<[Track](_leaflet_.trackdrawer.track.md)>
+**Returns:** Promise<[Track](_leaflet_.trackdrawer.track.md)\>
 
 ___
 
@@ -407,7 +407,7 @@ ___
 
 ### toGeoJSON
 
-▸ **toGeoJSON**(`exportStopovers`: boolean, `exportAsFlat`: boolean): geojson.FeatureCollection\<geojson.GeometryObject, any>
+▸ **toGeoJSON**(`exportStopovers`: boolean, `exportAsFlat`: boolean): geojson.FeatureCollection<geojson.GeometryObject, any\>
 
 Returns a GeoJSON representation of the track.
 
@@ -418,4 +418,4 @@ Name | Type | Description |
 `exportStopovers` | boolean | `true` to also export stop-over markers (default), `false` to ignore them |
 `exportAsFlat` | boolean | `true` to export as one unique Feature, `false` to export as-is (default)  |
 
-**Returns:** geojson.FeatureCollection\<geojson.GeometryObject, any>
+**Returns:** geojson.FeatureCollection<geojson.GeometryObject, any\>
