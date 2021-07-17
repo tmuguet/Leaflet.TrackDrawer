@@ -3142,7 +3142,7 @@
 	    var insertWaypoints = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 	    var filename = url.split('/').pop();
 	    var ext = filename.split('.').pop();
-	    var proxiedUrl = useProxy ? "fetch.php?url=".concat(encodeURI(url)) : url;
+	    var proxiedUrl = useProxy ? "fetch.php?url=".concat(encodeURIComponent(url)) : url;
 	    return new Promise(function (resolve, reject) {
 	      corslite__default['default'](proxiedUrl, function (err, resp) {
 	        if (!err) {
