@@ -108,7 +108,7 @@ Track.include({
     const filename = url.split('/').pop();
     const ext = filename.split('.').pop();
 
-    const proxiedUrl = useProxy ? `fetch.php?url=${encodeURI(url)}` : url;
+    const proxiedUrl = useProxy ? `fetch.php?url=${encodeURIComponent(url)}` : url;
 
     return new Promise((resolve, reject) => {
       corslite(
